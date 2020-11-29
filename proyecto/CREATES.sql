@@ -23,8 +23,7 @@ CREATE TABLE zonas(
 /
 CREATE TABLE aplicaciones_delivery (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    app MARCA NOT NULL,
-    logo BLOB NOT NULL
+    app MARCA NOT NULL
 );
 /
 CREATE TABLE garajes (
@@ -71,8 +70,7 @@ CREATE TABLE registro_de_mantenimiento (
 /
 CREATE TABLE empresas (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    app MARCA NOT NULL,
-    logo BLOB NOT NULL
+    app MARCA NOT NULL
 );
 /
 CREATE TABLE planes_de_servicio (
