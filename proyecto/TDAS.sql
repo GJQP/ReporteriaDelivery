@@ -3,6 +3,7 @@ CREATE OR REPLACE TYPE MARCA AS OBJECT(
     nombre VARCHAR2(80),
     rif VARCHAR2(18),
     fecha_de_registro DATE,
+    logo BLOB,
     CONSTRUCTOR FUNCTION MARCA(SELF IN OUT NOCOPY MARCA, nombre VARCHAR2, RIF VARCHAR2, fecha_de_registro DATE) RETURN SELF AS RESULT,
     STATIC FUNCTION VALIDAR_RIF(rif VARCHAR2) RETURN VARCHAR2
 );
@@ -22,6 +23,7 @@ CREATE OR REPLACE TYPE BODY MARCA IS
         SELF.nombre := nombre;
         SELF.rif := MARCA.VALIDAR_RIF(rif);
         SELF.fecha_de_registro := fecha_de_registro;
+        SELF.logo := EMPTY_BLOB();
         RETURN;
     END;
 END;

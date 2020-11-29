@@ -7,13 +7,13 @@ CREATE OR REPLACE PROCEDURE insertar_app_delivery(
 IS
    l_size NUMBER;
    l_file_ptr BFILE;
-   l_blob BLOB;
+   m MARCA;
 BEGIN
    l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
-   INSERT INTO aplicaciones_delivery (id, app, logo) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro) , empty_blob() ) returning logo into l_blob;
-   dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
+   INSERT INTO aplicaciones_delivery (id, app) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning app into m;
+   dbms_lob.loadfromfile(m.LOGO, l_file_ptr, l_size);
    COMMIT;
    dbms_lob.close(l_file_ptr);
 END;
@@ -23,15 +23,15 @@ CREATE OR REPLACE PROCEDURE insertar_empresa(
     fecha_registro DATE ,
     nombre_img_logo VARCHAR2)
 IS
-   l_size NUMBER;
-   l_file_ptr BFILE;
-   l_blob BLOB;
+    l_size NUMBER;
+    l_file_ptr BFILE;
+    m MARCA;
 BEGIN
    l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
-   INSERT INTO aplicaciones_delivery (id, app, logo) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro) , empty_blob() ) returning logo into l_blob;
-   dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
+   INSERT INTO empresas (id, app) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning app into m;
+   dbms_lob.loadfromfile(m.logo, l_file_ptr, l_size);
    COMMIT;
    dbms_lob.close(l_file_ptr);
 END;
@@ -85,4 +85,3 @@ BEGIN
     WHEN no_data_found THEN
         DBMS_OUTPUT.PUT_LINE('NO EXISTE LA ZONA SOLICITADA');
 END;*/
-/
