@@ -23,7 +23,6 @@ CREATE OR REPLACE TYPE BODY MARCA IS
         SELF.nombre := nombre;
         SELF.rif := MARCA.VALIDAR_RIF(rif);
         SELF.fecha_de_registro := fecha_de_registro;
-        SELF.logo := EMPTY_BLOB();
         RETURN;
     END;
 END;
@@ -148,3 +147,4 @@ CREATE OR REPLACE TYPE BODY UBICACION IS
     END;
 END;
 /
+
