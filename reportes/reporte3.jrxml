@@ -35,7 +35,7 @@
 		</band>
 	</background>
 	<title>
-		<band height="180" splitType="Stretch">
+		<band height="184" splitType="Stretch">
 			<staticText>
 				<reportElement x="380" y="29" width="70" height="20" uuid="e0f8dbf5-e521-4118-9b4e-e25c44ae00ed"/>
 				<textElement>
@@ -51,12 +51,64 @@
 				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"YYYY-MM-dd")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="39" y="35" width="346" height="110" uuid="841ccfa7-cab1-449c-86d1-38dcbeafefdb"/>
+				<reportElement x="34" y="30" width="346" height="50" uuid="60949870-4450-4ba5-9f7d-ee010c787f7b"/>
 				<textElement>
 					<font fontName="Arial Black" size="25" isBold="true"/>
 				</textElement>
-				<text><![CDATA[PRESUPUESTO DE PROVEEDORES DE DELIVERY]]></text>
+				<text><![CDATA[CANTIDAD DE ENVÍOS]]></text>
 			</staticText>
+			<staticText>
+				<reportElement x="39" y="134" width="76" height="20" uuid="1fffc803-46fc-47be-870d-9a51ce38886a"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[SECTOR:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="118" y="135" width="109" height="19" uuid="23184faa-cb7a-49fe-a11d-efeb5d9205db"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement x="39" y="160" width="76" height="20" uuid="f1aafa55-7a20-400e-9a40-097e2356a47d"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[ESTADO:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="118" y="161" width="109" height="19" uuid="cc36deed-e098-496e-8b60-6091a8465acb"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement x="305" y="135" width="139" height="20" uuid="f0c5014b-cde7-4a78-8fef-80dd689a42c1"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[FECHA DE INICIO:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="447" y="136" width="109" height="19" uuid="f757e305-434f-4948-af9e-efe8a8e58ec4"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement x="308" y="155" width="139" height="20" uuid="c9bbd39e-e03d-4032-879c-5a22edb0f6eb"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[FECHA DE FIN:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="450" y="156" width="109" height="19" uuid="3f89720c-08be-4947-b5f6-8dff4beb7fdc"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
 		</band>
 	</title>
 	<pageHeader>

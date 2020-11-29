@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
+	<queryString language="plsql">
+		<![CDATA[{call prueba_jasper($P{ORACLE_REF_CURSOR})}]]>
+	</queryString>
+	<field name="ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="ID"/>
+	</field>
+	<field name="LOGO" class="java.sql.Blob">
+		<property name="com.jaspersoft.studio.field.name" value="LOGO"/>
+		<property name="com.jaspersoft.studio.field.label" value="LOGO"/>
+	</field>
+	<background>
+		<band height="595" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<image>
+				<reportElement x="0" y="0" width="842" height="595" uuid="4b88ad14-3797-4daf-9478-8d3ff71f8c94"/>
+				<imageExpression><![CDATA["fondo_portrait.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</background>
+	<title>
+		<band height="135" splitType="Stretch">
+			<staticText>
+				<reportElement x="624" y="29" width="70" height="20" uuid="e0f8dbf5-e521-4118-9b4e-e25c44ae00ed"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[FECHA:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="694" y="30" width="109" height="19" uuid="cd3b6160-61df-4526-b851-9b241e2807ca"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"YYYY-MM-dd")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="34" y="30" width="425" height="50" uuid="60949870-4450-4ba5-9f7d-ee010c787f7b"/>
+				<textElement>
+					<font fontName="Arial Black" size="25" isBold="true"/>
+				</textElement>
+				<text><![CDATA[USUARIOS REGISTRADOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="39" y="104" width="76" height="20" uuid="f5eec032-7ef3-477c-91f7-3e6284d27554"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[ESTADO:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="118" y="105" width="109" height="19" uuid="51dea42f-96d9-43e5-a6ce-a65a5e6af4d5"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement x="520" y="104" width="170" height="20" uuid="96c06f6e-184c-4600-9020-cba0ac19b7db"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[FECHA DE REGISTRO:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="690" y="104" width="109" height="19" uuid="d32a4cd5-89fd-48f8-843a-34c55e1aeee8"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="61" splitType="Stretch"/>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch"/>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>

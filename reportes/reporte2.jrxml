@@ -51,11 +51,24 @@
 				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"YYYY-MM-dd")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="39" y="35" width="346" height="110" uuid="841ccfa7-cab1-449c-86d1-38dcbeafefdb"/>
+				<reportElement x="39" y="35" width="346" height="110" uuid="f3be0196-bec9-49d9-912f-fe8ccd94ec4b"/>
 				<textElement>
 					<font fontName="Arial Black" size="25" isBold="true"/>
 				</textElement>
-				<text><![CDATA[PRESUPUESTO DE PROVEEDORES DE DELIVERY]]></text>
+				<text><![CDATA[EMPRESAS ALIADAS Y DELIVERYS]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="118" y="156" width="182" height="19" uuid="29f6a2e0-32cb-403a-9d45-e221d1b6191e"/>
+				<textElement>
+					<font fontName="Arial" size="14"/>
+				</textElement>
+			</textField>
+			<staticText>
+				<reportElement x="39" y="155" width="149" height="20" uuid="547e82ec-df13-4714-8fc4-f045bb71720d"/>
+				<textElement>
+					<font fontName="Arial Black" size="14"/>
+				</textElement>
+				<text><![CDATA[ESTADO:]]></text>
 			</staticText>
 		</band>
 	</title>
