@@ -12,7 +12,7 @@ BEGIN
    l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
-   INSERT INTO aplicaciones_delivery (id, app, logo) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro), EMPTY_BLOB()) returning logo into l_blob;
+   INSERT INTO aplicaciones_delivery (id, app) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning TREAT(app as MARCA).LOGO into l_blob;
    dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
    COMMIT;
    dbms_lob.close(l_file_ptr);
@@ -26,12 +26,11 @@ IS
     l_size NUMBER;
     l_file_ptr BFILE;
     l_blob BLOB;
-    m MARCA;
 BEGIN
    l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
-   INSERT INTO empresas (id, empresa, logo) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro), EMPTY_BLOB()) returning logo into l_blob;
+   INSERT INTO empresas (id, empresa) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning TREAT(empresa AS MARCA).LOGO into l_blob;
    dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
    COMMIT;
    dbms_lob.close(l_file_ptr);
@@ -86,3 +85,5 @@ BEGIN
     WHEN no_data_found THEN
         DBMS_OUTPUT.PUT_LINE('NO EXISTE LA ZONA SOLICITADA');
 END;*/
+/
+
