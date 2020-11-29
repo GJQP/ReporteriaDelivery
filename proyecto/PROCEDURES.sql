@@ -1,4 +1,44 @@
-CREATE OR REPLACE PROCEDURE validar_pedidos(
+-- PROCEDURES DE INSERTS
+CREATE OR REPLACE PROCEDURE insertar_app_delivery(
+    nombre VARCHAR2,
+    rif VARCHAR2,
+    fecha_registro DATE,
+    nombre_img_logo VARCHAR2)
+IS
+   l_size NUMBER;
+   l_file_ptr BFILE;
+   l_blob BLOB;
+BEGIN
+   l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
+   dbms_lob.fileopen(l_file_ptr);
+   l_size := dbms_lob.getlength(l_file_ptr);
+   INSERT INTO aplicaciones_delivery (id, app, logo) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro) , empty_blob() ) returning logo into l_blob;
+   dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
+   COMMIT;
+   dbms_lob.close(l_file_ptr);
+END;
+
+CREATE OR REPLACE PROCEDURE insertar_empresa(
+    nombre VARCHAR2, rif VARCHAR2,
+    fecha_registro DATE ,
+    nombre_img_logo VARCHAR2)
+IS
+   l_size NUMBER;
+   l_file_ptr BFILE;
+   l_blob BLOB;
+BEGIN
+   l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
+   dbms_lob.fileopen(l_file_ptr);
+   l_size := dbms_lob.getlength(l_file_ptr);
+   INSERT INTO aplicaciones_delivery (id, app, logo) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro) , empty_blob() ) returning logo into l_blob;
+   dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
+   COMMIT;
+   dbms_lob.close(l_file_ptr);
+END;
+/
+
+-- PROCEDURES OTROS
+/*CREATE OR REPLACE PROCEDURE validar_pedidos(
     in_fecha IN DATE,
     in_zona VARCHAR2
 )
@@ -17,7 +57,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('ID zona '|| id_zona);
 
     OPEN cur FOR
-        SELECT app.nombre,
+        SELECT app.marca.nombre,
                COUNT(pe.tracking) AS "Pedidos"
         FROM pedidos pe, direcciones dir, zonas zo, aplicaciones_delivery app, usuarios u
         WHERE pe.id_direccion = dir.id
@@ -44,5 +84,5 @@ BEGIN
     EXCEPTION
     WHEN no_data_found THEN
         DBMS_OUTPUT.PUT_LINE('NO EXISTE LA ZONA SOLICITADA');
-END;
+END;*/
 /
