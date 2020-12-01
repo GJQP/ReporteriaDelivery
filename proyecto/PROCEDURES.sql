@@ -9,7 +9,7 @@ IS
    l_file_ptr BFILE;
    l_blob BLOB;
 BEGIN
-   l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
+   l_file_ptr := bfilename('IMGDIR_APPS', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
    INSERT INTO aplicaciones_delivery (id, app) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning TREAT(app as MARCA).LOGO into l_blob;
@@ -27,10 +27,37 @@ IS
     l_file_ptr BFILE;
     l_blob BLOB;
 BEGIN
-   l_file_ptr := bfilename('IMGDIR', nombre_img_logo);
+   l_file_ptr := bfilename('IMGDIR_EMPRESAS', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
    INSERT INTO empresas (id, empresa) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning TREAT(empresa AS MARCA).LOGO into l_blob;
+   dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
+   COMMIT;
+   dbms_lob.close(l_file_ptr);
+END;
+/
+
+CREATE OR REPLACE PROCEDURE insertar_usario(
+    p_nombre VARCHAR2,
+    s_nombre VARCHAR2,
+    p_apellido VARCHAR2,
+    s_apellido VARCHAR2,
+    t_cedula CHAR,
+    n_cedula NUMBER,
+    u_email VARCHAR2,
+    nombre_img_foto VARCHAR2)
+IS
+    l_size NUMBER;
+    l_file_ptr BFILE;
+    l_blob BLOB;
+BEGIN
+   l_file_ptr := bfilename('IMGDIR_USUARIOS', nombre_img_foto);
+   dbms_lob.fileopen(l_file_ptr);
+   l_size := dbms_lob.getlength(l_file_ptr);
+   INSERT INTO
+       USUARIOS (ID, PRIMER_NOMBRE, SEGUNDO_NOMBRE, PRIMER_APELLIDO, SEGUNDO_APELLIDO, TIPO_DE_CEDULA, NUMERO_DE_CEDULA, EMAIL, ESTADO, FOTO)
+   VALUES
+        (DEFAULT, p_nombre, s_nombre, p_apellido, s_apellido, t_cedula, n_cedula, u_email, RANGO_TIEMPO(SYSDATE), empty_blob()) returning FOTO into l_blob;
    dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
    COMMIT;
    dbms_lob.close(l_file_ptr);

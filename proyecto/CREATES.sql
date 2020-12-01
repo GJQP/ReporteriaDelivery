@@ -80,7 +80,7 @@ CREATE TABLE planes_de_servicio (
     precio NUMBER(10,2) NOT NULL,
     cantidad_envios NUMBER(10) NOT NULL,
     modalidad VARCHAR2(20) NOT NULL CHECK (modalidad IN('MENSUAL', 'TRIMESTRAL', 'SEMESTRAL', 'ANUAL')),
-    cancelado CANCELACION,
+    cancelado CANCELACION DEFAULT NULL,
     FOREIGN KEY(id_app) REFERENCES aplicaciones_delivery(id),
     PRIMARY KEY(id_app, id)
 );
@@ -100,7 +100,7 @@ CREATE TABLE contratos (
     id INTEGER GENERATED ALWAYS AS IDENTITY,
     duracion RANGO_TIEMPO NOT NULL,
     porcentaje_descuento NUMBER(5,2),
-    cancelado CANCELACION,
+    cancelado CANCELACION DEFAULT NULL,
     FOREIGN KEY(id_app, id_plan) REFERENCES planes_de_servicio(id_app, id),
     FOREIGN KEY(id_empresa) REFERENCES empresas(id),
     PRIMARY KEY (id_app, id_plan, id_empresa, id)
@@ -170,7 +170,8 @@ CREATE TABLE usuarios (
   tipo_de_cedula CHAR NOT NULL CHECK (tipo_de_cedula IN ('V', 'E')),
   numero_de_cedula NUMBER(8) NOT NULL,
   email VARCHAR2(150) NOT NULL UNIQUE,
-  estado RANGO_TIEMPO NOT NULL
+  estado RANGO_TIEMPO NOT NULL,
+  foto BLOB
 );
 /
 CREATE TABLE registros (
