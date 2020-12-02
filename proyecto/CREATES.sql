@@ -178,6 +178,7 @@ CREATE TABLE usuarios (
 CREATE TABLE registros (
   id_app INTEGER,
   id_usuario INTEGER,
+  registro RANGO_TIEMPO NOT NULL,
   FOREIGN KEY(id_app) REFERENCES aplicaciones_delivery(id),
   FOREIGN KEY(id_usuario) REFERENCES usuarios(id),
   PRIMARY KEY(id_app, id_usuario)
