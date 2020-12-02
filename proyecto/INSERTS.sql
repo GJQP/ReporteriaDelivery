@@ -17,6 +17,22 @@ CALL INSERTAR_APP_DELIVERY('AlPelo','J19862936-4',SYSDATE,'alpelo.jpg'); --15
 CALL INSERTAR_APP_DELIVERY('Ubixven','J98629361-8',SYSDATE,'ubixven.jpg'); --16
 CALL INSERTAR_APP_DELIVERY('Lalo Delivery','J86293619-7',SYSDATE,'lalo.jpg'); --17
 
+CALL INSERTAR_USUARIO('Joaquin', null, 'Piris', 'Corley', 'E', 72613591, 'ucorley0@4shared.com','hombre1.jpg');
+CALL INSERTAR_USUARIO('Dar', null, 'McLarty', 'Stanistrete', 'E', 75033727, 'astanistrete1@elegantthemes.com','hombre2.jpg');
+CALL INSERTAR_USUARIO('Ewart', null, 'Northage', 'Ead', 'E', 74839693, 'aead2@xinhuanet.com','hombre3.jpg');
+CALL INSERTAR_USUARIO('Olly', null, 'Matis', 'Pickrill', 'E', 77161771, 'wpickrill3@shareasale.com','hombre4.jpg');
+CALL INSERTAR_USUARIO('Etan', null, 'Scothron', 'Arens', 'V', 28510070, 'harens4@bluehost.com','hombre5.jpg');
+CALL INSERTAR_USUARIO('Terry', 'Wyatt', 'Cozens', 'Czadla', 'V', 19402936, 'wczadla5@blogs.com','hombre6.jpg');
+CALL INSERTAR_USUARIO('Jule', 'Ellary', 'Speake', 'Cranmere', 'E', 70710683, 'ecranmere6@cbsnews.com','hombre7.jpg');
+CALL INSERTAR_USUARIO('Addie', null, 'Muscat', 'Wickwarth', 'V', 16219656, 'twickwarth0@yelp.com','mujer1.jpg');
+CALL INSERTAR_USUARIO('Benita', 'Hedi', 'Digwood', 'Colville', 'E', 73238525, 'hcolville1@kickstarter.com','mujer2.jpg');
+CALL INSERTAR_USUARIO('Jilly', 'Cornie', 'Simester', 'Vreede', 'V', 16298972, 'cvreede2@blog.com','mujer3.jpg');
+CALL INSERTAR_USUARIO('Michaella', 'Christy', 'Melhuish', 'Severns', 'V', 17637519, 'cseverns3@google.co.jp','mujer4.jpg');
+CALL INSERTAR_USUARIO('Deb', null, 'Ottee', 'Thomsen', 'V', 22924842, 'nthomsen4@thetimes.co.uk','mujer5.jpg');
+CALL INSERTAR_USUARIO('Monica', 'Darby', 'Pocke', 'Betho', 'V', 20025976, 'dbetho5@infoseek.co.jp','mujer6.jpg');
+CALL INSERTAR_USUARIO('Maryanne', 'Gratiana', 'Cobbe', 'Wressell', 'E', 78018114, 'gwressell6@xrea.com','mujer7.jpg');
+CALL INSERTAR_USUARIO('Janene', null, 'Philippard', 'Ivimey', 'V', 22098712, 'jivimey7@wikia.com','mujer8.jpg');
+
 --ESTADOS
 INSERT INTO estados VALUES (DEFAULT, 'Amazonas'); --1
 INSERT INTO estados VALUES (DEFAULT, 'Anzoátegui'); --2
