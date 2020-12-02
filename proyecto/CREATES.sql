@@ -89,7 +89,7 @@ CREATE TABLE ubicaciones_aplicables (
     id_app INTEGER,
     id_plan INTEGER,
     id_estado INTEGER,
-    FOREIGN KEY(id_app, id_plan) REFERENCES planes_de_servicio(id),
+    FOREIGN KEY(id_app, id_plan) REFERENCES planes_de_servicio(id_app, id),
     FOREIGN KEY(id_estado) REFERENCES estados(id),
     PRIMARY KEY(id_app, id_estado)
 );
