@@ -37,7 +37,7 @@ BEGIN
 END;
 /
 
-CREATE OR REPLACE PROCEDURE insertar_usario(
+CREATE OR REPLACE PROCEDURE insertar_usuario(
     p_nombre VARCHAR2,
     s_nombre VARCHAR2,
     p_apellido VARCHAR2,
