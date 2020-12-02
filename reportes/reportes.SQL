@@ -18,7 +18,7 @@ OPEN test_cur FOR
     ORDER BY NOMBRE;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte2 (test_cur OUT sys_refcursor) IS
+CREATE OR REPLACE PROCEDURE reporte2 (test_cur OUT sys_refcursor, estados VARCHAR2) IS
 BEGIN
 
 END;
