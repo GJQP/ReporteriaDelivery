@@ -4,6 +4,7 @@
 --DROP PROCEDURE validar_envios;
 DROP PROCEDURE insertar_app_delivery;
 DROP PROCEDURE insertar_empresa;
+DROP PROCEDURE insertar_usuario;
 /
 -- TABLES
 DROP TABLE rutas;
