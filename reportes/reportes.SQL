@@ -18,6 +18,61 @@ BEGIN
     ORDER BY NOMBRE;
 END;
 
+CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
+BEGIN
+    IF(p_estado IS NULL) THEN
+        OPEN test_cur FOR
+        SELECT
+        S.*,
+        (SELECT
+            MIN(TREAT(CS.DURACION AS RANGO_TIEMPO).FECHA_INICIO) FECHA_REG
+        FROM
+            CONTRATOS CS
+        WHERE
+            S.EMPRESA = CS.ID_EMPRESA
+        ) FECHA_REGISTRO,
+        TREAT(EP.EMPRESA AS MARCA).LOGO AS LOGO
+        FROM (
+             SELECT
+                C2.ID_EMPRESA EMPRESA,
+                TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
+                TREAT(PS.DURACION AS RANGO_TIEMPO).FECHA_INICIO AS FECHA_INICIO,
+                TREAT(PS.DURACION AS RANGO_TIEMPO).FECHA_FIN AS FECHA_FIN,
+                LISTAGG(E.NOMBRE,', ') WITHIN GROUP (ORDER BY E.NOMBRE) AS ESTADOS,
+                C2.PORCENTAJE_DESCUENTO DESCUENTO,
+                PS.MODALIDAD MODALIDAD,
+                PS.CANTIDAD_ENVIOS CANTIDAD_ENVIOS,
+                PS.PRECIO PRECIO
+             FROM
+                 PLANES_DE_SERVICIO PS
+             INNER JOIN
+                 APLICACIONES_DELIVERY AD ON AD.ID = PS.ID_APP
+             INNER JOIN
+                 UBICACIONES_APLICABLES UA ON PS.ID_APP = UA.ID_APP AND PS.ID = UA.ID_PLAN
+             INNER JOIN
+                 ESTADOS E ON UA.ID_ESTADO = E.ID
+             INNER JOIN
+                 CONTRATOS C2 ON C2.CANCELADO IS NULL AND PS.ID_APP = C2.ID_APP AND PS.ID = C2.ID_PLAN
+             WHERE
+                 PS.DURACION.FECHA_FIN IS NULL AND PS.CANCELADO IS NULL
+             GROUP BY
+                 TREAT(AD.APP AS MARCA).NOMBRE,
+                 TREAT(PS.DURACION AS RANGO_TIEMPO).FECHA_FIN,
+                 TREAT(PS.DURACION AS RANGO_TIEMPO).FECHA_INICIO,
+                 C2.ID_EMPRESA,
+                 C2.PORCENTAJE_DESCUENTO,
+                 PS.MODALIDAD,
+                 PS.CANTIDAD_ENVIOS,
+                 PS.PRECIO
+             ORDER BY
+                 C2.ID_EMPRESA,
+                 TREAT(PS.DURACION AS RANGO_TIEMPO).FECHA_FIN
+             ) S
+        INNER JOIN
+            EMPRESAS EP ON S.EMPRESA = EP.ID;
+    END IF;
+END;
+
 CREATE OR REPLACE PROCEDURE reporte4 (test_cur OUT sys_refcursor, estado VARCHAR2 DEFAULT NULL) IS
 BEGIN
 
