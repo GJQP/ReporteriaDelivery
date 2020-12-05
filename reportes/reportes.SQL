@@ -73,10 +73,77 @@ BEGIN
     END IF;
 END;
 
+CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL) IS
+    min_date DATE;
+    max_date DATE;
+BEGIN
+    IF fecha_ini IS NULL THEN
+        SELECT MIN(TREAT(PEDO.DURACION AS RANGO_TIEMPO).FECHA_INICIO) INTO min_date FROM PEDIDOS PEDO;
+    END IF;
+    IF fecha_fin IS NULL THEN
+        SELECT MAX(TREAT(PEDO.DURACION AS RANGO_TIEMPO).FECHA_INICIO) INTO max_date FROM PEDIDOS PEDO;
+    END IF;
+    OPEN test_cur FOR
+    SELECT S.*,
+        TREAT(AP.APP AS MARCA).LOGO LOGO_APP,
+        TREAT(EP.EMPRESA AS MARCA).LOGO LOGO_EMPRESA,
+        (SELECT
+            LISTAGG(SDC.NOMBRE,',') WITHIN GROUP (ORDER BY SDC.NOMBRE) AS SECTORES_DE_COMERCIO
+        FROM
+           EMPRESAS EMP
+        INNER JOIN
+            SECTORES_DE_EMPRESAS SDE on EMP.ID = SDE.ID_EMPRESAS
+        INNER JOIN
+            SECTORES_DE_COMERCIO SDC on SDE.ID_SECTOR = SDC.ID
+           ) SECTORES_DE_COMERCIO
+        FROM
+            (
+                SELECT
+                PD.ID_APP IDAPP,
+                PD.ID_EMPRESA IDEMPRESA,
+                TREAT(EP.EMPRESA AS MARCA).NOMBRE NOMBRE_EMP,
+                TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
+                E.NOMBRE,
+                COUNT(PD.TRACKING) AS CANTIDAD_PEDIDOS,
+                TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO FI,
+                TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN FF
+            FROM
+                PEDIDOS PD
+            INNER JOIN
+                EMPRESAS EP ON EP.ID = PD.ID_EMPRESA
+            INNER JOIN
+                APLICACIONES_DELIVERY AD ON AD.ID = PD.ID_APP
+            INNER JOIN
+                DETALLES D ON PD.TRACKING = D.ID_TRACKING
+            INNER JOIN
+                ESTADOS E ON E.ID = PD.ID_ESTADO
+            WHERE
+                  PD.CANCELADO IS NULL AND
+                  TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO >= min_date AND
+                  TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN <= max_date
+            GROUP BY
+                    PD.ID_APP,
+                    PD.ID_EMPRESA,
+                    E.NOMBRE,
+                    TREAT(EP.EMPRESA AS MARCA).NOMBRE,
+                    TREAT(AD.APP AS MARCA).NOMBRE,
+                    TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO,
+                    TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN
+            ORDER BY
+                    PD.ID_EMPRESA,
+                    PD.ID_APP,
+                    E.NOMBRE,
+                    TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO
+            ) S
+        INNER JOIN
+            EMPRESAS EP ON EP.ID = S.IDEMPRESA
+        INNER JOIN
+            APLICACIONES_DELIVERY AP ON AP.ID = S.IDAPP;
+END;
+
 CREATE OR REPLACE PROCEDURE reporte4 (test_cur OUT sys_refcursor, estado VARCHAR2 DEFAULT NULL) IS
 BEGIN
-
-    IF (estado IS NULL ) THEN
+    IF (estado IS NULL) THEN
         OPEN test_cur FOR
         SELECT S.*, TREAT(EX.APP AS MARCA).LOGO LOGO_APP
         FROM
