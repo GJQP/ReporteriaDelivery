@@ -11,7 +11,7 @@ CREATE OR REPLACE TYPE MARCA AS OBJECT(
 CREATE OR REPLACE TYPE BODY MARCA IS
     STATIC FUNCTION VALIDAR_RIF(rif VARCHAR2) RETURN VARCHAR2 IS
     BEGIN
-        IF REGEXP_LIKE(rif, '^J[[:digit:]]{8}-[[:digit:]]') THEN
+        IF REGEXP_LIKE(rif, '^J-[[:digit:]]{8}-[[:digit:]]') THEN
             RETURN rif;
         ELSE
             RAISE_APPLICATION_ERROR(-20001,'Error: El rif no es válido');

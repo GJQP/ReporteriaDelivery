@@ -1,21 +1,21 @@
 --APLICACIONES DELIVERY
-CALL INSERTAR_APP_DELIVERY('Liveri','J40812034-8',SYSDATE,'liveri.jpg'); --1
-CALL INSERTAR_APP_DELIVERY('Pedidos Ya','J08120344-5',SYSDATE,'pedidosya.jpg'); --2
-CALL INSERTAR_APP_DELIVERY('Yummy','J50019455-8',SYSDATE,'yummy.jpg'); --3
-CALL INSERTAR_APP_DELIVERY('Ubii Go','J01945525-7',SYSDATE,'ubiigo.jpg'); --4
-CALL INSERTAR_APP_DELIVERY('Detodito','J19455250-3',SYSDATE,'detodito.jpg'); --5
-CALL INSERTAR_APP_DELIVERY('KePido','J94552500-0',SYSDATE,'kepido.jpg'); --6
-CALL INSERTAR_APP_DELIVERY('Pedidos To Go','J45525001-9',SYSDATE,'pedidostogo.jpg'); --7
-CALL INSERTAR_APP_DELIVERY('YoLoPido','J55250019-4',SYSDATE,'yolopido.jpg'); --8
-CALL INSERTAR_APP_DELIVERY('Traetelo','J52500194-2',SYSDATE,'traetelo.jpg'); --9
-CALL INSERTAR_APP_DELIVERY('Dingo','J25001945-3',SYSDATE,'traetelo.jpg'); --10
-CALL INSERTAR_APP_DELIVERY('Piira Domicilios','J93619862-2',SYSDATE,'piira.jpg'); --11
-CALL INSERTAR_APP_DELIVERY('Eco Delivery','J36198629-1',SYSDATE,'ecodelivery.jpg'); --12
-CALL INSERTAR_APP_DELIVERY('Vivery','J29361986-6',SYSDATE,'ecodelivery.jpg'); --13
-CALL INSERTAR_APP_DELIVERY('De One','J61986293-5',SYSDATE,'deone.jpg'); --14
-CALL INSERTAR_APP_DELIVERY('AlPelo','J19862936-4',SYSDATE,'alpelo.jpg'); --15
-CALL INSERTAR_APP_DELIVERY('Ubixven','J98629361-8',SYSDATE,'ubixven.jpg'); --16
-CALL INSERTAR_APP_DELIVERY('Lalo Delivery','J86293619-7',SYSDATE,'lalo.jpg'); --17
+CALL INSERTAR_APP_DELIVERY('Liveri','J-40812034-8',SYSDATE,'liveri.jpg'); --1
+CALL INSERTAR_APP_DELIVERY('Pedidos Ya','J-08120344-5',SYSDATE,'pedidosya.jpg'); --2
+CALL INSERTAR_APP_DELIVERY('Yummy','J-50019455-8',SYSDATE,'yummy.jpg'); --3
+CALL INSERTAR_APP_DELIVERY('Ubii Go','J-01945525-7',SYSDATE,'ubiigo.jpg'); --4
+CALL INSERTAR_APP_DELIVERY('Detodito','J-19455250-3',SYSDATE,'detodito.jpg'); --5
+CALL INSERTAR_APP_DELIVERY('KePido','J-94552500-0',SYSDATE,'kepido.jpg'); --6
+CALL INSERTAR_APP_DELIVERY('Pedidos To Go','J-45525001-9',SYSDATE,'pedidostogo.jpg'); --7
+CALL INSERTAR_APP_DELIVERY('YoLoPido','J-55250019-4',SYSDATE,'yolopido.jpg'); --8
+CALL INSERTAR_APP_DELIVERY('Traetelo','J-52500194-2',SYSDATE,'traetelo.jpg'); --9
+CALL INSERTAR_APP_DELIVERY('Dingo','J-25001945-3',SYSDATE,'traetelo.jpg'); --10
+CALL INSERTAR_APP_DELIVERY('Piira Domicilios','J-93619862-2',SYSDATE,'piira.jpg'); --11
+CALL INSERTAR_APP_DELIVERY('Eco Delivery','J-36198629-1',SYSDATE,'ecodelivery.jpg'); --12
+CALL INSERTAR_APP_DELIVERY('Vivery','J-29361986-6',SYSDATE,'ecodelivery.jpg'); --13
+CALL INSERTAR_APP_DELIVERY('De One','J-61986293-5',SYSDATE,'deone.jpg'); --14
+CALL INSERTAR_APP_DELIVERY('AlPelo','J-19862936-4',SYSDATE,'alpelo.jpg'); --15
+CALL INSERTAR_APP_DELIVERY('Ubixven','J-98629361-8',SYSDATE,'ubixven.jpg'); --16
+CALL INSERTAR_APP_DELIVERY('Lalo Delivery','J-86293619-7',SYSDATE,'lalo.jpg'); --17
 
 CALL INSERTAR_USUARIO('Joaquin', null, 'Piris', 'Corley', 'E', 72613591, 'ucorley0@4shared.com','hombre1.jpg');
 CALL INSERTAR_USUARIO('Dar', null, 'McLarty', 'Stanistrete', 'E', 75033727, 'astanistrete1@elegantthemes.com','hombre2.jpg');
@@ -32,6 +32,36 @@ CALL INSERTAR_USUARIO('Deb', null, 'Ottee', 'Thomsen', 'V', 22924842, 'nthomsen4
 CALL INSERTAR_USUARIO('Monica', 'Darby', 'Pocke', 'Betho', 'V', 20025976, 'dbetho5@infoseek.co.jp','mujer6.jpg');
 CALL INSERTAR_USUARIO('Maryanne', 'Gratiana', 'Cobbe', 'Wressell', 'E', 78018114, 'gwressell6@xrea.com','mujer7.jpg');
 CALL INSERTAR_USUARIO('Janene', null, 'Philippard', 'Ivimey', 'V', 22098712, 'jivimey7@wikia.com','mujer8.jpg');
+
+-- EMPRESAS
+CALL INSERTAR_EMPRESA('Mc Donald''s','J-00187198-5', SYSDATE,'mcdonalds.jpg');
+CALL INSERTAR_EMPRESA('Wendy''s','J-30-404833-5',SYSDATE,'wendys.jpg');
+CALL INSERTAR_EMPRESA('Arturo''s','J-00219752-8',SYSDATE,'arturos.jpg');
+CALL INSERTAR_EMPRESA('Burger King','J-40121706-0',SYSDATE,'burgerking.jpg');
+CALL INSERTAR_EMPRESA('Bonsai Sushi','J-30018017-4',SYSDATE,'bonsaisushi.jpg');
+CALL INSERTAR_EMPRESA('KFC','J-31155925-8',SYSDATE,'kfc.jpg');
+CALL INSERTAR_EMPRESA('Papa John''s','J-00217622-9',SYSDATE,'papajohns.jpg');
+CALL INSERTAR_EMPRESA('Pizza Hut',	'J-08025364-7',SYSDATE,'pizzahut.jpg');
+CALL INSERTAR_EMPRESA('Tequechongos','J-00229160-5',SYSDATE,'tequechongos.jpg');
+CALL INSERTAR_EMPRESA('Chip-a-cookies','J-00089796-4',SYSDATE,'chipsacookie.jpg');
+CALL INSERTAR_EMPRESA('Zara','J-70317622-8',SYSDATE,'zara.jpg');
+CALL INSERTAR_EMPRESA('Bershka','J-31357032-0',SYSDATE,'bershka.jpg');
+CALL INSERTAR_EMPRESA('Pablo Electrónica','J-31357032-0',SYSDATE,'pabloelectronica.jpg');
+CALL INSERTAR_EMPRESA('Electrónica Chacao','J-31357032-0',SYSDATE,'electronicachacao.jpg');
+CALL INSERTAR_EMPRESA('Valmy','	J-00011407-2',SYSDATE,'valmy.jpg');
+CALL INSERTAR_EMPRESA('Elf cosméticos',	'J-30906259-0',SYSDATE,'elf.jpg');
+CALL INSERTAR_EMPRESA('Farmatodo','J-00020200-1', SYSDATE,'farmatodo.jpg');
+CALL INSERTAR_EMPRESA('Farmacias SAAS','J-00019780-6',SYSDATE,'farmaciassaas.jpg');
+CALL INSERTAR_EMPRESA('General Import',	'J-00016059-7', SYSDATE,'generalimport.jpg');
+CALL INSERTAR_EMPRESA('Nacho Toys','J-30401204-7',SYSDATE,'nachotoys.jpg');
+CALL INSERTAR_EMPRESA('Ford Motors Venezuela','J-00014864-3',SYSDATE,'fordmotors.jpg');
+CALL INSERTAR_EMPRESA('Renault Venezuela','J-03024875-3',SYSDATE,'renault.jpg');
+CALL INSERTAR_EMPRESA('Dorsay','J-02014864-9',SYSDATE,'dorsay.png');
+CALL INSERTAR_EMPRESA('BECO','J-40107362-0',SYSDATE,'beco.jpg');
+CALL INSERTAR_EMPRESA('Vapear Vzla','J-00066418-8',SYSDATE,'vapearvzla.jpg');
+CALL INSERTAR_EMPRESA('Prolicor','J-00170868-5',SYSDATE,'prolicor.jpg');
+CALL INSERTAR_EMPRESA('Prolicor','J-00170868-5',SYSDATE,'prolicor.jpg');
+
 
 --ESTADOS
 INSERT INTO estados VALUES (DEFAULT, 'Amazonas'); --1
