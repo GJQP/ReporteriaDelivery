@@ -35,7 +35,7 @@ CALL INSERTAR_USUARIO('Janene', null, 'Philippard', 'Ivimey', 'V', 22098712, 'ji
 
 -- EMPRESAS
 CALL INSERTAR_EMPRESA('Mc Donald''s','J-00187198-5', SYSDATE,'mcdonalds.jpg');
-CALL INSERTAR_EMPRESA('Wendy''s','J-30-404833-5',SYSDATE,'wendys.jpg');
+CALL INSERTAR_EMPRESA('Wendy''s','J-30404833-5',SYSDATE,'wendys.jpg');
 CALL INSERTAR_EMPRESA('Arturo''s','J-00219752-8',SYSDATE,'arturos.jpg');
 CALL INSERTAR_EMPRESA('Burger King','J-40121706-0',SYSDATE,'burgerking.jpg');
 CALL INSERTAR_EMPRESA('Bonsai Sushi','J-30018017-4',SYSDATE,'bonsaisushi.jpg');
@@ -46,9 +46,9 @@ CALL INSERTAR_EMPRESA('Tequechongos','J-00229160-5',SYSDATE,'tequechongos.jpg');
 CALL INSERTAR_EMPRESA('Chip-a-cookies','J-00089796-4',SYSDATE,'chipsacookie.jpg');
 CALL INSERTAR_EMPRESA('Zara','J-70317622-8',SYSDATE,'zara.jpg');
 CALL INSERTAR_EMPRESA('Bershka','J-31357032-0',SYSDATE,'bershka.jpg');
-CALL INSERTAR_EMPRESA('Pablo Electrónica','J-31357032-0',SYSDATE,'pabloelectronica.jpg');
-CALL INSERTAR_EMPRESA('Electrónica Chacao','J-31357032-0',SYSDATE,'electronicachacao.jpg');
-CALL INSERTAR_EMPRESA('Valmy','	J-00011407-2',SYSDATE,'valmy.jpg');
+CALL INSERTAR_EMPRESA('Pablo Electrónica','J-00000643-1',SYSDATE,'pabloelectronica.jpg');
+CALL INSERTAR_EMPRESA('Electrónica Chacao','J-32373032-0',SYSDATE,'electronicachacao.jpg');
+CALL INSERTAR_EMPRESA('Valmy','J-01011707-2',SYSDATE,'valmy.jpg');
 CALL INSERTAR_EMPRESA('Elf cosméticos',	'J-30906259-0',SYSDATE,'elf.jpg');
 CALL INSERTAR_EMPRESA('Farmatodo','J-00020200-1', SYSDATE,'farmatodo.jpg');
 CALL INSERTAR_EMPRESA('Farmacias SAAS','J-00019780-6',SYSDATE,'farmaciassaas.jpg');
@@ -58,9 +58,9 @@ CALL INSERTAR_EMPRESA('Ford Motors Venezuela','J-00014864-3',SYSDATE,'fordmotors
 CALL INSERTAR_EMPRESA('Renault Venezuela','J-03024875-3',SYSDATE,'renault.jpg');
 CALL INSERTAR_EMPRESA('Dorsay','J-02014864-9',SYSDATE,'dorsay.png');
 CALL INSERTAR_EMPRESA('BECO','J-40107362-0',SYSDATE,'beco.jpg');
-CALL INSERTAR_EMPRESA('Vapear Vzla','J-00066418-8',SYSDATE,'vapearvzla.jpg');
+CALL INSERTAR_EMPRESA('Vapear Vzla','J-00066418-8',SYSDATE,'vapearvzla.png');
 CALL INSERTAR_EMPRESA('Prolicor','J-00170868-5',SYSDATE,'prolicor.jpg');
-CALL INSERTAR_EMPRESA('Prolicor','J-00170868-5',SYSDATE,'prolicor.jpg');
+CALL INSERTAR_EMPRESA('Curda 24 express','J-00170868-5',SYSDATE,'curda24express.png');
 
 
 --ESTADOS
@@ -1579,7 +1579,7 @@ INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Equipamiento para el Hogar');
 INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Productos de limpieza');--9
 INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Tabaco');--10
 INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Alcohol');--11
-INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Alimentos para Mascotas');--12
+INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Mascotas');--12
 INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Joyería');--13
 INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Lamparas e Iluminación');--14
 INSERT INTO SECTORES_DE_COMERCIO VALUES (DEFAULT, 'Materiales eléctricos');--15
