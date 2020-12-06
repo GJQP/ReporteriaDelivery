@@ -153,7 +153,6 @@ CREATE TABLE almacenes (
     id_sucursal INTEGER,
     id_producto INTEGER,
     disponibilidad NUMBER(5),
-    precio NUMBER(10,2),
     FOREIGN KEY(id_empresa, id_sucursal) REFERENCES sucursales(id_empresa, id),
     FOREIGN KEY (id_producto) REFERENCES productos(id),
     PRIMARY KEY (id_empresa, id_sucursal, id_producto)
