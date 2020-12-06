@@ -1839,8 +1839,31 @@ INSERT INTO registros  VALUES (17, 10, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,1
 INSERT INTO registros  VALUES (17, 5, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
 INSERT INTO registros  VALUES (17, 8, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
 
+/*
 -- Insert de tipos de transporte
+CREATE TABLE tipos_de_unidades (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY ,
+    nombre VARCHAR2(20) NOT NULL CHECK (nombre IN ('CARRO', 'BICICLETA', 'MOTO','CARRO','DRONE')),
+    distancia_operativa VARCHAR2(20) NOT NULL CHECK (distancia_operativa IN ('ZONA', 'MUNICIPIO', 'ESTADO')),
+    velocidad_media NUMBER(5,2),
+    cantidad_pedidos NUMBER(2)
+);
+*/
 
-INSERT INTO tipos_de_unidades VALUES (DEFAULT,'Carro','Z' )
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',90,4);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',80,4);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',50,4);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'BICICLETA','MUNICIPIO',8,2);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'BICICLETA','ZONA',7,2);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'MOTO','MUNICIPIO',30,2);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'MOTO','ESTADO',40,2);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'MOTO','ESTADO',50,3);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'DRONE','ESTADO',70,1);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'DRONE','MUNICIPIO',60,1);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'DRONE','ZONA',40,1);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',60,4);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',70,4);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',40,4);
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'BICICLETA','MUNICIPIO',10,2);
 
-DROP TABLE tipos_de_unidades;
+
