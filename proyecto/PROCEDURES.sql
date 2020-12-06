@@ -21,7 +21,8 @@ END;
 CREATE OR REPLACE PROCEDURE insertar_empresa(
     nombre VARCHAR2, rif VARCHAR2,
     fecha_registro DATE ,
-    nombre_img_logo VARCHAR2)
+    nombre_img_logo VARCHAR2,
+    id_sector INTEGER)
 IS
     l_size NUMBER;
     l_file_ptr BFILE;
@@ -30,7 +31,7 @@ BEGIN
    l_file_ptr := bfilename('IMGDIR_EMPRESAS', nombre_img_logo);
    dbms_lob.fileopen(l_file_ptr);
    l_size := dbms_lob.getlength(l_file_ptr);
-   INSERT INTO empresas (id, empresa) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro)) returning TREAT(empresa AS MARCA).LOGO into l_blob;
+   INSERT INTO empresas (id, empresa, id_sector) VALUES (DEFAULT, MARCA(nombre, rif, fecha_registro), id_sector) returning TREAT(empresa AS MARCA).LOGO into l_blob;
    dbms_lob.loadfromfile(l_blob, l_file_ptr, l_size);
    COMMIT;
    dbms_lob.close(l_file_ptr);

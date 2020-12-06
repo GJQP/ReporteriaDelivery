@@ -86,16 +86,7 @@ BEGIN
     OPEN test_cur FOR
     SELECT S.*,
         TREAT(AP.APP AS MARCA).LOGO LOGO_APP,
-        TREAT(EP.EMPRESA AS MARCA).LOGO LOGO_EMPRESA,
-        (SELECT
-            LISTAGG(SDC.NOMBRE,',') WITHIN GROUP (ORDER BY SDC.NOMBRE) AS SECTORES_DE_COMERCIO
-        FROM
-           EMPRESAS EMP
-        INNER JOIN
-            SECTORES_DE_EMPRESAS SDE on EMP.ID = SDE.ID_EMPRESAS
-        INNER JOIN
-            SECTORES_DE_COMERCIO SDC on SDE.ID_SECTOR = SDC.ID
-           ) SECTORES_DE_COMERCIO
+        TREAT(EP.EMPRESA AS MARCA).LOGO LOGO_EMPRESA
         FROM
             (
                 SELECT
@@ -103,7 +94,7 @@ BEGIN
                 PD.ID_EMPRESA IDEMPRESA,
                 TREAT(EP.EMPRESA AS MARCA).NOMBRE NOMBRE_EMP,
                 TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
-                E.NOMBRE,
+                SDC.NOMBRE,
                 COUNT(PD.TRACKING) AS CANTIDAD_PEDIDOS,
                 TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO FI,
                 TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN FF
@@ -117,6 +108,8 @@ BEGIN
                 DETALLES D ON PD.TRACKING = D.ID_TRACKING
             INNER JOIN
                 ESTADOS E ON E.ID = PD.ID_ESTADO
+            INNER JOIN
+                SECTORES_DE_COMERCIO SDC ON SDC.ID = EP.id_sector
             WHERE
                   PD.CANCELADO IS NULL AND
                   TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO >= min_date AND
@@ -124,9 +117,10 @@ BEGIN
             GROUP BY
                     PD.ID_APP,
                     PD.ID_EMPRESA,
-                    E.NOMBRE,
                     TREAT(EP.EMPRESA AS MARCA).NOMBRE,
                     TREAT(AD.APP AS MARCA).NOMBRE,
+                    SDC.NOMBRE,
+                    E.NOMBRE,
                     TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO,
                     TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN
             ORDER BY

@@ -68,9 +68,16 @@ CREATE TABLE registro_de_mantenimiento (
     PRIMARY KEY (id_app, id_garaje, id_unidad, id)
 );
 /
+CREATE TABLE sectores_de_comercio (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nombre VARCHAR2(80) NOT NULL UNIQUE
+);
+/
 CREATE TABLE empresas (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    empresa MARCA NOT NULL
+    empresa MARCA NOT NULL,
+    id_sector INTEGER NOT NULL,
+    FOREIGN KEY (id_sector) REFERENCES sectores_de_comercio(id)
 );
 /
 CREATE TABLE planes_de_servicio (
@@ -129,26 +136,16 @@ CREATE TABLE eventos (
     PRIMARY KEY (id_empresa, id_sucursal, id)
 );
 /
-CREATE TABLE sectores_de_comercio (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nombre VARCHAR2(80) NOT NULL UNIQUE
-);
-/
-CREATE TABLE sectores_de_empresas (
-    id_sector INTEGER,
-    id_empresas INTEGER,
-    FOREIGN KEY(id_sector) REFERENCES sectores_de_comercio(id),
-    FOREIGN KEY(id_empresas) REFERENCES empresas(id),
-    PRIMARY KEY(id_sector, id_empresas)
-);
-/
 CREATE TABLE productos (
     id_sector INTEGER,
+    id_empresa INTEGER,
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nombre VARCHAR2(150) NOT NULL,
-    precio_medio NUMBER(10,2) NOT NULL,
-    tiempo_de_preparacion NUMBER(10),
-    descripcion VARCHAR2(400)
+    precio NUMBER(10,2) NOT NULL,
+    tiempo_de_preparacion NUMBER(10) DEFAULT 0,
+    descripcion VARCHAR2(400),
+    FOREIGN KEY (id_sector) REFERENCES sectores_de_comercio(id),
+    FOREIGN KEY (id_empresa) REFERENCES empresas(id)
 );
 /
 CREATE TABLE almacenes (
