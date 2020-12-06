@@ -1838,3 +1838,9 @@ INSERT INTO registros  VALUES (16, 11, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,1
 INSERT INTO registros  VALUES (17, 10, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
 INSERT INTO registros  VALUES (17, 5, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
 INSERT INTO registros  VALUES (17, 8, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
+
+-- Insert de tipos de transporte
+
+INSERT INTO tipos_de_unidades VALUES (DEFAULT,'Carro','Z' )
+
+DROP TABLE tipos_de_unidades;
