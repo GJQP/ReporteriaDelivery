@@ -40,7 +40,7 @@ CREATE TABLE garajes (
 /
 CREATE TABLE tipos_de_unidades (
     id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY ,
-    nombre VARCHAR2(20) NOT NULL,
+    nombre VARCHAR2(20) NOT NULL CHECK (nombre IN ('CARRO', 'BICICLETA', 'MOTO','CARRO','DRONE')),
     distancia_operativa VARCHAR2(20) NOT NULL CHECK (distancia_operativa IN ('ZONA', 'MUNICIPIO', 'ESTADO')),
     velocidad_media NUMBER(5,2),
     cantidad_pedidos NUMBER(2)
