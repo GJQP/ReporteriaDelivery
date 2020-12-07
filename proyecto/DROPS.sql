@@ -27,6 +27,9 @@ DROP TABLE sucursales;
 DROP TABLE contratos;
 DROP TABLE ubicaciones_aplicables;
 DROP TABLE planes_de_servicio;
+DROP TABLE empresas;
+DROP TABLE sectores_de_comercio;
+DROP TABLE registro_de_mantenimiento;
 DROP TABLE unidades_de_transporte;
 DROP TABLE registro_de_mantenimiento;
 DROP TABLE tipos_de_unidades;
@@ -34,18 +37,9 @@ DROP TABLE garajes;
 DROP TABLE aplicaciones_delivery;
 DROP TABLE zonas;
 DROP TABLE municipios;
---DROP TABLE SECTORES_DE_EMPRESAS;
 DROP TABLE estados;
 DROP TABLE sectores_de_comercio;
 DROP TABLE empresas;
-
-
-
-
-
-
-
-
 /
 --TYPES
 DROP TYPE UBICACION;
