@@ -1747,10 +1747,258 @@ CALL INSERTAR_EMPRESA('Nacho Toys','J-30401204-7',SYSDATE,'nachotoys.jpg',5);
 CALL INSERTAR_EMPRESA('Ford Motors Venezuela','J-00014864-3',SYSDATE,'fordmotors.jpg',7);
 CALL INSERTAR_EMPRESA('Renault Venezuela','J-03024875-3',SYSDATE,'renault.jpg',7);
 CALL INSERTAR_EMPRESA('Dorsay','J-02014864-9',SYSDATE,'dorsay.png',8);
-CALL INSERTAR_EMPRESA('BECO','J-40107362-0',SYSDATE,'beco.jpg',8);
+CALL INSERTAR_EMPRESA('Beco','J-40107362-0',SYSDATE,'beco.jpg',8);
 CALL INSERTAR_EMPRESA('Vapear Vzla','J-00066418-8',SYSDATE,'vapearvzla.png',10);
 CALL INSERTAR_EMPRESA('Prolicor','J-00170868-5',SYSDATE,'prolicor.jpg',11);
 CALL INSERTAR_EMPRESA('Curda 24 express','J-00170868-5',SYSDATE,'curda24express.png',11);
+
+-- PROTUCTOS
+-- Mac Donald's
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Coca-Cola 2Lts', 1.7, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Pepsicola 2Lts', 1.7, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, '7UP 2Lts', 1.7, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Papas pequeñas', 1, 1, 'Paquete de 10 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Papas medianas', 1.5, 1, 'Paquete de 20 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Papas grandes', 2, 1, 'Paquete de 30 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Cajita feliz', 7, 5, 'Cajita feliz que incluye unas papas pequeñas, una hamburguesa mediana, un refresco de 2Lts y un juguete');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Hamburguesa mediana', 3, 3, 'Hamburguesa con dos tapas pan, carne, queso, cebolla y tocineta');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Hamburguesa grande', 5, 3, 'Hamburguesa con dos tapas pan, dos carnes, queso, cebolla y tocineta');
+INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Hamburguesa extra-grande', 7, 3, 'Hamburguesa con tres tapas pan, tres carnes, queso, cebolla y tocineta + salsa BBQ');
+-- Wendy's
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Coca-Cola 2Lts', 1.74, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Pepsicola 2Lts', 1.74, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, '7UP 2Lts', 1.74, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Papas pequeñas', 1, 1, 'Paquete de 10 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Papas medianas', 1.5, 1, 'Paquete de 20 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Papas grandes', 2, 1, 'Paquete de 30 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Hamburguesa mediana', 3, 3, 'Hamburguesa con dos tapas pan, carne, queso, cebolla y tocineta');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Hamburguesa grande', 5, 3, 'Hamburguesa con dos tapas pan, dos carnes, queso, cebolla y tocineta');
+INSERT INTO PRODUCTOS VALUES (1, 2, DEFAULT, 'Hamburguesa extra-grande', 7, 3, 'Hamburguesa con tres tapas pan, tres carnes, queso, cebolla y tocineta + salsa BBQ');
+-- Arturos
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, 'Coca-Cola 2Lts', 1.6, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, 'Pepsicola 2Lts', 1.75, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, '7UP 2Lts', 1.71, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, 'Papas pequeñas', 1.2, 1, 'Paquete de 12 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, 'Papas medianas', 1.8, 1, 'Paquete de 24 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, 'Papas grandes', 2.3, 1, 'Paquete de 33 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, '5 piezas de pollo', 4, 10, '5 piezas de pollo + salsa BBQ');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, '7 piezas de pollo', 6, 10, '7 piezas de pollo + salsa BBQ');
+INSERT INTO PRODUCTOS VALUES (1, 3, DEFAULT, '12 piezas de pollo', 8, 10, '12 piezas de pollo + salsa BBQ');
+-- Burger King
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Coca-Cola 2Lts', 1.7, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Pepsicola 2Lts', 1.7, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, '7UP 2Lts', 1.7, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Papas pequeñas', 1, 1, 'Paquete de 10 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Papas medianas', 1.5, 1, 'Paquete de 20 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Papas grandes', 2, 1, 'Paquete de 30 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Hamburguesa Junior', 3, 3, 'Hamburguesa con dos tapas pan, carne, queso, cebolla y tocineta');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Hamburguesa Queen', 5, 3, 'Hamburguesa con triple tapas pan, dos carnes, queso, cebolla y tocineta');
+INSERT INTO PRODUCTOS VALUES (1, 4, DEFAULT, 'Hamburguesa King', 8, 3, 'Hamburguesa con cuatro tapas pan, tres carnes, queso, cebolla y tocineta + salsa BBQ');
+-- Bonsai Sushi
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'Coca-Cola 2Lts', 1.74, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'Pepsicola 2Lts', 1.74, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, '7UP 2Lts', 1.74, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'IBM', 12.95, 15, 'Salmón ahumado con queso crema');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'El increible', 12.95, 15, 'Camarón temperado con aguacate');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'Rollos de coco con camarón', 10.95, 15, 'Rollos de coco con camarón');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'Angel', 11.95, 15, 'Pescado blanco temperado con aguacate');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'Atardecer en la plaza', 12.95, 15, 'Langosta al vapor con aguacate, camarones y tiritas de cangrejo');
+INSERT INTO PRODUCTOS VALUES (1, 5, DEFAULT, 'Mono marino',10.95, 15, 'Camarón temperado con aguacate y cebollín ');
+-- KFC
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, 'Coca-Cola 2Lts', 1.6, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, 'Pepsicola 2Lts', 1.75, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, '7UP 2Lts', 1.71, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, 'Papas pequeñas', 1.2, 1, 'Paquete de 12 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, 'Papas medianas', 1.8, 1, 'Paquete de 24 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, 'Papas grandes', 2.3, 1, 'Paquete de 33 papas fritas');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, '5 piezas de pollo', 4, 10, '5 piezas de pollo + salsa BBQ');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, '7 piezas de pollo', 5, 10, '7 piezas de pollo + salsa BBQ');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, '12 piezas de pollo', 7, 10, '12 piezas de pollo + salsa BBQ');
+INSERT INTO PRODUCTOS VALUES (1, 6, DEFAULT, '18 piezas de pollo', 9, 10, '18 piezas de pollo + salsa BBQ');
+-- Papa Jhons
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Coca-Cola 2Lts', 1.6, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pepsicola 2Lts', 1.75, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, '7UP 2Lts', 1.71, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza pequeña', 2.3, 20, 'Pizza pequeña para una persona');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza mediana', 3.9, 20, 'Pizza mediana para dos personas');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza grande', 5.9, 20, 'Pizza grande para tres personas');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza familiar', 8.2, 20, 'Pizza familiar para cuatro personas');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, '5 piezas de pollo', 5, 10, '5 piezas de pollo');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza pequeña delgada', 2, 20, 'Pizza pequeña crugiente para una persona');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza mediana delgada', 3.5, 20, 'Pizza mediana crugiente para dos personas');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza grande delgada', 5.7, 20, 'Pizza grande para crugiente tres personas');
+INSERT INTO PRODUCTOS VALUES (1, 7, DEFAULT, 'Pizza familiar delgada', 7.9, 20, 'Pizza familiar para crugiente cuatro personas');
+-- Pizza's Hut
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Coca-Cola 2Lts', 1.6, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pepsicola 2Lts', 1.75, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, '7UP 2Lts', 1.71, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza pequeña', 2, 20, 'Pizza pequeña para una persona');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza mediana', 4, 20, 'Pizza mediana para dos personas');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza grande', 6, 20, 'Pizza grande para tres personas');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza familiar', 8, 20, 'Pizza familiar para cuatro personas');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, '5 piezas de pollo', 5, 10, '5 piezas de pollo');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza pequeña delgada', 2, 20, 'Pizza pequeña crugiente para una persona');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza mediana delgada', 3.5, 20, 'Pizza mediana crugiente para dos personas');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza grande delgada', 5.8, 20, 'Pizza grande para crugiente tres personas');
+INSERT INTO PRODUCTOS VALUES (1, 8, DEFAULT, 'Pizza familiar delgada', 8, 20, 'Pizza familiar para crugiente cuatro personas');
+-- Tequechongos
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, 'Coca-Cola 2Lts', 1.3, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, 'Pepsicola 2Lts', 1.6, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, '7UP 2Lts', 1.6, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, 'Tequeñon de arequipe', 2.3, 20, 'Tequeñon relleno de arequipe');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, 'Tequeñon de queso', 2, 20, 'Tequeñon relleno de queso');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, 'Tequeñon de chocolate', 2.7, 10, 'Tequeñon relleno de chocolate');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, '7 tequeños de queso', 4.9, 10, '7 tequeños rellenos de queso');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, '7 tequeños de jamón', 5.2, 10, '7 tequeños rellenos de jamón');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, '7 tequeños de chorizo', 5.6, 10, '7 tequeños rellenos de chorizo');
+INSERT INTO PRODUCTOS VALUES (1, 9, DEFAULT, '7 tequeños de queso crema', 5.4, 10, '7 tequeños rellenos de queso crema');
+-- Chip-a-cookies
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, 'Coca-Cola 2Lts', 1.3, 0, 'Botella de Coca-Cola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, 'Pepsicola 2Lts', 1.6, 0, 'Botella de Pepsicola tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, '7UP 2Lts', 1.6, 0, 'Botella de 7UP tradicional de 2Lts');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, 'Galletas de coco 12 piezas', 3.5, 10, 'Galletas de coco 12 piezas');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, 'Galletas saldas 12 piezas', 3.2, 10, 'Galletas saldas 12 piezas');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, 'Galletas con queso 12 piezas', 3.5, 10, 'Galletas con queso 12 piezas');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, 'Galletas con crema 12 piezas', 4.2, 10, 'Galletas con crema 12 piezas');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, '6 Galletas grandes con chispas de chocolate', 6.5, 10, '6 Galletas grandes con chispas de chocolate');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, '6 Galletas grandes con coco', 6, 10, '6 Galletas grandes con chispas de coco');
+INSERT INTO PRODUCTOS VALUES (1, 10, DEFAULT, '6 Galletas grandes con chispas de arequipe', 6.3, 10, '6 Galletas grandes con chispas de arequipe');
+-- Zara
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Camisa talla S', 24.99, 0, 'Camisa talla S varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Camisa talla M', 26, 0, 'Camisa talla M varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Camisa talla L', 27.99, 0, 'Camisa talla L varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Camias talla XL', 30, 0, 'Camisa talla XL varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Pantalón talla S', 27, 0, 'Pantalón talla S varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Pantalón talla M', 29, 0, 'Pantalón talla M varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Pantalón talla L', 30.99, 0, 'Pantalón talla L varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Pantalón talla XL', 31.2, 0, 'Pantalón talla XL varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Gorra Negra', 19.9, 0, 'Gorra negra');
+INSERT INTO PRODUCTOS VALUES (6, 11, DEFAULT, 'Gorra Blanca', 17.9, 0, 'Gorra Blanca');
+-- Bershka
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Camisa talla S', 25.99, 0, 'Camisa talla S varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Camisa talla M', 27, 0, 'Camisa talla M varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Camisa talla L', 28.99, 0, 'Camisa talla L varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Camisa talla XL', 29, 0, 'Camisa talla XL varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Pantalón talla S', 26.99, 0, 'Pantalón talla S varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Pantalón talla M', 29, 0, 'Pantalón talla M varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Pantalón talla L', 31.4, 0, 'Pantalón talla L varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Pantalón talla XL', 30, 0, 'Pantalón talla XL varios colores');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Gorra Negra premium', 35.2, 0, 'Gorra negra');
+INSERT INTO PRODUCTOS VALUES (6, 12, DEFAULT, 'Gorra Blanca premium', 31.99, 0, 'Gorra Blanca');
+-- Pablo Electrónica
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Televisor Hinsense 32 pulgadas', 149.99, 0, 'Televisor Hinsense 32 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Televisor Samsung 50 pulgadas', 377.49, 0, 'Televisor Samsung 50 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Televisor Samsung 65 pulgadas', 677.99, 0, 'Televisor Samsung 65 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Televisor LG 49 pulgadas 4K', 649.99, 0, 'Televisor LG 49 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Computadora Gamming', 999.99, 0, 'Computadora Gamming');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Computadora I7-10540', 680, 0, 'Computadora I7-10540');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Xiaomi Redmi9', 149.99, 0, 'Xiaomi Redmi9');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Google Pixel', 500, 0, 'Google Pixel');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Play Station 5', 1335, 0, 'Play Station 5');
+INSERT INTO PRODUCTOS VALUES (2, 13, DEFAULT, 'Xbox One', 331.99, 0, 'XBox One');
+-- Electrónica Chacao
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Televisor LG 42 pulgadas', 280, 0, 'Televisor Hinsense 32 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Televisor Samsung 50 pulgadas', 477.49, 0, 'Televisor Samsung 50 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Televisor Samsung 65 pulgadas', 677.99, 0, 'Televisor Samsung 65 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Televisor LG 49 pulgadas 4K', 649.99, 0, 'Televisor LG 49 pulgadas');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Computadora Gamming', 999.99, 0, 'Computadora Gamming');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Computadora I7-10540', 680, 0, 'Computadora I7-10540');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Xiaomi Redmi9', 149.99, 0, 'Xiaomi Redmi9');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Google Pixel', 500, 0, 'Google Pixel');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Play Station 5', 1335, 0, 'Play Station 5');
+INSERT INTO PRODUCTOS VALUES (2, 14, DEFAULT, 'Xbox One', 331.99, 0, 'XBox One');
+-- Valmy
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Valmy esmalte para uñas pack de 3', 19, 0, 'Esmalte para uñas pack de 3');
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Valmy esmalte para uñas pack de 2', 14.99, 0, 'Esmalte para uñas pack de 2');
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Valmy capa protectora para uñas pack de 6', 25, 0, 'Capa protectora para uñas pack de 6');
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Valmy capa protectora para uñas pack de 3', 13, 0, 'Capa protectora para uñas pack de 3');
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Valmy gel para las uñas', 8.99, 0, 'Gel para las uñas con calcio');
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Christine Valmy anti-edad 40g', 45.9, 0, 'Christine Valmy anti-edad 40g');
+INSERT INTO PRODUCTOS VALUES (3, 15, DEFAULT, 'Valmy Protector solar 50g', 34.35, 0, 'Protector solar 50g');
+-- Elf cosméticos
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf esmalte para uñas pack de 3', 19, 0, 'Esmalte para uñas pack de 3');
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf esmalte para uñas pack de 2', 14.99, 0, 'Esmalte para uñas pack de 2');
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf Capa protectora para uñas pack de 6', 25, 0, 'Capa protectora para uñas pack de 6');
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf Capa protectora para uñas pack de 3', 13, 0, 'Capa protectora para uñas pack de 3');
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf gel para las uñas', 8.99, 0, 'Elf gel para las uñas con calcio');
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf anti-edad 40g', 45.9, 0, 'Elf anti-edad 40g');
+INSERT INTO PRODUCTOS VALUES (3, 16, DEFAULT, 'Elf protector solar 50g', 34.35, 0, 'Elf Protector solar 50g');
+-- Farmatodo
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, '4 envaces de 950ml de alcohol isopropílico', 33.52, 0, '4 envaces de 950ml de alcohol isopropílico');
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, 'Caja de 210 limpadores de lentes con alcohol', 12.99, 0, 'Caja de 210 limpadores de lentes con alcohol');
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, 'Ibuprofeno 200mg 500 pastillas', 15, 0, 'Capa protectora para uñas pack de 6');
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, 'Voltarem 100mg paquete de 2', 13, 0, 'Voltarem 100mg paquete de 2');
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, 'Toalla termica Sunbeam', 33.83, 0, 'Toalla termica Sunbeam');
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, 'Guantes desechables 100 piezas', 23.20, 0, 'Guantes desechables 100 piezas');
+INSERT INTO PRODUCTOS VALUES (4, 17, DEFAULT, 'Agua destilada', 35.99, 0, 'Agua destilada');
+-- Farmacias SAAS
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, '2 envaces de 950ml de alcohol isopropílico', 17.9, 0, '2 envaces de 950ml de alcohol isopropílico');
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, 'Hexomedine 45ml', 38.99, 0, 'Hexomedine 45ml');
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, 'Fungicida homeopático 50ml', 58, 0, 'Fungicida homeopático 50ml');
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, 'Voltarem 100mg paquete de 2', 13, 0, 'Voltarem 100mg paquete de 2');
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, 'Retinol anti edad 50ml', 22.89, 0, 'Retinol anti edad 50ml');
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, 'Guantes desechables 100 piezas', 23.20, 0, 'Guantes desechables 100 piezas');
+INSERT INTO PRODUCTOS VALUES (4, 18, DEFAULT, 'Agua destilada', 35.99, 0, 'Agua destilada');
+-- General Import
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'LEGO Barco en la botella', 69, 0, 'LEGO Barco en la botella');
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'LEGO Star Wars AT-ST', 38.99, 0, 'LEGO Star Wars AT-ST');
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'LEGO Marvel Advengers cabeza de Iron Man', 47.99, 0, 'LEGO Marvel Advengers cabeza de Iron Man');
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'Monopoly Fornite', 19.99, 0, 'Monopoly Fornite');
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'Monopoly Juego de Tronos', 29.99, 0, 'Monopoly Juego de Tronos');
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'Barbie Navideña', 24.86, 0, 'Barbie Navideña');
+INSERT INTO PRODUCTOS VALUES (5, 19, DEFAULT, 'Barbie Yoga', 14.99, 0, 'Barbie Yoga');
+-- Nacho Toys
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'LEGO City Comando Movil de Policia', 39.99, 0, 'LEGO City Comando Movil de Policia');
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'LEGO Star Wars Destructor Imperial', 38.99, 0, 'LEGO Star Wars Destructor Imperial');
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'LEGO Arquitectura Coliseo', 59.99, 0, 'LEGO Coliseo');
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'Monopoly Tradicional', 19.99, 0, 'Monopoly Tradicional');
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'Monopoly FRIENDS', 29.99, 0, 'Monopoly FRIENDS');
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'Barbie Navideña', 24.86, 0, 'Barbie Navideña');
+INSERT INTO PRODUCTOS VALUES (5, 20, DEFAULT, 'Barbie Yoga', 14.99, 0, 'Barbie Yoga');
+-- Ford Motors Venezuela
+INSERT INTO PRODUCTOS VALUES (7, 21, DEFAULT, '4 Cauchos completas 235/65R16C 121/119R', 139.99, 0, 'LLanta 235/65R16C 121/119R');
+INSERT INTO PRODUCTOS VALUES (7, 21, DEFAULT, 'Alfombrilla para Ford', 89.99, 0, 'Alfombrilla para Ford');
+INSERT INTO PRODUCTOS VALUES (7, 21, DEFAULT, 'Covertores para Ford Transit', 119, 0, 'Covertores para Ford Transit');
+INSERT INTO PRODUCTOS VALUES (7, 21, DEFAULT, 'Luces traceras Ford 2009 en C', 168.98, 0, 'Luces traceras Ford 2009 en C');
+INSERT INTO PRODUCTOS VALUES (7, 21, DEFAULT, 'Tercera luz de freno roja', 34.99, 0, 'Tercera luz de freno roja');
+-- Renault Venezuela
+INSERT INTO PRODUCTOS VALUES (7, 22, DEFAULT, '4 Cauchos completas 230/65R16C 121/119R', 129.99, 0, 'LLanta 230/65R16C 121/119R');
+INSERT INTO PRODUCTOS VALUES (7, 22, DEFAULT, 'Alfombrilla para Renault', 89.99, 0, 'Alfombrilla para Renault');
+INSERT INTO PRODUCTOS VALUES (7, 22, DEFAULT, 'Covertores para Renault', 119, 0, 'Covertores para Renault');
+INSERT INTO PRODUCTOS VALUES (7, 22, DEFAULT, 'Luces traceras Renault 2009 en C', 168.98, 0, 'Luces traceras Renault 2009 en C');
+INSERT INTO PRODUCTOS VALUES (7, 22, DEFAULT, '2x RENAULT R4 4a 1982', 27.99, 0, '2x RENAULT R4 4a 1982');
+-- Dorsay
+INSERT INTO PRODUCTOS VALUES (8, 23, DEFAULT, 'Juego de 18 piezas Gibson', 44.31, 0, 'Juego de 18 piezas Gibson');
+INSERT INTO PRODUCTOS VALUES (8, 23, DEFAULT, 'Juego de 12 piezas Gibson', 39.99, 0, 'Juego de 12 piezas Gibson');
+INSERT INTO PRODUCTOS VALUES (8, 23, DEFAULT, 'Juego de cucharas de te 16 piezas', 168.98, 0, 'Juego de cucharas de te 16 piezas');
+INSERT INTO PRODUCTOS VALUES (8, 23, DEFAULT, 'NOMA Arbolito de Navidad', 149.99, 0, 'NOMA Arbolito de Navidad');
+INSERT INTO PRODUCTOS VALUES (8, 23, DEFAULT, 'MOICO Recogedor de caca de perro', 27.99, 0, 'MOICO Recogedor de caca de perro');
+-- Beco
+INSERT INTO PRODUCTOS VALUES (8, 24, DEFAULT, 'Juego de 18 piezas Corelle', 52.99, 0, 'Juego de 18 piezas Corelle');
+INSERT INTO PRODUCTOS VALUES (8, 24, DEFAULT, 'Juego de 12 piezas Corelle', 45.99, 0, 'Juego de 12 piezas Corelle');
+INSERT INTO PRODUCTOS VALUES (8, 24, DEFAULT, 'Juego de cucharas de te 16 piezas', 168.98, 0, 'Juego de cucharas de te 16 piezas');
+INSERT INTO PRODUCTOS VALUES (8, 24, DEFAULT, 'Cuchillo Zelite', 129.99, 0, 'Cuchillo Zelite');
+INSERT INTO PRODUCTOS VALUES (8, 24, DEFAULT, 'Cuchillo Victorinox de Acero', 37.38, 0, 'Cuchillo Victorinox de Acero');
+-- Vapear Vzla
+INSERT INTO PRODUCTOS VALUES (10, 25, DEFAULT, 'Cigarrillos sin nicotina', 29.99, 0, 'Cigarrillos sin nicotina');
+INSERT INTO PRODUCTOS VALUES (10, 25, DEFAULT, 'Vapper de vinilo electrónico', 8.99, 0, 'Vapper de vinilo electrónico');
+INSERT INTO PRODUCTOS VALUES (10, 25, DEFAULT, 'Vapper azul electrónico', 12.95, 0, 'Vapper azul electrónico');
+INSERT INTO PRODUCTOS VALUES (10, 25, DEFAULT, 'Vapper edición especial multicolor', 19.95, 0, 'Vapper edición especial multicolor');
+INSERT INTO PRODUCTOS VALUES (10, 25, DEFAULT, 'Capella escencia de patilla 10ml', 8.23, 0, 'Capella escencia de patilla');
+INSERT INTO PRODUCTOS VALUES (10, 25, DEFAULT, 'Capella escencia de piña 10ml', 6.97, 0, 'Capella escencia de piña');
+-- Prolicor
+INSERT INTO PRODUCTOS VALUES (11, 26, DEFAULT, 'Botella de ron Cacique 500', 13, 0, 'Ron Cacique 500');
+INSERT INTO PRODUCTOS VALUES (11, 26, DEFAULT, 'Botella de ron Carupano 12 años', 12, 0, 'Ron Carupano 12 años');
+INSERT INTO PRODUCTOS VALUES (11, 26, DEFAULT, 'Caja de 36 solera azul', 20, 0, 'Caja de 36 solera verde');
+INSERT INTO PRODUCTOS VALUES (11, 26, DEFAULT, 'Caja de 36 polarcita', 18.95, 0, 'Caja de 36 polarcita');
+INSERT INTO PRODUCTOS VALUES (11, 26, DEFAULT, 'Caja de 36 solera verde', 18.23, 0, 'Caja de 36 solera verde');
+-- Curda 24 express
+INSERT INTO PRODUCTOS VALUES (11, 27, DEFAULT, 'Caja de 36 solera verde', 16, 0, 'Caja de 36 solera verde');
+INSERT INTO PRODUCTOS VALUES (11, 27, DEFAULT, 'Botella de ron Carupano 12 años', 12.3, 0, 'Botella de ron Carupano 12 años');
+INSERT INTO PRODUCTOS VALUES (11, 27, DEFAULT, 'Caja de 36 solera azul', 19.95, 0, 'Caja de 36 solera verde');
+INSERT INTO PRODUCTOS VALUES (11, 27, DEFAULT, 'Caja de 36 polarcita', 17.32, 0, 'Caja de 36 polarcita');
+INSERT INTO PRODUCTOS VALUES (11, 27, DEFAULT, 'Botella de ron Cacique 500', 12.5, 0, 'Botella de ron Cacique 500');
+INSERT INTO PRODUCTOS VALUES (11, 27, DEFAULT, 'Botella de ron Santa Teresa', 8, 0, 'Botella de ron Santa Teresa');
 
 ---- USUARIOS
 CALL INSERTAR_USUARIO('Joaquin', null, 'Piris', 'Corley', 'E', 72613591, 'ucorley0@4shared.com','hombre1.jpg');
@@ -1839,16 +2087,6 @@ INSERT INTO registros  VALUES (17, 10, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,1
 INSERT INTO registros  VALUES (17, 5, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
 INSERT INTO registros  VALUES (17, 8, RANGO_TIEMPO(SYSDATE,add_months(SYSDATE,12)));
 
-/*
--- Insert de tipos de transporte
-CREATE TABLE tipos_de_unidades (
-    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY ,
-    nombre VARCHAR2(20) NOT NULL CHECK (nombre IN ('CARRO', 'BICICLETA', 'MOTO','CARRO','DRONE')),
-    distancia_operativa VARCHAR2(20) NOT NULL CHECK (distancia_operativa IN ('ZONA', 'MUNICIPIO', 'ESTADO')),
-    velocidad_media NUMBER(5,2),
-    cantidad_pedidos NUMBER(2)
-);
-*/
 
 INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',90,4);
 INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',80,4);
@@ -1866,7 +2104,38 @@ INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',70,4);
 INSERT INTO tipos_de_unidades VALUES (DEFAULT,'CARRO','ESTADO',40,4);
 INSERT INTO tipos_de_unidades VALUES (DEFAULT,'BICICLETA','MUNICIPIO',10,2);
 
--- Garajes
---INSERT INTO garajes VALUES (DEFAULT,)
 
-
+-- Garajes Caracas, needs testing
+INSERT INTO garajes VALUES (1,DEFAULT,UBICACION(10.511941,-66.911546,SYSDATE),24,335,1117);
+INSERT INTO garajes VALUES (2,DEFAULT,UBICACION(10.515081,-66.91114,SYSDATE),24,335,1117);
+INSERT INTO garajes VALUES (3,DEFAULT,UBICACION(10.504703999999998,-66.904948,SYSDATE),24,335,1130);
+INSERT INTO garajes VALUES (4,DEFAULT,UBICACION(10.504481,-66.902232,SYSDATE),24,335,1130);
+INSERT INTO garajes VALUES (5,DEFAULT,UBICACION(10.501727,-66.903901,SYSDATE),24,335,1130);
+INSERT INTO garajes VALUES (6,DEFAULT,UBICACION(10.4637,-66.982537,SYSDATE),24,335,1136);
+INSERT INTO garajes VALUES (7,DEFAULT,UBICACION(10.468025,-66.977142,SYSDATE),24,335,1136);
+INSERT INTO garajes VALUES (8,DEFAULT,UBICACION(10.46677,-66.97929599999999,SYSDATE),24,335,1136);
+INSERT INTO garajes VALUES (9,DEFAULT,UBICACION(10.443224,-66.925843,SYSDATE),24,335,1135);
+INSERT INTO garajes VALUES (10,DEFAULT,UBICACION(10.448178,-66.923467,SYSDATE),24,335,1135);
+INSERT INTO garajes VALUES (11,DEFAULT,UBICACION(10.452706,-66.92501700000001,SYSDATE),24,335,1135);
+INSERT INTO garajes VALUES (12,DEFAULT,UBICACION(10.45317,-66.924991,SYSDATE),24,335,1132);
+INSERT INTO garajes VALUES (13,DEFAULT,UBICACION(10.497729,-66.877262,SYSDATE),24,335,1132);
+INSERT INTO garajes VALUES (14,DEFAULT,UBICACION(10.502673,-66.876813,SYSDATE),24,335,1132);
+INSERT INTO garajes VALUES (15,DEFAULT,UBICACION(10.493416,-66.925393,SYSDATE),24,335,1133);
+INSERT INTO garajes VALUES (16,DEFAULT,UBICACION(10.494613000000001,-66.925001,SYSDATE),24,335,1133);
+INSERT INTO garajes VALUES (17,DEFAULT,UBICACION(10.492636,-66.928933,SYSDATE),24,335,1133);
+INSERT INTO garajes VALUES (1,DEFAULT,UBICACION(10.515851,-66.94676700000001,SYSDATE),24,335,1119);
+INSERT INTO garajes VALUES (2,DEFAULT,UBICACION(10.516616,-66.945324,SYSDATE),24,335,1119);
+INSERT INTO garajes VALUES (3,DEFAULT,UBICACION(10.516368,-66.94330699999999,SYSDATE),24,335,1119);
+INSERT INTO garajes VALUES (4,DEFAULT,UBICACION(10.500371000000001,-66.923618,SYSDATE),24,335,1123);
+INSERT INTO garajes VALUES (5,DEFAULT,UBICACION(10.499,-66.919841,SYSDATE),24,335,1123);
+INSERT INTO garajes VALUES (6,DEFAULT,UBICACION(10.496101,-66.923468,SYSDATE),24,335,1123);
+INSERT INTO garajes VALUES (7,DEFAULT,UBICACION(10.493613999999999,-66.918325,SYSDATE),24,335,1120);
+INSERT INTO garajes VALUES (8,DEFAULT,UBICACION(10.495165,-66.91736999999999,SYSDATE),24,335,1120);
+INSERT INTO garajes VALUES (9,DEFAULT,UBICACION(10.496613,-66.91651800000001,SYSDATE),24,335,1120);
+INSERT INTO garajes VALUES (10,DEFAULT,UBICACION(10.500439,-66.91466700000001,SYSDATE),24,335,1138);
+INSERT INTO garajes VALUES (11,DEFAULT,UBICACION(10.501726,-66.917556,SYSDATE),24,335,1138);
+INSERT INTO garajes VALUES (12,DEFAULT,UBICACION(10.501417,-66.913444,SYSDATE),24,335,1138);
+INSERT INTO garajes VALUES (13,DEFAULT,UBICACION(10.457278,-66.94766700000001,SYSDATE),24,335,1128);
+INSERT INTO garajes VALUES (14,DEFAULT,UBICACION(10.457417,-66.947722,SYSDATE),24,335,1128);
+INSERT INTO garajes VALUES (15,DEFAULT,UBICACION(10.447067,-66.94550100000001,SYSDATE),24,335,1128);
+INSERT INTO garajes VALUES (16,DEFAULT,UBICACION(10.510192,-66.919377,SYSDATE),24,335,1129)
