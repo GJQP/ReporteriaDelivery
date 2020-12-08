@@ -13,6 +13,12 @@ DROP PROCEDURE insertar_app_delivery;
 DROP PROCEDURE insertar_empresa;
 DROP PROCEDURE insertar_usuario;
 /
+--SIMULACION
+DROP PROCEDURE modulo_contratos;
+DROP PROCEDURE crear_plan_servicio;
+DROP PROCEDURE crear_contrato;
+DROP FUNCTION obtener_empresa_no_contratada;
+/
 -- TABLES
 DROP TABLE rutas;
 DROP TABLE detalles;

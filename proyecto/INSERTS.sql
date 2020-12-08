@@ -1752,7 +1752,24 @@ CALL INSERTAR_EMPRESA('Vapear Vzla','J-00066418-8',SYSDATE,'vapearvzla.png',10);
 CALL INSERTAR_EMPRESA('Prolicor','J-00170868-5',SYSDATE,'prolicor.jpg',11);
 CALL INSERTAR_EMPRESA('Curda 24 express','J-00170868-5',SYSDATE,'curda24express.png',11);
 
--- PROTUCTOS
+--CONTRATOS
+INSERT INTO contratos VALUES (2, 5, 25,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-11-04','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (12, 37, 21,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-07-07','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (15, 47, 12,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-09-11','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (6, 17, 21,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-06-26','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (8, 24, 9,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-04-19','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (16, 51, 17,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-06-20','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (6, 18, 7,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-07-15','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (5, 16, 12,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-06-19','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (6, 18, 7,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-10-03','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (1, 1, 2, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-07-23','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (15, 45, 27, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-02-19','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (1, 2, 5, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-10-19','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (11, 34, 16, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-12-04','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (1, 2, 11, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-01-15','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (1, 3, 8, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-09-29','yyyy-mm-dd')), 0.00, null);
+
+-- PRODUCTOS
 -- Mac Donald's
 INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Coca-Cola 2Lts', 1.7, 0, 'Botella de Coca-Cola tradicional de 2Lts');
 INSERT INTO PRODUCTOS VALUES (1, 1, DEFAULT, 'Pepsicola 2Lts', 1.7, 0, 'Botella de Pepsicola tradicional de 2Lts');
