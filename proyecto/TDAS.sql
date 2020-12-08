@@ -165,14 +165,14 @@ CREATE OR REPLACE TYPE BODY UBICACION IS
         modulo_real := UBICACION.DISTANCIA_ENTRE_DOS_PUNTOS(UBICACION(vector_ubi.latitud*modulo_kmh*tiempo_horas + p1.latitud, vector_ubi.longitud*modulo_kmh*tiempo_horas + p1.longitud, SYSDATE), p1);
         DBMS_OUTPUT.PUT_LINE(modulo_real - modulo_deseado);
         IF (modulo_real > modulo_deseado + delta) THEN
-            DBMS_OUTPUT.PUT_LINE('El vehículo recorre más de lo esperado' || (modulo_real-modulo_deseado)/modulo_kmh);
+            DBMS_OUTPUT.PUT_LINE('##### El vehículo recorre más de lo esperado');
             tiempo_necesario := DISTANCIA_ENTRE_DOS_PUNTOS(p2,p1)/modulo_kmh;
             RETURN UBICACION(p2.latitud, p2.longitud, p1.ACTUALIZADO+tiempo_necesario/24);
         ELSIF (modulo_real < (modulo_deseado + delta) AND modulo_real > (modulo_deseado - delta)) THEN --Falta agregar un delta
-            DBMS_OUTPUT.PUT_LINE('El vehículo recorre lo esperado' || to_char(tiempo_horas, '99.999999'));
+            DBMS_OUTPUT.PUT_LINE('##### El vehículo recorre lo esperado');
             RETURN UBICACION(p2.latitud, p2.longitud, p1.ACTUALIZADO+tiempo_horas/24);
         ELSE
-            DBMS_OUTPUT.PUT_LINE('El vehículo recorre menos de lo esperado' || to_char(tiempo_horas, '99.999999'));
+            DBMS_OUTPUT.PUT_LINE('##### El vehículo recorre menos de lo esperado');
             RETURN UBICACION(vector_ubi.latitud*modulo_kmh*tiempo_horas + p1.latitud, vector_ubi.longitud*modulo_kmh*tiempo_horas + p1.longitud, p1.ACTUALIZADO+tiempo_horas/24);
         END IF;
     END;
