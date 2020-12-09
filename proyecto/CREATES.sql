@@ -122,7 +122,7 @@ CREATE TABLE sucursales (
     id INTEGER GENERATED ALWAYS AS IDENTITY,
     ubicacion UBICACION NOT NULL,
     FOREIGN KEY(id_estado, id_municipio, id_zona) REFERENCES zonas(id_estado, id_municipio, id),
-    FOREIGN KEY(id_municipio) REFERENCES empresas(id),
+    FOREIGN KEY(id_empresa) REFERENCES empresas(id),
     PRIMARY KEY (id_empresa, id)
 );
 /
