@@ -5,13 +5,25 @@ DROP PROCEDURE REPORTE3;
 DROP PROCEDURE REPORTE4;
 DROP PROCEDURE REPORTE5;
 DROP PROCEDURE REPORTE6;
-
+/
 -- TRIGGERS
---/
+DROP TRIGGER registro_mantenimiento_unidades;
+/
 -- PROCEDURES
 DROP PROCEDURE insertar_app_delivery;
 DROP PROCEDURE insertar_empresa;
 DROP PROCEDURE insertar_usuario;
+/
+--SIMULACION
+
+--contratos
+DROP PROCEDURE modulo_contratos;
+DROP PROCEDURE crear_plan_servicio;
+DROP PROCEDURE crear_contrato;
+DROP FUNCTION obtener_empresa_no_contratada;
+
+--mantenimiento
+DROP PROCEDURE MODULO_MANTENIMIENTO;
 /
 -- TABLES
 DROP TABLE rutas;
@@ -27,25 +39,16 @@ DROP TABLE sucursales;
 DROP TABLE contratos;
 DROP TABLE ubicaciones_aplicables;
 DROP TABLE planes_de_servicio;
-DROP TABLE unidades_de_transporte;
+DROP TABLE empresas;
+DROP TABLE sectores_de_comercio;
 DROP TABLE registro_de_mantenimiento;
+DROP TABLE unidades_de_transporte;
 DROP TABLE tipos_de_unidades;
 DROP TABLE garajes;
 DROP TABLE aplicaciones_delivery;
 DROP TABLE zonas;
 DROP TABLE municipios;
---DROP TABLE SECTORES_DE_EMPRESAS;
 DROP TABLE estados;
-DROP TABLE sectores_de_comercio;
-DROP TABLE empresas;
-
-
-
-
-
-
-
-
 /
 --TYPES
 DROP TYPE UBICACION;
