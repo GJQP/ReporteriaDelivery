@@ -266,6 +266,87 @@ IS
 
 --FIN CONTRATOS
 
+--INICIO MANTENIMIENTO
+
+--SE PUEDE HACER POR APP
+CREATE OR REPLACE PROCEDURE modulo_mantenimiento(fecha_sim DATE DEFAULT SYSDATE, in_app aplicaciones_delivery.id%TYPE DEFAULT NULL)
+IS
+    DIAS_PARA_DESCONTINUAR CONSTANT NUMBER := 30;
+    DIAS_PARA_REALIZAR_MANT_PREV CONSTANT NUMBER := 90;
+
+    unidad unidades_de_transporte%ROWTYPE;
+    ult_mantenimiento registro_de_mantenimiento%ROWTYPE;
+    CURSOR unidades_app(in_id_app aplicaciones_delivery.id%TYPE DEFAULT NULL)
+    IS
+        SELECT *
+        FROM unidades_de_transporte ut
+        WHERE in_id_app IS NULL OR ut.id_app = in_id_app;
+
+BEGIN
+
+    OPEN unidades_app(in_app);
+    FOR unidad IN unidades_app
+    LOOP
+        dbms_output.PUT_LINE('## SE VERIFICA EL ESTADO DE LA UNIDAD');
+        IF unidad.estado = 'REPARACION' THEN
+            dbms_output.PUT_LINE('### LA UNIDAD ESTÁ DAÑADA SE DECIDE SI REALIZAR O NO EL MANTENIMIENTO A LA UNIDAD');
+            IF dbms_random.VALUE(0,1) > 0.5 THEN
+
+                dbms_output.PUT_LINE('## SE DECIDE SI REALIZAR MANTENIMIENTO CORRECTIVO ' ||
+                                     'O DESCONTINUAR LA UNIDAD');
+
+                SELECT * INTO ult_mantenimiento
+                FROM registro_de_mantenimiento
+                WHERE id_app=unidad.id_app
+                  AND id_garaje=unidad.id_garaje
+                  AND id_unidad=unidad.id
+                ORDER BY id DESC
+                FETCH FIRST ROW ONLY;
+
+                IF  ult_mantenimiento.fecha_registro - fecha_sim
+                       >
+                   DIAS_PARA_DESCONTINUAR THEN
+                    dbms_output.PUT_LINE('### SE DECIDE A NO REALIZAR MANTENIMIENTO Y DESCONTINUAR LA UNIDAD');
+
+                    UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
+                    WHERE id = unidad.id
+                        AND id_garaje=unidad.id_garaje
+                        AND id_app=unidad.id_app;
+
+                END IF;
+
+            ELSE
+                dbms_output.PUT_LINE('### SE DECIDE NO REALIZAR MANTENIMIENTO A LA UNIDAD Y CONTINUARA EN MANTENIMIENTO');
+            END IF;
+        ELSIF unidad.estado = 'OPERATIVA' THEN
+
+            SELECT * INTO ult_mantenimiento
+                FROM registro_de_mantenimiento
+                WHERE id_app=unidad.id_app
+                  AND id_garaje=unidad.id_garaje
+                  AND id_unidad=unidad.id
+                ORDER BY id DESC
+                FETCH FIRST ROW ONLY;
+
+            dbms_output.PUT_LINE('### LA UNIDAD ESTÁ OPERATIVA');
+            dbms_output.PUT_LINE('## SE VERIFICA SI REQUIERE DE MANTENIMIENTO PREVENTIVO');
+            IF ult_mantenimiento.fecha_registro - fecha_sim > DIAS_PARA_REALIZAR_MANT_PREV THEN
+                dbms_output.PUT_LINE('### SE REALIZA MANTENIMIENTO PREVENTIVO' ||
+                                     'A LA UNIDAD');
+
+                UPDATE unidades_de_transporte SET estado = 'REPARACION'
+                    WHERE id = unidad.id
+                        AND id_garaje=unidad.id_garaje
+                        AND id_app=unidad.id_app;
+            ELSE
+                dbms_output.PUT_LINE('### SE MANTIENE OPERATIVA LA UNIDAD');
+            END IF;
+        END IF;
+    END LOOP;
+
+END;
+
+--FIN MANTENIMIENTO
 
 -- PROCEDURES OTROS
 /*CREATE OR REPLACE PROCEDURE validar_pedidos(
