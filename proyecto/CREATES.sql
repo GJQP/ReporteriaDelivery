@@ -243,3 +243,9 @@ CREATE TABLE rutas (
     PRIMARY KEY (id_app, id_garaje, id_unidad, id_traking, id)
 );
 /
+CREATE TABLE sim_time(
+    id INTEGER GENERATED ALWAYS AS IDENTITY,
+    tiempo RANGO_TIEMPO,
+    descripcion VARCHAR2(2000)
+);
+/
