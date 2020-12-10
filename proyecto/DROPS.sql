@@ -8,7 +8,7 @@ DROP PROCEDURE REPORTE6;
 /
 -- TRIGGERS
 
-DROP TRIGGER se_ha_creado_una_ruta;
+DROP TRIGGER se_ha_eliminado_una_ruta;
 DROP TRIGGER se_ha_creado_una_ruta;
 DROP TRIGGER se_ha_cancelado_un_pedido;
 DROP TRIGGER se_ha_hecho_un_nuevo_pedido;
