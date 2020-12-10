@@ -375,6 +375,239 @@ END;
 
 --FIN MANTENIMIENTO
 
+-- PEDIDOS
+
+CREATE OR REPLACE FUNCTION sucursal_factible(in_id_app aplicaciones_delivery.id%TYPE,
+                    in_id_empresa empresas.id%TYPE,
+                    in_direccion direcciones%ROWTYPE)
+RETURN sucursales.id%TYPE
+IS
+    id_sucursal sucursales.id%TYPE;
+    id_zona NUMBER;
+    id_municipio NUMBER;
+    id_estado NUMBER;
+BEGIN
+        SELECT s.id,
+           DECODE(s.id_zona,DECODE(in_direccion.id_zona,g.id_zona,s.id_zona,0),s.id_zona,0) as id_zona,
+           DECODE(s.id_municipio,DECODE(in_direccion.id_municipio,g.id_municipio,s.id_municipio,0),s.id_municipio,0) as id_municipio,
+           DECODE(s.id_estado,DECODE(in_direccion.id_estado,g.id_estado,s.id_estado,0),s.id_estado,0) as id_estado
+        INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
+        FROM sucursales s
+        JOIN garajes g ON s.id_estado = g.id_estado
+        --JOIN direcciones d ON g.id_estado = d.id_estado
+        JOIN unidades_de_transporte udt ON g.id_app = udt.id_app AND g.id = udt.id_garaje
+        JOIN tipos_de_unidades tdu ON udt.id_tipo = tdu.id
+        JOIN almacenes a2 ON s.id_empresa = a2.id_empresa AND s.id = a2.id_sucursal
+        WHERE g.id_app = in_id_app --APP
+        --AND d.id_usuario = in_id_usuario --USUARIO
+        AND s.id_empresa = in_id_empresa--EMPRESA
+        AND 0 > (SELECT COUNT(disponibilidad) FROM almacenes al WHERE al.id_sucursal = a2.id_sucursal) --DISPONIBILIDAD
+        AND udt.estado = 'OPERATIVA'
+        AND (
+            ( s.id_zona = g.id_zona AND s.id_zona = in_direccion.id_zona ) --ZONA
+            OR
+            ( s.id_municipio = g.id_municipio AND s.id_municipio = in_direccion.id_municipio AND tdu.distancia_operativa NOT LIKE 'ZONA')--MUNICIPIO
+            OR
+            (tdu.distancia_operativa LIKE 'ESTADO')--ESTADO
+            )--ALCANCE
+        ORDER BY id_zona DESC, id_municipio DESC
+        FETCH FIRST ROW ONLY;
+
+        RETURN id_sucursal;
+
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+            RETURN 0;
+END;
+
+CREATE OR REPLACE PROCEDURE crear_pedido_aleatorio(
+    app_id aplicaciones_delivery.id%TYPE,
+    plan_id planes_de_servicio.id%TYPE,
+    empresa_id empresas.id%TYPE,
+    contrato_id contratos.id%TYPE,
+    estado_id estados.id%TYPE,
+    municipio_id municipios.id%TYPE,
+    zona_id zonas.id%TYPE,
+    usuario_id usuarios.id%TYPE,
+    direccion_id direcciones.id%TYPE,
+    sucursal_id sucursales.id%TYPE
+)
+IS
+
+    CURSOR disponibilidad_producto(
+        in_cur_id_empresa empresas.id%TYPE,
+        in_cur_id_sucursal sucursales.id%TYPE)
+        IS
+        SELECT p.id,p.precio, a.disponibilidad
+        FROM almacenes a
+        JOIN productos p ON a.id_producto = p.id
+        WHERE a.id_empresa = in_cur_id_empresa
+        AND a.id_sucursal = in_cur_id_sucursal;
+
+    TYPE item IS RECORD(
+        producto_id productos.id%TYPE,
+        cantidad detalles.cantidad%TYPE,
+        precio_unitario detalles.precio_unitario%TYPE
+    );
+
+    TYPE carrito IS TABLE OF item;
+
+    aux item;
+
+    producto disponibilidad_producto%ROWTYPE;
+
+    detalle_orden carrito := carrito();
+
+    total_orden NUMBER := 0;
+
+    pedido pedidos.tracking%TYPE;
+BEGIN
+
+    FOR producto IN disponibilidad_producto(empresa_id,sucursal_id)
+    LOOP
+        IF producto.disponibilidad > 0 THEN
+            detalle_orden.extend();
+
+            --aux.cantidad := FLOOR(dbms_random.VALUE(1,producto.disponibilidad));
+            --aux.precio_unitario := producto.precio;
+
+            detalle_orden(detalle_orden.last).producto_id := producto.id;
+            detalle_orden(detalle_orden.last).cantidad := FLOOR(dbms_random.VALUE(1,producto.disponibilidad));
+            detalle_orden(detalle_orden.last).precio_unitario := producto.precio;
+
+            total_orden:= total_orden + producto.precio * detalle_orden(detalle_orden.last).cantidad;
+        END IF;
+    END LOOP;
+
+    INSERT INTO pedidos VALUES (app_id,
+                                plan_id,
+                                empresa_id,
+                                contrato_id,
+                                DEFAULT,
+                                estado_id,
+                                municipio_id,
+                                zona_id,
+                                usuario_id,
+                                direccion_id,
+                                rango_tiempo(SYSDATE),
+                                total_orden,
+                                NULL,
+                                NULL,
+                                NULL
+                                )
+    RETURNING tracking INTO pedido;
+
+    FOR l_orden IN detalle_orden.first..detalle_orden.last
+    LOOP
+        INSERT INTO detalles VALUES (empresa_id,
+                                     sucursal_id,
+                                     detalle_orden(l_orden).producto_id,
+                                     pedido,
+                                     DEFAULT,
+                                     detalle_orden(l_orden).precio_unitario,
+                                     detalle_orden(l_orden).cantidad);
+    END LOOP;
+
+
+END;
+
+CREATE OR REPLACE PROCEDURE modulo_pedido
+IS
+
+    CURSOR empresas_elegibles(cur_app_id aplicaciones_delivery.id%TYPE, cur_usuario_id usuarios.id%TYPE)
+    IS
+    SELECT c2.id_app,c2.id_plan,c2.id_empresa,c2.id as id_contrato
+    FROM contratos c2
+    JOIN planes_de_servicio pds ON pds.id_app = c2.id_app AND pds.id = c2.id_plan
+    JOIN ubicaciones_aplicables ua ON pds.id_app = ua.id_app AND pds.id = ua.id_plan
+
+    WHERE (pds.duracion.fecha_fin > SYSDATE OR pds.duracion.fecha_fin IS NULL) --PLAN VIGENTE
+    AND (c2.duracion.fecha_fin > SYSDATE OR c2.duracion.fecha_fin IS NULL) --CONTRATO VIGENTE
+    AND ua.id_estado IN (SELECT d.id_estado FROM direcciones d WHERE d.id_usuario = cur_usuario_id) -- DEL ESTADO DE LAS DIRECCIONES DE LA PERSONA
+    AND c2.id_app = cur_app_id;-- DE LA APP
+
+    rand_usuario_id usuarios.id%TYPE;
+    app_id aplicaciones_delivery.id%TYPE;
+    cont_id contratos.id%TYPE;
+
+    direccion_usuario direcciones%ROWTYPE;
+
+    fk_pedidos_sucursal empresas_elegibles%ROWTYPE;
+
+    id_suc sucursales.id%TYPE := 0;
+
+BEGIN
+
+    --SELECCIONA UN USUARIO AL AZAR REGISTRADO
+    SELECT u.id
+    INTO rand_usuario_id
+    FROM usuarios u
+    WHERE u.estado.fecha_fin IS NULL
+    ORDER BY dbms_random.value
+    FETCH FIRST ROW ONLY;
+    --CONSULTA ALGUNA APLICACION AL AZAR DONDE ESTE REGISTRADO
+    SELECT r.id_app
+    INTO app_id
+    FROM registros r
+    WHERE r.id_usuario = rand_usuario_id
+    ORDER BY dbms_random.VALUE
+    FETCH FIRST ROW ONLY;
+    --CONSULTA LAS SUCURSALES APLICABLES PARA ESA APP
+    OPEN empresas_elegibles(app_id,rand_usuario_id);
+
+    dbms_output.PUT_LINE('## SE OBTIENEN LOS CONTRATOS QUE APLIQUEN DE LA APP ' || app_id);
+    dbms_output.PUT_LINE('## SE OBTIENEN LAS EMPRESAS DE LOS CONTRATOS');
+    FETCH empresas_elegibles INTO fk_pedidos_sucursal;
+
+    --verifica si existe
+    IF empresas_elegibles%FOUND THEN
+
+        SELECT * INTO direccion_usuario
+        FROM direcciones
+        WHERE id_usuario = rand_usuario_id
+        ORDER BY dbms_random.VALUE
+        FETCH FIRST ROW ONLY;
+
+        LOOP
+        EXIT WHEN empresas_elegibles%NOTFOUND;
+        dbms_output.PUT_LINE('## SE VERIFICA SI LA SUCURSAL MAS CERCANA DE LA EMPRESA ' ||
+                            fk_pedidos_sucursal.id_empresa ||
+                             ' PUEDE ATENDER EL PEDIDO CON LAS UNIDADES DISPONIBLES DE LA APP');
+
+        id_suc := sucursal_factible(app_id,fk_pedidos_sucursal.id_empresa,direccion_usuario);
+
+        dbms_output.PUT_LINE('DEBUG '||id_suc);
+        EXIT WHEN id_suc > 0;
+
+        FETCH empresas_elegibles INTO fk_pedidos_sucursal;
+        END LOOP;
+
+        IF id_suc > 0 THEN
+            dbms_output.PUT_LINE('## SE REGISTRA EL PEDIDO');
+            crear_pedido_aleatorio(app_id,
+                fk_pedidos_sucursal.id_plan,
+                fk_pedidos_sucursal.id_empresa,
+                fk_pedidos_sucursal.id_contrato,
+                direccion_usuario.id_estado,
+                direccion_usuario.id_municipio,
+                direccion_usuario.id_zona,
+                rand_usuario_id,
+                direccion_usuario.id,
+                id_suc
+                );
+        ELSE
+            dbms_output.PUT_LINE('NO SE OBTUVO SUCURSAL');
+
+        END IF;
+    ELSE
+        dbms_output.PUT_LINE('### LA APLICACIÓN NO PRESENTA SERVICIOS O SUCURSALES DISPONIBLES');
+    END IF;
+
+
+END;
+
+-- FIN PEDIDOS
+
 -- PROCEDURES OTROS
 /*CREATE OR REPLACE PROCEDURE validar_pedidos(
     in_fecha IN DATE,
