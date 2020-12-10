@@ -1762,7 +1762,7 @@ INSERT INTO contratos VALUES (8, 24, 9,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08
 INSERT INTO contratos VALUES (16, 51, 17,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-06-20','yyyy-mm-dd')), 0.00, null);
 INSERT INTO contratos VALUES (6, 18, 7,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-07-15','yyyy-mm-dd')), 0.00, null);
 INSERT INTO contratos VALUES (5, 16, 12,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-06-19','yyyy-mm-dd')), 0.00, null);
-INSERT INTO contratos VALUES (6, 18, 7,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-10-03','yyyy-mm-dd')), 0.00, null);
+INSERT INTO contratos VALUES (6, 18, 8,DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-10-03','yyyy-mm-dd')), 0.00, null);
 INSERT INTO contratos VALUES (1, 1, 2, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-07-23','yyyy-mm-dd')), 0.00, null);
 INSERT INTO contratos VALUES (15, 45, 27, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-02-19','yyyy-mm-dd')), 0.00, null);
 INSERT INTO contratos VALUES (1, 2, 5, DEFAULT, RANGO_TIEMPO(TO_DATE('2020-12-08','yyyy-mm-dd'),TO_DATE('2021-10-19','yyyy-mm-dd')), 0.00, null);
