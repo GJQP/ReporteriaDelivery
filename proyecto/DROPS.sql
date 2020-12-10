@@ -7,6 +7,15 @@ DROP PROCEDURE REPORTE5;
 DROP PROCEDURE REPORTE6;
 /
 -- TRIGGERS
+
+DROP TRIGGER se_ha_creado_una_ruta;
+DROP TRIGGER se_ha_creado_una_ruta;
+DROP TRIGGER se_ha_cancelado_un_pedido;
+DROP TRIGGER se_ha_hecho_un_nuevo_pedido;
+DROP TRIGGER se_ha_cambiado_el_estado_de_la_unidad;
+DROP TRIGGER se_inserta_una_nueva_unidad;
+DROP TRIGGER se_ha_creado_una_promocion;
+DROP TRIGGER se_ha_cancelado_un_contrato;
 DROP TRIGGER registro_mantenimiento_unidades;
 /
 -- PROCEDURES
@@ -15,6 +24,8 @@ DROP PROCEDURE insertar_empresa;
 DROP PROCEDURE insertar_usuario;
 /
 --SIMULACION
+DROP PROCEDURE update_sim_time;
+DROP PROCEDURE sim_date;
 
 --contratos
 DROP PROCEDURE modulo_contratos;
@@ -26,6 +37,7 @@ DROP FUNCTION obtener_empresa_no_contratada;
 DROP PROCEDURE MODULO_MANTENIMIENTO;
 /
 -- TABLES
+DROP TABLE sim_time;
 DROP TABLE rutas;
 DROP TABLE detalles;
 DROP TABlE pedidos;

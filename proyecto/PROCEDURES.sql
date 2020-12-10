@@ -66,6 +66,33 @@ END;
 /
 
 -- SIMULACION
+CREATE OR REPLACE PROCEDURE update_sim_time(p_descripcion VARCHAR2) IS
+    d DATE;
+    ids INTEGER;
+BEGIN
+    UPDATE
+        sim_time SM
+    SET
+        SM.TIEMPO.FECHA_FIN = SYSDATE
+    WHERE
+          SM.TIEMPO.FECHA_FIN IS NULL
+    RETURNING
+        SM.TIEMPO.FECHA_INICIO INTO d;
+    INSERT INTO
+        sim_time
+    VALUES
+        (DEFAULT, RANGO_TIEMPO(d), p_descripcion)
+    RETURNING
+        id INTO ids;
+    DBMS_OUTPUT.PUT_LINE('# Se ha actualizado la fecha de la simulación de ' || d || ' a ' || d + 1/4/24 || ' en ' || p_descripcion);
+END;
+
+CREATE OR REPLACE FUNCTION sim_date RETURN DATE IS
+    d DATE;
+BEGIN
+    SELECT SM.TIEMPO.FECHA_INICIO  INTO d FROM sim_time SM WHERE SM.TIEMPO.FECHA_FIN IS NULL;
+    RETURN d;
+END;
 
 --CONTRATOS
 
