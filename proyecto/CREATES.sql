@@ -132,7 +132,7 @@ CREATE TABLE eventos (
     id INTEGER GENERATED ALWAYS AS IDENTITY,
     duracion RANGO_TIEMPO NOT NULL,
     porcentaje_descuento NUMBER(5,2),
-    FOREIGN KEY(id_empresa, id_sucursal) REFERENCES sucursales(id_empresa, id),
+    FOREIGN KEY (id_empresa, id_sucursal) REFERENCES sucursales(id_empresa, id),
     PRIMARY KEY (id_empresa, id_sucursal, id)
 );
 /
@@ -234,8 +234,8 @@ CREATE TABLE rutas (
     id_unidad INTEGER,
     id_traking INTEGER,
     id INTEGER GENERATED ALWAYS AS IDENTITY,
-    origen SDO_GEOMETRY NOT NULL,
-    destino SDO_GEOMETRY NOT NULL,
+    origen UBICACION NOT NULL,
+    destino UBICACION NOT NULL,
     proposito VARCHAR2(20) NOT NULL CHECK(proposito IN ('PEDIDO', 'ENVIO', 'RETORNO')),
     cancelado CANCELACION,
     FOREIGN KEY(id_app, id_garaje, id_unidad) REFERENCES unidades_de_transporte(id_app, id_garaje, id),
