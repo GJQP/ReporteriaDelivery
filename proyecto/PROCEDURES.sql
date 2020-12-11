@@ -123,7 +123,7 @@ BEGIN
         ) pc
     RIGHT JOIN empresas e ON e.id = pc.id_empresa
     WHERE pc.id_empresa IS NULL
-    ORDER BY dbms_random.value
+    ORDER BY dbms_random.value()
     FETCH FIRST ROW ONLY;
 
     RETURN rand_empresa;
@@ -229,7 +229,7 @@ IS
                     OR
                     TREAT(cancelado AS cancelacion).fecha_cancelacion > SIM_DATE()
                 )
-            ORDER BY dbms_random.value
+            ORDER BY dbms_random.value()
             FETCH FIRST ROW ONLY;
 
     BEGIN
@@ -240,7 +240,7 @@ IS
     SELECT id
         INTO id_app_rand
         FROM aplicaciones_delivery
-        ORDER BY DBMS_RANDOM.VALUE
+        ORDER BY DBMS_RANDOM.VALUE()
         FETCH FIRST ROW ONLY;
 
     dbms_output.PUT_LINE('## SE VERIFICAN LOS PLANES DE LA APP ' || id_app_rand);
@@ -269,7 +269,7 @@ IS
                     SELECT id
                     FROM contratos
                     WHERE id_plan = id_plan_selec
-                    ORDER BY dbms_random.value
+                    ORDER BY dbms_random.value()
                     FETCH FIRST ROW ONLY
                     );
             ELSE
@@ -307,7 +307,7 @@ IS
         SELECT *
         FROM unidades_de_transporte ut
         WHERE in_id_app IS NULL OR ut.id_app = in_id_app
-        ORDER BY dbms_random.value;
+        ORDER BY dbms_random.value();
 
     CURSOR mant_unidad(unidad unidades_app%ROWTYPE)
     IS
@@ -536,6 +536,40 @@ BEGIN
 
 END;
 
+CREATE OR REPLACE FUNCTION obtener_usuario_azar_pedido
+RETURN usuarios.id%TYPE
+IS
+BEGIN
+
+    FOR l_usuario IN (
+        SELECT u.id,r.id_app,u.primer_nombre,ad.app.nombre
+        FROM usuarios u
+        INNER JOIN registros r ON u.id = r.id_usuario
+        INNER JOIN aplicaciones_delivery ad ON ad.id = r.id_app
+        ORDER BY dbms_random.VALUE()
+        )
+    LOOP
+         dbms_output.PUT_LINE('## SE SELECCIONA LA USUARIO DE ID '|| l_usuario.id);
+         dbms_output.PUT_LINE('## SE VERIFICA SI TIENE APPS CON CONTRATOS VIGENTES');
+         FOR l_app IN (
+             SELECT DISTINCT r.id_app
+            FROM registros r
+            INNER JOIN contratos c2 ON r.id_app = c2.id_app
+            INNER JOIN planes_de_servicio pds ON c2.id_app = pds.id_app AND c2.id_plan = pds.id
+            WHERE r.id_usuario = l_usuario.id
+            AND c2.duracion.fecha_fin >= SIM_DATE() AND c2.cancelado IS NULL
+            AND pds.duracion.fecha_fin >= SIM_DATE() AND pds.cancelado IS NULL
+            FETCH FIRST ROW ONLY)
+         LOOP
+             RETURN l_usuario.id;
+         END LOOP;
+         dbms_output.PUT_LINE('## EL USUARIO' || l_usuario.id ||' NO TIENE APPS CON CONTRATOS VIGENTES');
+    END LOOP;
+
+    RETURN 0;
+
+END;
+
 CREATE OR REPLACE PROCEDURE modulo_pedido
 IS
 
@@ -564,19 +598,25 @@ IS
 BEGIN
 
     --SELECCIONA UN USUARIO AL AZAR REGISTRADO
-    SELECT u.id
-    INTO rand_usuario_id
-    FROM usuarios u
-    WHERE u.estado.fecha_fin IS NULL
-    ORDER BY dbms_random.value
-    FETCH FIRST ROW ONLY;
-    --CONSULTA ALGUNA APLICACION AL AZAR DONDE ESTE REGISTRADO
+    rand_usuario_id := obtener_usuario_azar_pedido();
+
+    IF rand_usuario_id = 0 THEN
+        GOTO fin;
+    END IF;
+    --CONSULTA ALGUNA APLICACION VALIDA AL AZAR DONDE ESTE REGISTRADO
     SELECT r.id_app
     INTO app_id
     FROM registros r
+    INNER JOIN contratos c2 ON r.id_app = c2.id_app
+    INNER JOIN planes_de_servicio pds ON c2.id_app = pds.id_app AND c2.id_plan = pds.id
     WHERE r.id_usuario = rand_usuario_id
-    ORDER BY dbms_random.VALUE
+    AND c2.duracion.fecha_fin >= SIM_DATE() AND c2.cancelado IS NULL
+    AND pds.duracion.fecha_fin >= SIM_DATE() AND pds.cancelado IS NULL
+    ORDER BY dbms_random.VALUE()
     FETCH FIRST ROW ONLY;
+
+    dbms_output.PUT_LINE('## SE SELECCIONA LA APP DE ID '|| APP_id);
+
     --CONSULTA LAS SUCURSALES APLICABLES PARA ESA APP
     OPEN empresas_elegibles(app_id,rand_usuario_id);
 
@@ -590,7 +630,7 @@ BEGIN
         SELECT * INTO direccion_usuario
         FROM direcciones
         WHERE id_usuario = rand_usuario_id
-        ORDER BY dbms_random.VALUE
+        ORDER BY dbms_random.VALUE()
         FETCH FIRST ROW ONLY;
 
         LOOP
@@ -601,7 +641,7 @@ BEGIN
 
         id_suc := sucursal_factible(app_id,fk_pedidos_sucursal.id_empresa,direccion_usuario);
 
-        dbms_output.PUT_LINE('DEBUG '||id_suc);
+        --dbms_output.PUT_LINE('DEBUG '|| id_suc);
         EXIT WHEN id_suc > 0;
 
         FETCH empresas_elegibles INTO fk_pedidos_sucursal;
@@ -624,11 +664,13 @@ BEGIN
             dbms_output.PUT_LINE('NO SE OBTUVO SUCURSAL');
 
         END IF;
+
     ELSE
         dbms_output.PUT_LINE('### LA APLICACIÓN NO PRESENTA SERVICIOS O SUCURSALES DISPONIBLES');
     END IF;
 
-
+    <<fin>>
+    NULL;
 END;
 
 -- FIN PEDIDOS
@@ -644,10 +686,15 @@ IS
         SELECT COUNT(1)
         INTO res
         FROM rutas r
-        WHERE cancelado IS NULL
+        WHERE
+              r.id_unidad = unidad_id
+            AND cancelado IS NULL
             AND proposito IN ('PEDIDO','ENVIO');
 
-        RETURN res = 0;
+        RETURN (res <= 0);
+
+        EXCEPTION
+        WHEN NO_DATA_FOUND THEN RETURN TRUE;
     END;
 
 CREATE OR REPLACE PROCEDURE simular_accidente(
@@ -838,6 +885,7 @@ BEGIN
             ,sucursal_sel
             ,direccion_sel)
         LOOP
+            dbms_output.PUT_LINE('AMAAA');
             IF unidad_disponible(l_unidad.id)
                    AND preparacion > ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
                     l_unidad.ubicacion_garaje,sucursal_sel.ubicacion,l_unidad.velocidad_media)
@@ -845,6 +893,7 @@ BEGIN
                     ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
                     sucursal_sel.ubicacion,direccion_sel.ubicacion,l_unidad.velocidad_media)
                 THEN
+                dbms_output.PUT_LINE('AMAAA asignadaa');
                 unidad_trnsp := l_unidad;
                 preparacion := ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
                     l_unidad.ubicacion_garaje,sucursal_sel.ubicacion,l_unidad.velocidad_media)
