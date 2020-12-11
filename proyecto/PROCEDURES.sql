@@ -73,7 +73,7 @@ BEGIN
     UPDATE
         sim_time SM
     SET
-        SM.TIEMPO.FECHA_FIN = SYSDATE
+        SM.TIEMPO = rango_tiempo(SM.TIEMPO.fecha_inicio,SM.TIEMPO.fecha_inicio+15/24/60)
     WHERE
           SM.TIEMPO.FECHA_FIN IS NULL
     RETURNING
@@ -81,10 +81,10 @@ BEGIN
     INSERT INTO
         sim_time
     VALUES
-        (DEFAULT, RANGO_TIEMPO(d), p_descripcion)
+        (DEFAULT, RANGO_TIEMPO(d+15/24/60), p_descripcion)
     RETURNING
         id INTO ids;
-    DBMS_OUTPUT.PUT_LINE('# Se ha actualizado la fecha de la simulación de ' || d || ' a ' || d + 1/4/24 || ' en ' || p_descripcion);
+    --DBMS_OUTPUT.PUT_LINE('# Se ha actualizado la fecha de la simulación de ' || d || ' a ' || d + 1/4/24 || ' en ' || p_descripcion);
 END;
 
 CREATE OR REPLACE FUNCTION sim_date RETURN DATE IS
@@ -98,7 +98,7 @@ END;
 
 --TODO VALIDAR SI LA EMPRESA TIENE SUCURSALES APLICABLES PARA ENTRAR EN ESTA OPCION
 --UNA EMPRESA NO CONTRATADA ES AQUELLA DONDE EL ESTADO DEL GARAJE DE LAS APPS Y UNA SUCURSAL COINCIDA
-CREATE OR REPLACE FUNCTION obtener_empresa_no_contratada(id_app_busqueda aplicaciones_delivery.id%TYPE, fecha_sim DATE DEFAULT SYSDATE)
+CREATE OR REPLACE FUNCTION obtener_empresa_no_contratada(id_app_busqueda aplicaciones_delivery.id%TYPE, fecha_sim DATE DEFAULT SIM_DATE())
 RETURN empresas.id%TYPE
 IS
     rand_empresa empresas.id%TYPE;
@@ -164,7 +164,7 @@ IS
                    in_id_plan,
                    in_id_empresa,
                    DEFAULT,
-                   RANGO_TIEMPO(SYSDATE,SYSDATE + ROUND(dbms_random.VALUE(0,365))),
+                   RANGO_TIEMPO(SIM_DATE(),SIM_DATE() + ROUND(dbms_random.VALUE(0,365))),
                    descuento,
                    NULL
                   );
@@ -194,7 +194,7 @@ IS
         INSERT INTO planes_de_servicio VALUES
         (in_app_id,
          DEFAULT,
-         RANGO_TIEMPO(SYSDATE,SYSDATE + ROUND(dbms_random.VALUE(0,365))),
+         RANGO_TIEMPO(SIM_DATE(),SIM_DATE() + ROUND(dbms_random.VALUE(0,365))),
          ROUND(dbms_random.VALUE(50,4000),2), --PRECIO
          ROUND(dbms_random.VALUE(10,800)), --CANTIDAD DE ENVIO
          plan_modalidad, --MODALIDAD
@@ -212,7 +212,7 @@ IS
 
     END;
 
-CREATE OR REPLACE PROCEDURE modulo_contratos(fecha_sim DATE DEFAULT SYSDATE)
+CREATE OR REPLACE PROCEDURE modulo_contratos(fecha_sim DATE DEFAULT SIM_DATE())
 IS
     id_app_rand aplicaciones_delivery.id%TYPE;
     id_plan_selec planes_de_servicio.id%TYPE;
@@ -223,11 +223,11 @@ IS
         SELECT ps.id
             FROM planes_de_servicio ps
             WHERE ps.id_app = id_app_rand
-            AND TREAT(duracion AS rango_tiempo).fecha_fin > SYSDATE
+            AND TREAT(duracion AS rango_tiempo).fecha_fin > SIM_DATE()
             AND (
                     cancelado IS NULL
                     OR
-                    TREAT(cancelado AS cancelacion).fecha_cancelacion > SYSDATE
+                    TREAT(cancelado AS cancelacion).fecha_cancelacion > SIM_DATE()
                 )
             ORDER BY dbms_random.value
             FETCH FIRST ROW ONLY;
@@ -295,7 +295,7 @@ IS
 --INICIO MANTENIMIENTO
 
 --SE PUEDE HACER POR APP
-CREATE OR REPLACE PROCEDURE modulo_mantenimiento(fecha_sim DATE DEFAULT SYSDATE, in_app aplicaciones_delivery.id%TYPE DEFAULT NULL)
+CREATE OR REPLACE PROCEDURE modulo_mantenimiento(fecha_sim DATE DEFAULT SIM_DATE(), in_app aplicaciones_delivery.id%TYPE DEFAULT NULL)
 IS
     DIAS_PARA_DESCONTINUAR CONSTANT NUMBER := 30;
     DIAS_PARA_REALIZAR_MANT_PREV CONSTANT NUMBER := 90;
@@ -306,14 +306,26 @@ IS
     IS
         SELECT *
         FROM unidades_de_transporte ut
-        WHERE in_id_app IS NULL OR ut.id_app = in_id_app;
+        WHERE in_id_app IS NULL OR ut.id_app = in_id_app
+        ORDER BY dbms_random.value;
+
+    CURSOR mant_unidad(unidad unidades_app%ROWTYPE)
+    IS
+        SELECT *
+            INTO ult_mantenimiento
+            FROM registro_de_mantenimiento
+            WHERE id_app=unidad.id_app
+              AND id_garaje=unidad.id_garaje
+              AND id_unidad=unidad.id
+            ORDER BY id DESC
+            FETCH FIRST ROW ONLY;
 
 BEGIN
 
-    OPEN unidades_app(in_app);
-    FOR unidad IN unidades_app
+    FOR unidad IN unidades_app(in_app)
     LOOP
-        dbms_output.PUT_LINE('## SE VERIFICA EL ESTADO DE LA UNIDAD');
+        dbms_output.PUT_LINE('## SE VERIFICA EL ESTADO DE LA UNIDAD '|| unidad.id);
+
         IF unidad.estado = 'REPARACION' THEN
             dbms_output.PUT_LINE('### LA UNIDAD ESTÁ DAÑADA SE DECIDE SI REALIZAR O NO EL MANTENIMIENTO A LA UNIDAD');
             IF dbms_random.VALUE(0,1) > 0.5 THEN
@@ -346,19 +358,25 @@ BEGIN
             END IF;
         ELSIF unidad.estado = 'OPERATIVA' THEN
 
-            SELECT * INTO ult_mantenimiento
-                FROM registro_de_mantenimiento
-                WHERE id_app=unidad.id_app
-                  AND id_garaje=unidad.id_garaje
-                  AND id_unidad=unidad.id
-                ORDER BY id DESC
-                FETCH FIRST ROW ONLY;
-
             dbms_output.PUT_LINE('### LA UNIDAD ESTÁ OPERATIVA');
-            dbms_output.PUT_LINE('## SE VERIFICA SI REQUIERE DE MANTENIMIENTO PREVENTIVO');
+
+            OPEN mant_unidad(unidad);
+            FETCH mant_unidad INTO ult_mantenimiento;
+
+            IF mant_unidad%NOTFOUND AND dbms_random.VALUE(0,1) > 0.2 THEN
+                dbms_output.PUT_LINE('### SE REALIZA MANTENIMIENTO PREVENTIVO ' ||
+                                     'A LA UNIDAD');
+
+                UPDATE unidades_de_transporte SET estado = 'REPARACION'
+                    WHERE id = unidad.id
+                        AND id_garaje=unidad.id_garaje
+                        AND id_app=unidad.id_app;
+
+            ELSE
+               dbms_output.PUT_LINE('## SE VERIFICA SI REQUIERE DE MANTENIMIENTO PREVENTIVO');
             IF ult_mantenimiento.fecha_registro - fecha_sim > DIAS_PARA_REALIZAR_MANT_PREV THEN
                 dbms_output.PUT_LINE('### SE REALIZA MANTENIMIENTO PREVENTIVO' ||
-                                     'A LA UNIDAD');
+                                     ' A LA UNIDAD');
 
                 UPDATE unidades_de_transporte SET estado = 'REPARACION'
                     WHERE id = unidad.id
@@ -367,6 +385,11 @@ BEGIN
             ELSE
                 dbms_output.PUT_LINE('### SE MANTIENE OPERATIVA LA UNIDAD');
             END IF;
+
+            END IF;
+
+            CLOSE mant_unidad;
+
         END IF;
     END LOOP;
 
@@ -400,7 +423,7 @@ BEGIN
         WHERE g.id_app = in_id_app --APP
         --AND d.id_usuario = in_id_usuario --USUARIO
         AND s.id_empresa = in_id_empresa--EMPRESA
-        AND 0 > (SELECT COUNT(disponibilidad) FROM almacenes al WHERE al.id_sucursal = a2.id_sucursal) --DISPONIBILIDAD
+        AND 0 < (SELECT COUNT(disponibilidad) FROM almacenes al WHERE al.id_sucursal = a2.id_sucursal) --DISPONIBILIDAD
         AND udt.estado = 'OPERATIVA'
         AND (
             ( s.id_zona = g.id_zona AND s.id_zona = in_direccion.id_zona ) --ZONA
@@ -488,7 +511,7 @@ BEGIN
                                 zona_id,
                                 usuario_id,
                                 direccion_id,
-                                rango_tiempo(SYSDATE),
+                                rango_tiempo(SIM_DATE()),
                                 total_orden,
                                 NULL,
                                 NULL,
@@ -506,8 +529,8 @@ BEGIN
                                      detalle_orden(l_orden).precio_unitario,
                                      detalle_orden(l_orden).cantidad);
 
-        UPDATE almacenes SET disponibilidad = disponibilidad - detalle_orden(l_orden).cantidad
-        WHERE id_sucursal = sucursal_id AND id_empresa = empresa_id AND id_producto = producto;
+        /*UPDATE almacenes SET disponibilidad = disponibilidad - detalle_orden(l_orden).cantidad
+        WHERE id_sucursal = sucursal_id AND id_empresa = empresa_id AND id_producto = producto;*/
     END LOOP;
 
 
@@ -523,8 +546,8 @@ IS
     JOIN planes_de_servicio pds ON pds.id_app = c2.id_app AND pds.id = c2.id_plan
     JOIN ubicaciones_aplicables ua ON pds.id_app = ua.id_app AND pds.id = ua.id_plan
 
-    WHERE (pds.duracion.fecha_fin > SYSDATE OR pds.duracion.fecha_fin IS NULL) --PLAN VIGENTE
-    AND (c2.duracion.fecha_fin > SYSDATE OR c2.duracion.fecha_fin IS NULL) --CONTRATO VIGENTE
+    WHERE (pds.duracion.fecha_fin > SIM_DATE() OR pds.duracion.fecha_fin IS NULL) --PLAN VIGENTE
+    AND (c2.duracion.fecha_fin > SIM_DATE() OR c2.duracion.fecha_fin IS NULL) --CONTRATO VIGENTE
     AND ua.id_estado IN (SELECT d.id_estado FROM direcciones d WHERE d.id_usuario = cur_usuario_id) -- DEL ESTADO DE LAS DIRECCIONES DE LA PERSONA
     AND c2.id_app = cur_app_id;-- DE LA APP
 
@@ -774,7 +797,7 @@ BEGIN
     SELECT *
     INTO pedido_sel
     FROM pedidos p
-    WHERE p.duracion.fecha_fin IS NOT NULL
+    WHERE p.duracion.fecha_fin IS NULL
     AND p.cancelado IS NULL
     ORDER BY p.duracion.fecha_inicio
     FETCH FIRST ROW ONLY;
@@ -784,7 +807,7 @@ BEGIN
     --TODO CANCELAR EL PEDIDO SI HA PASADO MUCHO TIEMPO (?)
 
     --veririficar si esta listo (pedido)
-    SELECT MAX(NVL(p2.tiempo_de_preparacion,0))
+    SELECT MAX(NVL(p2.tiempo_de_preparacion,0))/24/60
     INTO preparacion
     FROM pedidos p
     INNER JOIN detalles d ON p.tracking = d.id_tracking
@@ -793,7 +816,7 @@ BEGIN
 
     dbms_output.PUT_LINE('## SE VERIFICA SI EL PEDIDO YA FUE ELEBORADO');
 
-    IF preparacion/24/60 + pedido_sel.duracion.fecha_inicio >= SYSDATE THEN
+    IF pedido_sel.duracion.fecha_inicio + preparacion <= SIM_DATE() THEN
 
         SELECT d3.*
         INTO direccion_sel FROM sucursales s
@@ -809,6 +832,7 @@ BEGIN
         WHERE s.id = d2.id_sucursal
         FETCH FIRST ROW ONLY;
 
+        preparacion := 0;
         dbms_output.PUT_LINE('## SE CONSULTAN LAS UNIDADES QUE PUEDEN DESPACHAR EL PEDIDO');
         FOR l_unidad IN unidades_permitidas(pedido_sel.id_app
             ,sucursal_sel
