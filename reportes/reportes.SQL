@@ -187,7 +187,10 @@ BEGIN
     INNER JOIN
         ESTADOS E ON E.ID = D.ID_ESTADO
     WHERE
-        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR E.NOMBRE = p_estado) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro);
+        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR E.NOMBRE = p_estado) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro)
+    ORDER BY
+        E.NOMBRE,
+        R.REGISTRO.FECHA_INICIO;
 END;
 
 
