@@ -529,8 +529,8 @@ BEGIN
                                      detalle_orden(l_orden).precio_unitario,
                                      detalle_orden(l_orden).cantidad);
 
-        /*UPDATE almacenes SET disponibilidad = disponibilidad - detalle_orden(l_orden).cantidad
-        WHERE id_sucursal = sucursal_id AND id_empresa = empresa_id AND id_producto = producto;*/
+        UPDATE almacenes SET disponibilidad = disponibilidad - detalle_orden(l_orden).cantidad
+        WHERE id_sucursal = sucursal_id AND id_empresa = empresa_id AND id_producto = producto.id;
     END LOOP;
 
 
