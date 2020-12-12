@@ -127,11 +127,11 @@ CREATE OR REPLACE TYPE BODY CANCELACION IS
 
     STATIC FUNCTION VALIDAR_FINALIZACION(fecha_cancelacion DATE) RETURN DATE IS
     BEGIN
-        IF fecha_cancelacion > SYSDATE THEN
+--         IF fecha_cancelacion > SYSDATE THEN
             RETURN fecha_cancelacion;
-        ELSE
-            RAISE_APPLICATION_ERROR(-20001,'Error: la fecha de caducidad no puede ser menor a la actual');
-        END IF;
+--         ELSE
+--             RAISE_APPLICATION_ERROR(-20001,'Error: la fecha de caducidad no puede ser menor a la actual');
+--         END IF;
     END;
 END;
 /

@@ -2432,6 +2432,22 @@ INSERT INTO  sucursales VALUES (16,211,700,5,DEFAULT,UBICACION(11.030011,-63.863
 INSERT INTO  sucursales VALUES (16,214,709,6,DEFAULT,UBICACION(10.988808,-63.819159,SYSDATE));
 INSERT INTO  sucursales VALUES (16,214,709,7,DEFAULT,UBICACION(10.984815,-63.813458,SYSDATE));
 
+--DESCUENTOS
+INSERT INTO eventos VALUES (12,12,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (16,16,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (21,21,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (17,84,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (9,9,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (17,17,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (25,25,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (25,58,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (2,2,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (12,45,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (12,79,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (17,50,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (8,41,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (27,27,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
+INSERT INTO eventos VALUES (27,60,DEFAULT,rango_tiempo(sysdate),TRUNC(dbms_random.VALUE(5,20),2));
 
 
 --TIPOS DE UNIDADES
@@ -4425,3 +4441,5 @@ INSERT INTO pedidos VALUES (2,5,25,1,DEFAULT,14,194,648,12,60, RANGO_TIEMPO(SYSD
 INSERT INTO detalles VALUES (25,58,203,20,DEFAULT,29.99,6);
 INSERT INTO detalles VALUES (25,58,204,20,DEFAULT,8.99,5);
 INSERT INTO detalles VALUES (25,58,205,20,DEFAULT,12.95,4);
+
+INSERT INTO sim_time VALUES(DEFAULT, RANGO_TIEMPO(SYSDATE), 'Inicio de la simulación');
