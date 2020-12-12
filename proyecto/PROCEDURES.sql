@@ -409,11 +409,11 @@ IS
     id_municipio NUMBER;
     id_estado NUMBER;
 BEGIN
-        SELECT s.id,
+        SELECT DISTINCT s.id,
            DECODE(s.id_zona,DECODE(in_direccion.id_zona,g.id_zona,s.id_zona,0),s.id_zona,0) as id_zona,
            DECODE(s.id_municipio,DECODE(in_direccion.id_municipio,g.id_municipio,s.id_municipio,0),s.id_municipio,0) as id_municipio,
            DECODE(s.id_estado,DECODE(in_direccion.id_estado,g.id_estado,s.id_estado,0),s.id_estado,0) as id_estado
-        INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
+        --INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
         FROM sucursales s
         JOIN garajes g ON s.id_estado = g.id_estado
         --JOIN direcciones d ON g.id_estado = d.id_estado
@@ -432,7 +432,7 @@ BEGIN
             OR
             (tdu.distancia_operativa LIKE 'ESTADO')--ESTADO
             )--ALCANCE
-        ORDER BY id_zona DESC, id_municipio DESC
+        ORDER BY id_zona DESC, id_municipio DESC, id_estado DESC
         FETCH FIRST ROW ONLY;
 
         RETURN id_sucursal;
@@ -875,7 +875,7 @@ BEGIN
     ORDER BY p.duracion.fecha_inicio
     FETCH FIRST ROW ONLY;
 
-    dbms_output.PUT_LINE('## SE OBTIENE EL PEDIDO DE TRACKING'|| pedido_sel.tracking);
+    dbms_output.PUT_LINE('## SE OBTIENE EL PEDIDO DE TRACKING '|| pedido_sel.tracking);
 
     --TODO CANCELAR EL PEDIDO SI HA PASADO MUCHO TIEMPO (?)
 
@@ -905,13 +905,16 @@ BEGIN
         WHERE s.id = d2.id_sucursal
         FETCH FIRST ROW ONLY;
 
-        preparacion := 0;
+        preparacion := 24;
         dbms_output.PUT_LINE('## SE CONSULTAN LAS UNIDADES QUE PUEDEN DESPACHAR EL PEDIDO');
+
+
         FOR l_unidad IN unidades_permitidas(pedido_sel.id_app
             ,sucursal_sel
             ,direccion_sel)
         LOOP
-            dbms_output.PUT_LINE('AMAAA');
+            unidad_trnsp := l_unidad;
+            --dbms_output.PUT_LINE('AMAAA');
             IF unidad_disponible(l_unidad.id)
                    AND preparacion > ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
                     l_unidad.ubicacion_garaje,sucursal_sel.ubicacion,l_unidad.velocidad_media)
@@ -919,7 +922,7 @@ BEGIN
                     ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
                     sucursal_sel.ubicacion,direccion_sel.ubicacion,l_unidad.velocidad_media)
                 THEN
-                dbms_output.PUT_LINE('AMAAA asignadaa');
+                --dbms_output.PUT_LINE('AMAAA asignadaa');
                 unidad_trnsp := l_unidad;
                 preparacion := ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
                     l_unidad.ubicacion_garaje,sucursal_sel.ubicacion,l_unidad.velocidad_media)
@@ -934,6 +937,10 @@ BEGIN
             dbms_output.PUT_LINE('## LA APLICACION YA NO PUEDE REALIZAR ENVÍOS POR LO TANTO DEBERÁ SER CANCELADO');
             UPDATE pedidos p SET p.cancelado = cancelacion(SIM_DATE(),'NO HAY UNIDADES QUE PUEDAN COMPLETAR EL PEDIDO')
             WHERE p.tracking = pedido_sel.tracking;
+            GOTO fin;
+        ELSIF NOT unidad_disponible(unidad_trnsp.id) THEN
+            dbms_output.PUT_LINE('## LAS UNIDADES SE ENCUENTRAN REALIZANDO PEDIDOS, EL PEDIDO NO PUEDE SER ATENDIDO');
+            GOTO fin;
         ELSE
             --
             dbms_output.PUT_LINE('## SE HA ASIGNADO LA UNIDAD DE TRANSPORTE ' || unidad_trnsp.id);
@@ -941,15 +948,17 @@ BEGIN
             --RELEVO
             FOR l_ruta IN rutas_pedido(pedido_sel.tracking)
             LOOP
-                --dbms_output.PUT_LINE('## LA UNIDAD VA A RETOMAR EL PEDIDO DE LA UNIDAD '|| l_ruta.id_unidad);
+                dbms_output.PUT_LINE('## LA UNIDAD VA A RETOMAR EL PEDIDO DE LA UNIDAD '|| l_ruta.id_unidad);
                 --ACCIDENTE
-                IF dbms_random.VALUE(0,1) > 0.5 THEN
+                IF dbms_random.VALUE(0,1) < 0.1 THEN
                     UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
                     WHERE id = unidad_trnsp.id;
+                    dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE GRAVE NO PUEDE RETOMAR EL PEDIDO');
                     GOTO fin;
-                ELSE
+                ELSIF dbms_random.VALUE(0,1) < 0.1 THEN
                     UPDATE unidades_de_transporte SET estado = 'REPARACION'
                     WHERE id = unidad_trnsp.id;
+                    dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE MENOR NO PUEDE RETOMAR EL PEDIDO');
                     GOTO fin;
                 END IF;
 
@@ -998,13 +1007,17 @@ BEGIN
             RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
 
             --ACCIDENTE
-            IF dbms_random.VALUE(0,1) > 0.5 THEN
-                UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
-                WHERE id = unidad_trnsp.id;
-            ELSE
-                UPDATE unidades_de_transporte SET estado = 'REPARACION'
-                WHERE id = unidad_trnsp.id;
-            END IF;
+            IF dbms_random.VALUE(0,1) < 0.1 THEN
+                    UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
+                    WHERE id = unidad_trnsp.id;
+                    dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE NO SE PUEDE ATENDER EL PEDIDO POR ESTA UNIDAD');
+                    GOTO fin;
+                ELSIF dbms_random.VALUE(0,1) < 0.1 THEN
+                    UPDATE unidades_de_transporte SET estado = 'REPARACION'
+                    WHERE id = unidad_trnsp.id;
+                    dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE MENOR NO SE PUEDE ATENDER EL PEDIDO POR ESTA UNIDAD');
+                    GOTO fin;
+                END IF;
 
             dbms_output.PUT_LINE('## LA UNIDAD SE DIRIGE AL DESTINO');
             INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,pedido_sel.tracking,
@@ -1025,7 +1038,7 @@ BEGIN
 
             dbms_output.PUT_LINE('## LA UNIDAD HA ENTREGADO EL PEDIDO');
             UPDATE pedidos p SET p.valoracion = dbms_random.VALUE(4,5),
-                                p.duracion = rango_tiempo(p.duracion.fecha_inicio)
+                                p.duracion = rango_tiempo(p.duracion.fecha_inicio,SIM_DATE())
             WHERE tracking = pedido_sel.tracking
             ;
 
@@ -1041,6 +1054,9 @@ BEGIN
 
     <<fin>>
     NULL;
+
+/*    EXCEPTION
+        WHEN OTHERS THEN dbms_output.PUT_LINE('NO HAY PEDIDOS QUE ATENDER ?');*/
 
 END;
 
