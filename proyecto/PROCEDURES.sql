@@ -442,6 +442,27 @@ BEGIN
             RETURN 0;
 END;
 
+CREATE OR REPLACE FUNCTION obtener_descuentos(empresa_id empresas.id%TYPE,sucursal_id sucursales.id%TYPE)
+RETURN eventos.porcentaje_descuento%TYPE
+IS
+    res eventos.porcentaje_descuento%TYPE := 0;
+BEGIN
+
+    SELECT e.porcentaje_descuento
+    INTO res
+    FROM eventos e
+    WHERE id_empresa = empresa_id AND id_sucursal = sucursal_id
+      AND e.duracion.fecha_inicio >= SIM_DATE()
+      AND e.duracion.fecha_fin IS NULL
+    FETCH FIRST ROW ONLY;
+
+    RETURN res;
+
+    EXCEPTION
+    WHEN NO_DATA_FOUND THEN RETURN res;
+
+END;
+
 CREATE OR REPLACE PROCEDURE crear_pedido_aleatorio(
     app_id aplicaciones_delivery.id%TYPE,
     plan_id planes_de_servicio.id%TYPE,
@@ -474,7 +495,7 @@ IS
 
     TYPE carrito IS TABLE OF item;
 
-    aux item;
+    descuento eventos.porcentaje_descuento%TYPE;
 
     producto disponibilidad_producto%ROWTYPE;
 
@@ -485,6 +506,7 @@ IS
     pedido pedidos.tracking%TYPE;
 BEGIN
 
+    descuento := obtener_descuentos(empresa_id,sucursal_id);
     FOR producto IN disponibilidad_producto(empresa_id,sucursal_id)
     LOOP
         IF producto.disponibilidad > 0 THEN
@@ -495,11 +517,15 @@ BEGIN
 
             detalle_orden(detalle_orden.last).producto_id := producto.id;
             detalle_orden(detalle_orden.last).cantidad := FLOOR(dbms_random.VALUE(1,producto.disponibilidad));
-            detalle_orden(detalle_orden.last).precio_unitario := producto.precio;
+            detalle_orden(detalle_orden.last).precio_unitario := producto.precio * (1 - descuento);
 
-            total_orden:= total_orden + producto.precio * detalle_orden(detalle_orden.last).cantidad;
+            total_orden:= total_orden + producto.precio * detalle_orden(detalle_orden.last).cantidad * (1 - descuento);
         END IF;
     END LOOP;
+
+    IF descuento > 0 THEN
+        dbms_output.PUT_LINE('### EL PEDIDO HA APLICADO UN DESCUENTO DE ' || descuento);
+    END IF;
 
     INSERT INTO pedidos VALUES (app_id,
                                 plan_id,
