@@ -867,6 +867,7 @@ BEGIN
     dbms_output.PUT_LINE('# MÓDULO DE DESPACHO');
 
     --selecciona el pedido mas antigo sin finalizar
+    --Y SIN RUTAS CANCELADAS O QUE NO SEA RETORNO
     SELECT *
     INTO pedido_sel
     FROM pedidos p
@@ -889,7 +890,12 @@ BEGIN
 
     dbms_output.PUT_LINE('## SE VERIFICA SI EL PEDIDO YA FUE ELEBORADO');
 
-    IF pedido_sel.duracion.fecha_inicio + preparacion <= SIM_DATE() THEN
+    IF pedido_sel.duracion.fecha_inicio + preparacion > SIM_DATE() THEN
+       dbms_output.PUT_LINE('## EL PEDIDO NO HA SIDO ELABORADO');
+       GOTO fin;
+    END IF;
+
+--    IF pedido_sel.duracion.fecha_inicio + preparacion <= SIM_DATE() THEN
 
         SELECT d3.*
         INTO direccion_sel FROM sucursales s
@@ -941,7 +947,8 @@ BEGIN
         ELSIF NOT unidad_disponible(unidad_trnsp.id) THEN
             dbms_output.PUT_LINE('## LAS UNIDADES SE ENCUENTRAN REALIZANDO PEDIDOS, EL PEDIDO NO PUEDE SER ATENDIDO');
             GOTO fin;
-        ELSE
+        END IF;
+--        ELSE
             --
             dbms_output.PUT_LINE('## SE HA ASIGNADO LA UNIDAD DE TRANSPORTE ' || unidad_trnsp.id);
 
@@ -949,6 +956,14 @@ BEGIN
             FOR l_ruta IN rutas_pedido(pedido_sel.tracking)
             LOOP
                 dbms_output.PUT_LINE('## LA UNIDAD VA A RETOMAR EL PEDIDO DE LA UNIDAD '|| l_ruta.id_unidad);
+
+                --IR A LA ULTIMA UBICACION
+                INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,
+                                          pedido_sel.tracking,DEFAULT,
+                                          CREAR_UBICACION(unidad_trnsp.ubicacion_garaje),
+                                          CREAR_UBICACION(l_ruta.destino),'PEDIDO',NULL)
+                RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
+
                 --ACCIDENTE
                 IF dbms_random.VALUE(0,1) < 0.1 THEN
                     UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
@@ -962,8 +977,7 @@ BEGIN
                     GOTO fin;
                 END IF;
 
-                --IR A LA ULTIMA UBICACION
-                INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,
+                INSERT INTO rutas VALUES (pedido_sel.id_app,l_ruta.id_garaje,l_ruta.id_unidad,
                                           pedido_sel.tracking,DEFAULT,
                                           CREAR_UBICACION(unidad_trnsp.ubicacion_garaje),
                                           CREAR_UBICACION(l_ruta.destino),'PEDIDO',NULL)
@@ -1002,6 +1016,7 @@ BEGIN
             END LOOP;
             --IR A LA SUCURSAL
             dbms_output.PUT_LINE('## LA UNIDAD SE DIRIGE A RETIRAR EL PEDIDO EN LA SUCURSAL');
+            --por cada pedido en la sucursal listo
             INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,pedido_sel.tracking,
                                       DEFAULT,CREAR_UBICACION(unidad_trnsp.ubicacion_garaje),CREAR_UBICACION(sucursal_sel.ubicacion),'PEDIDO',NULL)
             RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
@@ -1020,6 +1035,7 @@ BEGIN
                 END IF;
 
             dbms_output.PUT_LINE('## LA UNIDAD SE DIRIGE AL DESTINO');
+            --AQUI HACE
             INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,pedido_sel.tracking,
                                       DEFAULT,CREAR_UBICACION(sucursal_sel.ubicacion),CREAR_UBICACION(direccion_sel.ubicacion),'ENVIO',NULL)
             RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
@@ -1046,11 +1062,9 @@ BEGIN
             INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,pedido_sel.tracking,
                                       DEFAULT,direccion_sel.ubicacion,unidad_trnsp.ubicacion_garaje,'RETORNO',NULL);
 
-        END IF;
+ --       END IF;
 
-    ELSE
-        dbms_output.PUT_LINE('## EL PEDIDO NO HA SIDO ELABORADO');
-    END IF;
+--    END IF;
 
     <<fin>>
     NULL;
