@@ -98,7 +98,7 @@ BEGIN
     FROM
         APLICACIONES_DELIVERY AP
     INNER JOIN
-        PLANES_DE_SERVICIO PDS ON AP.ID = PDS.ID_APP AND (PDS.DURACION.fecha_fin >= d OR  PDS.DURACION.fecha_fin IS NULL)AND PDS.CANCELADO IS NULL
+        PLANES_DE_SERVICIO PDS ON AP.ID = PDS.ID_APP AND AP.ID = PDS.ID_APP AND (PDS.DURACION.fecha_fin >= d OR  PDS.DURACION.fecha_fin IS NULL)AND PDS.CANCELADO IS NULL
     INNER JOIN
         UBICACIONES_APLICABLES UAP ON UAP.ID_PLAN = PDS.ID AND UAP.ID_APP = PDS.ID_APP AND UAP.ID_ESTADO = direccion.ID_ESTADO
     INNER JOIN
@@ -117,7 +117,7 @@ BEGIN
         S.ID_MUNICIPIO,
         S.ID_ZONA
     ORDER BY
-        condicion_proximidad(dir_u_id, S.ID) DESC;
+        DBMS_RANDOM.VALUE(), condicion_proximidad(dir_u_id, S.ID) DESC;
     LOOP
         FETCH sucur_cur INTO
             APPID,
@@ -138,7 +138,7 @@ BEGIN
             DBMS_OUTPUT.PUT_LINE('### LA SUCURSAL (' || SUCURSALID || ') DE ' || NOMBRE_EMPRESA || ' ES LA CANDIDATA MÁS CERCANA PARA ENVIAR');
             SELECT SUM(ALM.DISPONIBILIDAD) INTO PRODUCTOS FROM ALMACENES ALM WHERE ALM.ID_EMPRESA = EMPRESAID AND ALM.ID_SUCURSAL = SUCURSALID;
             IF (PRODUCTOS > 0) THEN
-                DBMS_OUTPUT.PUT_LINE('### LA SUCURSAL (' || SUCURSALID || ') DE ' || NOMBRE_EMPRESA || ' PUEDE HACER EL ENVIO');
+                DBMS_OUTPUT.PUT_LINE('### LA SUCURSAL (' || SUCURSALID || ') DE ' || NOMBRE_EMPRESA || ' PUEDE TOMAR UN PEDIDO');
                 DBMS_OUTPUT.PUT_LINE('### LA SUCURSAL (' || SUCURSALID || ') DE ' || NOMBRE_EMPRESA || ' TIENE ' || PRODUCTOS || ' PRODUCTOS DISPONIBLES');
                 RETURN SUCURSALID;
             END IF;
@@ -230,7 +230,7 @@ BEGIN
     UPDATE PEDIDOS PD SET PD.TOTAL = total_c, PD.DURACION = RANGO_TIEMPO(SIM_DATE() + tiempo_max/60/24) WHERE PD.TRACKING = t;
     DBMS_OUTPUT.PUT_LINE('## SE HA GENERADO UN NUEVO PEDIDO PARA ' || usuario.PRIMER_NOMBRE || ' ' || usuario.PRIMER_APELLIDO || ' ');
     DBMS_OUTPUT.PUT_LINE('### EN LA SUCURSAL (' || sucursal.ID || ') DE LA EMPRESA ' || empresa.EMPRESA.nombre || ' CON LA APP '|| aplicacion.app.nombre);
-    DBMS_OUTPUT.PUT_LINE('### PEDIDO CON EL ID (' || t || ') POR UN TOTAL DE $' || total_c || ' EL ' || SIM_DATE());
+    DBMS_OUTPUT.PUT_LINE('### PEDIDO CON EL ID (' || t || ') POR UN TOTAL DE $' || total_c || ' EL ' || SIM_DATE() || ' MAS UN TIEMPO DE PREPARACION DE ' || tiempo_max || ' MINUTOS');
 END;
 
 CREATE OR REPLACE PROCEDURE generar_pedido(p_cantidad_de_pedidos NUMBER)
@@ -256,14 +256,229 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('## SE HA RECIBIDO UNA SOLICITUD DE ' || usuario.primer_nombre || ' ' || usuario.primer_apellido || ' PARA HACER UN PEDIDO');
         dir_u_id := elegir_ubicacion_usuario(usuario.id);
         sucur := elegir_sucursal_pedido(usuario.ID, dir_u_id, app_id, plan_id, contra_id);
-        DBMS_OUTPUT.PUT_LINE('## GENERANDO PEDIDO CON LA APP (' || app_id || ') CON EL PLAN (' || plan_id || ') BAJO EL CONTRATO (' || contra_id || ') PARA LA SUCURSUAL (' || sucur || ')');
-        nuevo_pedido(dir_u_id, app_id, plan_id, contra_id, sucur);
-
+        IF sucur IS NOT NULL THEN
+            DBMS_OUTPUT.PUT_LINE('## GENERANDO PEDIDO CON LA APP (' || app_id || ') CON EL PLAN (' || plan_id || ') BAJO EL CONTRATO (' || contra_id || ') PARA LA SUCURSUAL (' || sucur || ')');
+            nuevo_pedido(dir_u_id, app_id, plan_id, contra_id, sucur);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('## PARA LA UBICACIÓN ELEGIDA NINGUNA SUCURSAL PUEDE ATENDER EL PEDIDO');
+        END IF;
         c_cantidad_de_pedidos := c_cantidad_de_pedidos - 1;
     END LOOP;
     RETURN;
 END;
 
-CALL generar_pedido(10);
+CREATE OR REPLACE FUNCTION numero_de_rutas(tracking NUMBER) RETURN NUMBER
+IS
+    numero_de_rutas INTEGER;
+BEGIN
+    SELECT COUNT(RT.ID) INTO numero_de_rutas FROM RUTAS RT WHERE RT.ID_TRAKING = tracking;
+    RETURN numero_de_rutas;
+END;
 
-SELECT * FROM DIRECCIONES;
+
+CREATE OR REPLACE FUNCTION obtener_pedidos RETURN sys_refcursor
+IS
+    pedidos_cur SYS_REFCURSOR;
+    d DATE;
+BEGIN
+    d := SIM_DATE();
+    DBMS_OUTPUT.PUT_LINE('## SELECIONAMOS TODOS LOS PEDIDOS VIGENTES');
+    OPEN pedidos_cur FOR
+    SELECT
+        PD.*
+    FROM
+        PEDIDOS PD
+    WHERE
+        PD.DURACION.fecha_inicio <= SIM_DATE() AND PD.DURACION.fecha_fin IS NULL AND PD.CANCELADO IS NULL;
+    RETURN pedidos_cur;
+END;
+
+CREATE OR REPLACE FUNCTION unidad_libre(id_unidad_actual INTEGER) RETURN INTEGER
+IS
+    veces INTEGER;
+    d DATE;
+BEGIN
+    d := SIM_DATE();
+    SELECT
+        COUNT(R.ID)
+    INTO
+        veces
+    FROM
+        PEDIDOS PD
+    INNER JOIN
+        RUTAS R on PD.TRACKING = R.ID_TRAKING AND R.CANCELADO IS NULL AND R.PROPOSITO != 'RETORNO' AND R.ID_UNIDAD = 1
+    WHERE
+        PD.DURACION.fecha_fin IS NULL AND
+        PD.CANCELADO IS NULL;
+    IF veces = 0 THEN
+        RETURN 1;
+    END IF;
+    RETURN 0;
+END;
+
+CREATE OR REPLACE FUNCTION obtener_posicion_unidad(id_uni INTEGER) RETURN UBICACION
+IS
+    d DATE;
+    garaje GARAJES%ROWTYPE;
+    ruta RUTAS%ROWTYPE;
+    tipo TIPOS_DE_UNIDADES%ROWTYPE;
+    rut_cur SYS_REFCURSOR;
+    delta NUMBER;
+    vel NUMBER;
+    ultima_pos UBICACION;
+BEGIN
+    d := SIM_DATE();
+    SELECT G.* INTO garaje
+    FROM UNIDADES_DE_TRANSPORTE UDT
+    INNER JOIN GARAJES G on G.ID_APP = UDT.ID_APP and G.ID = UDT.ID_GARAJE
+    WHERE UDT.ID = id_uni;
+    SELECT TDU.VELOCIDAD_MEDIA INTO vel FROM UNIDADES_DE_TRANSPORTE UDT INNER JOIN TIPOS_DE_UNIDADES TDU on TDU.ID = UDT.ID_TIPO WHERE UDT.ID = id_uni;
+
+    OPEN rut_cur FOR
+    SELECT
+        R.*
+    FROM
+        PEDIDOS PD
+    INNER JOIN
+        RUTAS R on PD.TRACKING = R.ID_TRAKING AND R.CANCELADO IS NULL AND R.ID_UNIDAD = id_uni
+    WHERE
+        PD.CANCELADO IS NULL AND PD.DURACION.fecha_fin IS NULL
+    ORDER BY
+        R.ID;
+    LOOP
+         FETCH rut_cur INTO ruta;
+         EXIT WHEN rut_cur%NOTFOUND;
+         IF ruta.PROPOSITO = 'PEDIDO' THEN
+            ultima_pos := UBICACION(ruta.ORIGEN.latitud, ruta.ORIGEN.longitud, ruta.ORIGEN.actualizado);
+         END IF;
+            delta := (d - CAST(ultima_pos.actualizado AS DATE))*24;
+            ultima_pos := UBICACION.OBTENER_POSICION(UBICACION(ruta.DESTINO.latitud, ruta.DESTINO.longitud, ruta.DESTINO.actualizado),UBICACION(ultima_pos.latitud, ultima_pos.longitud, ultima_pos.actualizado),40 , delta);
+        IF CAST(ultima_pos.actualizado AS DATE) = d THEN
+            DBMS_OUTPUT.PUT_LINE('## LA UNIDAD DE TRANSPORTE ESTA FUERA DEL GARAGE');
+            RETURN UBICACION(ultima_pos.latitud, ultima_pos.longitud, d);
+        ELSIF ruta.PROPOSITO = 'RETORNO' AND CAST(ultima_pos.actualizado AS DATE) < d THEN
+            DBMS_OUTPUT.PUT_LINE('## LA UNIDAD SE ENCUENTRA EN EL GARAGE Y ESTABA REALIZANDO UN ENVIO');
+            RETURN UBICACION(garaje.UBICACION.latitud, garaje.UBICACION.longitud, d);
+        end if;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('## LA UNIDAD SE ENCUENTRA EN EL GARAGE Y NO ESTABA REALIZANDO UN ENVIO');
+    RETURN UBICACION(garaje.UBICACION.latitud, garaje.UBICACION.longitud, d);
+END;
+
+CREATE OR REPLACE FUNCTION unidad_aplicable_rango(uni INTEGER, id_sucur INTEGER) RETURN INTEGER
+IS
+    tipo TIPOS_DE_UNIDADES%ROWTYPE;
+    sucur SUCURSALES%ROWTYPE;
+    gar GARAJES%ROWTYPE;
+BEGIN
+    SELECT TDU.* INTO tipo FROM UNIDADES_DE_TRANSPORTE UDT INNER JOIN TIPOS_DE_UNIDADES TDU on TDU.ID = UDT.ID_TIPO WHERE UDT.ID = uni;
+    SELECT S.* INTO sucur FROM SUCURSALES S WHERE S.ID = id_sucur;
+    SELECT G.* INTO gar FROM UNIDADES_DE_TRANSPORTE UDT INNER JOIN GARAJES G on G.ID_APP = UDT.ID_APP and G.ID = UDT.ID_GARAJE WHERE UDT.ID = uni;
+    IF tipo.DISTANCIA_OPERATIVA = 'ESTADO' AND gar.ID_ESTADO = sucur.ID_ESTADO OR
+    tipo.DISTANCIA_OPERATIVA = 'MUNICIPIO' AND gar.ID_MUNICIPIO = sucur.ID_MUNICIPIO OR
+    tipo.DISTANCIA_OPERATIVA = 'ZONA' AND gar.ID_ZONA = sucur.ID_ZONA THEN
+        RETURN 1;
+    END IF;
+    RETURN 0;
+END;
+
+CREATE OR REPLACE PROCEDURE elegir_unidad_disponible_proxima(id_sucur INTEGER, id_a INTEGER, id_uni IN OUT INTEGER, id_gar IN OUT INTEGER)
+IS
+    unidad UNIDADES_DE_TRANSPORTE%ROWTYPE;
+    sucur SUCURSALES%ROWTYPE;
+BEGIN
+    SELECT S.* INTO sucur FROM SUCURSALES S WHERE S.ID = id_sucur;
+    SELECT
+        UDT.*
+    INTO
+        unidad
+    FROM
+        GARAJES GS
+    INNER JOIN
+        UNIDADES_DE_TRANSPORTE UDT ON GS.ID_APP = UDT.ID_APP AND GS.ID = UDT.ID_GARAJE AND UDT.ESTADO = 'OPERATIVO'
+    WHERE
+        GS.ID_APP = id_a AND GS.ID_ESTADO = sucur.ID_ESTADO AND 1 = unidad_libre(UDT.ID) AND 1 = unidad_aplicable_rango(UDT.ID, id_sucur)
+    ORDER BY
+        DBMS_RANDOM.VALUE();
+    id_uni := unidad.ID;
+    id_gar := unidad.ID_GARAJE;
+    RETURN;
+END;
+
+CREATE OR REPLACE PROCEDURE crear_rutas(p_tracking NUMBER) IS
+    pedido PEDIDOS%ROWTYPE;
+    id_uni INTEGER;
+    unidad UNIDADES_DE_TRANSPORTE%ROWTYPE;
+    tipo TIPOS_DE_UNIDADES%ROWTYPE;
+    gar GARAJES%ROWTYPE;
+    sucur SUCURSALES%ROWTYPE;
+    direc DIRECCIONES%ROWTYPE;
+    delta DATE;
+    beta DATE;
+    id_gar INTEGER;
+    id_sucur INTEGER;
+BEGIN
+    SELECT PD.* INTO pedido FROM PEDIDOS PD WHERE PD.TRACKING = p_tracking;
+    SELECT D.ID_SUCURSAL INTO id_sucur FROM PEDIDOS PD INNER JOIN DETALLES D on PD.TRACKING = D.ID_TRACKING WHERE PD.TRACKING = pedido.TRACKING GROUP BY D.ID_SUCURSAL;
+    DBMS_OUTPUT.PUT_LINE('## SELECIONAMOS LA UNIDAD DE TRANSPORTE DISPONIBLE MAS PROXIMA A LA SUCURSAL');
+    elegir_unidad_disponible_proxima(id_sucur, pedido.ID_APP, id_uni, id_gar);
+    IF id_uni IS NOT NULL THEN
+        SELECT UDT.* INTO unidad FROM UNIDADES_DE_TRANSPORTE UDT WHERE UDT.id = id_uni;
+        SELECT TDU.* INTO tipo FROM UNIDADES_DE_TRANSPORTE UDT INNER JOIN TIPOS_DE_UNIDADES TDU on TDU.ID = UDT.ID_TIPO WHERE UDT.id = id_uni;
+        SELECT G.* INTO gar FROM GARAJES G WHERE G.ID = id_gar;
+        SELECT S.* INTO sucur FROM SUCURSALES S WHERE S.ID = id_sucur;
+        SELECT DIR.* INTO direc FROM DIRECCIONES DIR WHERE DIR.ID = pedido.ID_DIRECCION;
+        DBMS_OUTPUT.PUT_LINE('### LA UNIDAD (' || id_uni || ') DEL GARAJE (' || id_gar || ') DE LA APP (' || unidad.ID_APP || ')');
+        DBMS_OUTPUT.PUT_LINE('### DEL TIPO ' || tipo.NOMBRE || ' CON UNA DISTANCIA OPERATIVA DE '|| tipo.DISTANCIA_OPERATIVA || ' TOMA EL ENVIO');
+        --TODO VARIAS PEDIDOS
+        delta := SIM_DATE() + UBICACION.OBTENER_TIEMPO_ESTIMADO_EN_HORAS( UBICACION(gar.UBICACION.latitud, gar.UBICACION.longitud, pedido.DURACION.fecha_inicio),  UBICACION(gar.UBICACION.latitud, gar.UBICACION.longitud, pedido.DURACION.fecha_inicio), tipo.VELOCIDAD_MEDIA)/24;
+        INSERT INTO RUTAS VALUES(
+            unidad.ID_APP,
+            unidad.ID_GARAJE,
+            unidad.ID,
+            p_tracking,
+            DEFAULT,
+            UBICACION(gar.UBICACION.latitud, gar.UBICACION.longitud, SIM_DATE()),
+            UBICACION(sucur.UBICACION.latitud, sucur.UBICACION.longitud, delta),
+            'PEDIDO',
+            NULL);
+        beta := delta + UBICACION.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(UBICACION(gar.UBICACION.latitud, gar.UBICACION.longitud, pedido.DURACION.fecha_inicio), UBICACION(direc.UBICACION.latitud, direc.UBICACION.longitud, pedido.DURACION.fecha_inicio), tipo.VELOCIDAD_MEDIA)/24;
+        INSERT INTO RUTAS VALUES(
+            unidad.ID_APP,
+            unidad.ID_GARAJE,
+            unidad.ID,
+            p_tracking,
+            DEFAULT,
+            UBICACION(sucur.UBICACION.latitud, sucur.UBICACION.longitud, delta),
+            UBICACION(gar.UBICACION.latitud, gar.UBICACION.longitud, beta),
+            'ENVIO',
+            NULL);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('### ACTUALMENTE NO SE DISPONEN DE UNIDADES PARA REALIZAR EL ENVIO');
+    END IF;
+    RETURN;
+END;
+
+-- ENVIOS
+CREATE OR REPLACE PROCEDURE realizar_envios
+IS
+    pedidos_cur SYS_REFCURSOR;
+    pedido PEDIDOS%ROWTYPE;
+BEGIN
+    pedidos_cur := obtener_pedidos();
+    LOOP
+        FETCH pedidos_cur INTO pedido;
+        EXIT WHEN pedidos_cur%NOTFOUND;
+        IF numero_de_rutas(pedido.TRACKING) = 0 THEN
+            DBMS_OUTPUT.PUT_LINE(' ');
+            DBMS_OUTPUT.PUT_LINE('### EL PEDIDO CON EL NÚMERO DE TRACKING (' || pedido.TRACKING || ') DEL ' || pedido.DURACION.fecha_inicio || ' NO SE HA RECOGIDO');
+            crear_rutas(pedido.TRACKING);
+        END IF;
+    END LOOP;
+END;
+
+CALL generar_pedido(1);
+CALL realizar_envios();
+SELECT P.*, SIM_DATE() D FROM PEDIDOS P;
+SELECT R.* FROM RUTAS R;
+
