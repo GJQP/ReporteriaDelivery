@@ -20,6 +20,8 @@ END;
 
 CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
 BEGIN -- Falta validar estado
+
+IF p_estado IS NOT NULL THEN
     OPEN test_cur FOR
     SELECT
         EP.EMPRESA.LOGO LOGO,
@@ -44,11 +46,11 @@ BEGIN -- Falta validar estado
     INNER JOIN
         UBICACIONES_APLICABLES UAP ON UAP.ID_APP = PS.ID_APP AND UAP.ID_PLAN = PS.ID
     INNER JOIN
-        ESTADOS ESTA ON ESTA.NOMBRE = p_estado OR (p_estado IS NULL)--AND ESTA.NOMBRE IS NOT NULL)
+        ESTADOS E ON E.id = UAP.ID_ESTADO
+    INNER JOIN
+        ESTADOS ESTA ON ESTA.NOMBRE = p_estado
     INNER JOIN
         UBICACIONES_APLICABLES UBI ON UBI.ID_APP = PS.ID_APP AND UBI.ID_PLAN = PS.ID AND UBI.ID_ESTADO = ESTA.ID
-    INNER JOIN
-        ESTADOS E ON E.id = UAP.ID_ESTADO
     INNER JOIN
         CONTRATOS C ON C.id_plan = PS.id AND C.id_app = PS.id_app AND C.cancelado IS NULL
     WHERE
@@ -68,6 +70,52 @@ BEGIN -- Falta validar estado
     INNER JOIN
         EMPRESAS EP ON EP.id = S.EMPRESA_ID
     ORDER BY 2;
+ELSIF p_estado IS NULL THEN
+ OPEN test_cur FOR
+    SELECT
+            EP.EMPRESA.LOGO LOGO,
+            EP.EMPRESA.NOMBRE NOMBRE,
+            S.*
+        FROM
+        (SELECT
+            C.ID_EMPRESA EMPRESA_ID,
+            AD.APP.NOMBRE NOMBRE_APP,
+            TO_CHAR(C.DURACION.FECHA_INICIO, 'DD-MM-YYYY') FECHA_REGISTRO,
+            TO_CHAR(C.DURACION.FECHA_INICIO, 'DD-MM-YYYY') FECHA_INICIO,
+            TO_CHAR(C.DURACION.FECHA_FIN, 'DD-MM-YYYY') FECHA_FIN,
+            C.PORCENTAJE_DESCUENTO DESCUENTO,
+            PS.MODALIDAD MODALIDAD,
+            PS.CANTIDAD_ENVIOS CANTIDAD_ENVIOS,
+            PS.PRECIO PRECIO,
+            LISTAGG(E.NOMBRE,', ') WITHIN GROUP (ORDER BY E.NOMBRE) AS ESTADOS
+        FROM
+            PLANES_DE_SERVICIO PS
+        INNER JOIN
+            APLICACIONES_DELIVERY AD ON AD.id = PS.id_app
+        INNER JOIN
+            UBICACIONES_APLICABLES UAP ON UAP.ID_APP = PS.ID_APP AND UAP.ID_PLAN = PS.ID
+        INNER JOIN
+            ESTADOS E ON E.id = UAP.ID_ESTADO
+        INNER JOIN
+            CONTRATOS C ON C.id_plan = PS.id AND C.id_app = PS.id_app AND C.cancelado IS NULL
+        WHERE
+            PS.cancelado IS NULL
+        GROUP BY
+            C.ID_EMPRESA,
+            AD.APP.NOMBRE,
+            C.DURACION.FECHA_INICIO,
+            C.DURACION.FECHA_FIN,
+            PS.MODALIDAD,
+            PS.CANTIDAD_ENVIOS,
+            PS.PRECIO,
+            C.PORCENTAJE_DESCUENTO
+        ORDER BY
+            AD.APP.NOMBRE,
+            C.DURACION.FECHA_INICIO) S
+        INNER JOIN
+            EMPRESAS EP ON EP.id = S.EMPRESA_ID
+        ORDER BY 2;
+END IF;
 END;
 
 CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL) IS
