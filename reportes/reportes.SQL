@@ -118,7 +118,7 @@ ELSIF p_estado IS NULL THEN
 END IF;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL) IS
+CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL, estado_nombre VARCHAR2 DEFAULT NULL) IS
 BEGIN
     OPEN test_cur FOR
     SELECT S.*,
@@ -129,12 +129,13 @@ BEGIN
                 SELECT
                 PD.ID_APP IDAPP,
                 PD.ID_EMPRESA IDEMPRESA,
+                E.NOMBRE NOMESTADO,
                 TREAT(EP.EMPRESA AS MARCA).NOMBRE NOMBRE_EMP,
                 TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
                 SDC.NOMBRE,
                 COUNT(PD.TRACKING) AS CANTIDAD_PEDIDOS,
-                TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO FI,
-                TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN FF
+                TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO) FI,
+                TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN) FF
             FROM
                 PEDIDOS PD
             INNER JOIN
@@ -142,16 +143,15 @@ BEGIN
             INNER JOIN
                 APLICACIONES_DELIVERY AD ON AD.ID = PD.ID_APP
             INNER JOIN
-                DETALLES D ON PD.TRACKING = D.ID_TRACKING
-            INNER JOIN
                 ESTADOS E ON E.ID = PD.ID_ESTADO
             INNER JOIN
                 SECTORES_DE_COMERCIO SDC ON SDC.ID = EP.id_sector
             WHERE
                   PD.CANCELADO IS NULL AND
-                  (TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO >= fecha_ini OR fecha_ini IS NULL) AND
-                  (TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN <= fecha_fin OR fecha_fin IS NULL) AND
+                  (fecha_ini IS NULL OR TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO) >= TRUNC(fecha_ini)) AND
+                  (fecha_fin IS NULL OR TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN) <= TRUNC(fecha_fin)) AND
                   (sector IS NULL OR SDC.NOMBRE = sector)
+                   AND (estado_nombre IS NULL OR E.nombre = estado_nombre)
             GROUP BY
                     PD.ID_APP,
                     PD.ID_EMPRESA,
@@ -159,13 +159,13 @@ BEGIN
                     TREAT(AD.APP AS MARCA).NOMBRE,
                     SDC.NOMBRE,
                     E.NOMBRE,
-                    TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO,
-                    TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN
+                    TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO),
+                    TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN)
             ORDER BY
                     PD.ID_EMPRESA,
                     PD.ID_APP,
                     E.NOMBRE,
-                    TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO
+                    TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO)
             ) S
         INNER JOIN
             EMPRESAS EP ON EP.ID = S.IDEMPRESA

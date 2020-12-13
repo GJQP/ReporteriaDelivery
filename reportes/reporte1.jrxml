@@ -148,7 +148,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Bottom">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[ $F{CANTIDAD_ENVIOS} + " envios"]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CANTIDAD_ENVIOS} + " envios"]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="331" y="0" width="89" height="110" forecolor="#5048C2" uuid="d7b4d39c-cfcb-4b28-b2c8-13f61fb185d4">
