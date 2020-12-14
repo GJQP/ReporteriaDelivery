@@ -1,3 +1,17 @@
+CREATE OR REPLACE FUNCTION buscar(l_array dbms_utility.lname_array,busq VARCHAR2)
+RETURN VARCHAR2
+IS
+BEGIN
+    FOR i IN 1 .. l_array.last
+    LOOP
+        IF l_array(i) = busq THEN
+            RETURN busq;
+        END IF;
+    END LOOP;
+
+    RETURN '';
+END;
+
 CREATE OR REPLACE PROCEDURE reporte1(test_cur OUT sys_refcursor) IS
 BEGIN
     OPEN test_cur FOR
@@ -18,10 +32,14 @@ BEGIN
     ORDER BY NOMBRE, TREAT(PLANES_DE_SERVICIO.duracion AS RANGO_TIEMPO).FECHA_INICIO;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
-BEGIN -- Falta validar estado
+CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL)
+IS
+    l_count PLS_INTEGER;
+    l_array dbms_utility.lname_array;
+BEGIN
 
 IF p_estado IS NOT NULL THEN
+    dbms_utility.COMMA_TO_TABLE(p_estado,l_count,l_array);
     OPEN test_cur FOR
     SELECT
         EP.EMPRESA.LOGO LOGO,
@@ -48,7 +66,7 @@ IF p_estado IS NOT NULL THEN
     INNER JOIN
         ESTADOS E ON E.id = UAP.ID_ESTADO
     INNER JOIN
-        ESTADOS ESTA ON ESTA.NOMBRE = p_estado
+        ESTADOS ESTA ON ESTA.NOMBRE = buscar(l_array,ESTA.nombre)
     INNER JOIN
         UBICACIONES_APLICABLES UBI ON UBI.ID_APP = PS.ID_APP AND UBI.ID_PLAN = PS.ID AND UBI.ID_ESTADO = ESTA.ID
     INNER JOIN
@@ -118,8 +136,20 @@ ELSIF p_estado IS NULL THEN
 END IF;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL, estado_nombre VARCHAR2 DEFAULT NULL) IS
+CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL, estado_nombre VARCHAR2 DEFAULT NULL)
+IS
+    l_count_e PLS_INTEGER;
+    l_array_e dbms_utility.lname_array;
+    l_count_s PLS_INTEGER;
+    l_array_s dbms_utility.lname_array;
 BEGIN
+    IF estado_nombre IS NOT NULL THEN
+        dbms_utility.COMMA_TO_TABLE(estado_nombre,l_count_e,l_array_e);
+    END IF;
+    IF sector IS NOT NULL THEN
+        dbms_utility.COMMA_TO_TABLE(sector,l_count_s,l_array_s);
+    END IF;
+
     OPEN test_cur FOR
     SELECT S.*,
         TREAT(AP.APP AS MARCA).LOGO LOGO_APP,
@@ -150,8 +180,8 @@ BEGIN
                   PD.CANCELADO IS NULL AND
                   (fecha_ini IS NULL OR TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO) >= TRUNC(fecha_ini)) AND
                   (fecha_fin IS NULL OR TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN) <= TRUNC(fecha_fin)) AND
-                  (sector IS NULL OR SDC.NOMBRE = sector)
-                   AND (estado_nombre IS NULL OR E.nombre = estado_nombre)
+                  (sector IS NULL OR SDC.NOMBRE = buscar(l_array_s,SDC.nombre))
+                   AND (estado_nombre IS NULL OR E.nombre = buscar(l_array_e,E.nombre))
             GROUP BY
                     PD.ID_APP,
                     PD.ID_EMPRESA,
@@ -173,8 +203,14 @@ BEGIN
             APLICACIONES_DELIVERY AP ON AP.ID = S.IDAPP;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte4 (test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
+CREATE OR REPLACE PROCEDURE reporte4 (test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL)
+IS
+    l_count PLS_INTEGER;
+    l_array dbms_utility.lname_array;
 BEGIN
+    IF p_estado IS NOT NULL THEN
+        dbms_utility.COMMA_TO_TABLE(p_estado,l_count,l_array);
+    END IF;
     OPEN test_cur FOR
     SELECT S.*, TREAT(EX.APP AS MARCA).LOGO LOGO_APP
     FROM
@@ -207,11 +243,17 @@ BEGIN
         TDU.NOMBRE
     ) S
     INNER JOIN
-        APLICACIONES_DELIVERY EX ON EX.ID = S.APPI AND ((p_estado IS NULL) OR S.NOMBRE_ESTADO = p_estado);
+        APLICACIONES_DELIVERY EX ON EX.ID = S.APPI AND ((p_estado IS NULL) OR S.NOMBRE_ESTADO = buscar(l_array,S.NOMBRE_ESTADO));
 END;
 
-CREATE OR REPLACE PROCEDURE reporte6 (test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL, p_fecha_registro DATE DEFAULT NULL) IS
+CREATE OR REPLACE PROCEDURE reporte6 (test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL, p_fecha_registro DATE DEFAULT NULL)
+IS
+    l_count PLS_INTEGER;
+    l_array dbms_utility.lname_array;
 BEGIN
+    IF p_estado IS NOT NULL THEN
+        dbms_utility.COMMA_TO_TABLE(p_estado,l_count,l_array);
+    END IF;
     OPEN test_cur FOR
     SELECT
         USUARIOS.FOTO,
@@ -239,7 +281,7 @@ BEGIN
     INNER JOIN
         ESTADOS E ON E.ID = D.ID_ESTADO
     WHERE
-        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR E.NOMBRE = p_estado) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro)
+        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR E.NOMBRE = buscar(l_array,E.nombre)) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro)
     ORDER BY
         E.NOMBRE,
         R.REGISTRO.FECHA_INICIO;
