@@ -854,16 +854,21 @@ IS
         IS
         SELECT p.*, d4.ubicacion FROM pedidos p,
                 (
-                    SELECT d.id_tracking, d.id_sucursal
+                    SELECT d.id_tracking, d.id_sucursal, d.id_empresa
                     FROM detalles d
                     WHERE d.id_sucursal = sucursal_id
-                    GROUP BY d.id_tracking, d.id_sucursal
+                    GROUP BY d.id_tracking, d.id_sucursal, d.id_empresa
                 ) s,
                 direcciones d4
         WHERE p.tracking = s.id_tracking --EQUI JOIN
           AND d4.id = p.id_direccion
           AND p.duracion.fecha_fin IS NULL
           AND p.cancelado IS NULL
+          AND p.duracion.fecha_inicio > (SIM_DATE() - (
+              SELECT MAX(NVL(p2.tiempo_de_preparacion,0))/24/60
+                FROM productos p2
+                WHERE p2.id_empresa = s.id_empresa
+            ))
         ORDER BY p.duracion.fecha_inicio
         FETCH FIRST capacidad ROWS ONLY;
 
