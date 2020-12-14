@@ -272,3 +272,29 @@ BEGIN
     OPEN test_cur FOR
     SELECT FOTO FROM USUARIOS;
 END;
+
+
+CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
+BEGIN -- Falta validar estado
+    OPEN test_cur FOR
+    SELECT
+    COUNT (pe.TRACKING) CANT_PEDIDOS,
+    e.NOMBRE NOMBRE_ESTADO,
+    app.APP.nombre NOMBRE_APP,
+    --app.APP.logo LOGO_APP,
+    emp.EMPRESA.nombre NOMBRE_EMPRESA,
+    --emp.EMPRESA.logo LOGO_EMPRESA,
+    mun.NOMBRE NOMBRE_MUNICIPIO
+    FROM PEDIDOS pe, DIRECCIONES dir, ESTADOS e, MUNICIPIOS mun, EMPRESAS emp, APLICACIONES_DELIVERY app
+    WHERE
+    pe.CANCELADO IS NULL
+    AND pe.DURACION.fecha_fin IS NOT NULL
+    AND dir.ID = pe.ID_DIRECCION
+    AND e.ID = dir.ID_ESTADO
+    AND mun.ID = dir.ID_MUNICIPIO
+    AND emp.ID = pe.ID_EMPRESA
+    AND app.ID = pe.ID_APP
+    GROUP BY
+    e.NOMBRE, app.APP.nombre, emp.EMPRESA.nombre, mun.NOMBRE;
+
+END;
