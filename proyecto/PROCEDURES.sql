@@ -202,6 +202,15 @@ IS
         )
         RETURNING id INTO id_nuevo_plan;
 
+        IF dbms_random.VALUE(0,1) < 0.3 THEN
+        INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,14);
+        END IF;
+        IF dbms_random.VALUE(0,1) < 0.4 THEN
+        INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,16);
+        ELSE
+        INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,24);
+        END IF;
+
         IF in_id_empresa IS NOT NULL THEN
             crear_contrato(in_app_id,id_nuevo_plan,in_id_empresa);
         ELSE
