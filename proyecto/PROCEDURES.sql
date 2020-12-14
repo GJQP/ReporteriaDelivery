@@ -1088,7 +1088,6 @@ BEGIN
     --por cada pedido en la sucursal listo
 
     --CARGO LOTE
-    dbms_output.put_line('DEBUG: '|| sucursal_sel.id);
     FOR n_pedido IN pedidos_sucursal(unidad_trnsp.cantidad_pedidos, sucursal_sel, unidad_trnsp.distancia_operativa)
         LOOP
             maleta.extend();
@@ -1117,7 +1116,6 @@ BEGIN
     --CREO RUTA A PEDIDO DE TODOS
     FOR l_ped_rut IN maleta.first .. maleta.last
         LOOP
-            dbms_output.put_line('#AAA');
             INSERT INTO rutas
             VALUES (maleta(l_ped_rut).pedido.id_app,
                     unidad_trnsp.id_garaje,
