@@ -103,26 +103,38 @@ RETURN empresas.id%TYPE
 IS
     rand_empresa empresas.id%TYPE;
 BEGIN
-    SELECT e.id
+    SELECT pac.id_empresa
     INTO rand_empresa
     FROM
-    (SELECT id_empresa, ps.id FROM planes_de_servicio ps
-    JOIN contratos c2 ON ps.id_app = c2.id_app AND ps.id = c2.id_plan
-    WHERE ps.id_app = id_app_busqueda
-            AND TREAT(ps.duracion AS rango_tiempo).fecha_fin > fecha_sim
-            AND (
-                    ps.cancelado IS NULL
-                    OR
-                    TREAT(ps.cancelado AS cancelacion).fecha_cancelacion > fecha_sim
-                )
-            AND(
-                c2.cancelado IS NULL
-                    OR
-                    TREAT(c2.cancelado AS cancelacion).fecha_cancelacion > fecha_sim
-                )
-        ) pc
-    RIGHT JOIN empresas e ON e.id = pc.id_empresa
-    WHERE pc.id_empresa IS NULL
+    (SELECT s.id_empresa FROM planes_de_servicio pds
+    INNER JOIN ubicaciones_aplicables ua ON pds.id_app = ua.id_app AND pds.id = ua.id_plan
+    INNER JOIN sucursales s ON ua.id_estado = s.id_estado
+    WHERE pds.id_app = id_app_busqueda
+    AND TREAT(pds.duracion AS rango_tiempo).fecha_fin > SIM_DATE()
+                AND (
+                        pds.cancelado IS NULL
+                        OR
+                        TREAT(pds.cancelado AS cancelacion).fecha_cancelacion > SIM_DATE()
+                    )
+    GROUP BY s.id_empresa) pac
+    LEFT JOIN
+    (SELECT e.id FROM planes_de_servicio pds
+    INNER JOIN contratos c2 ON pds.id_app = c2.id_app AND pds.id = c2.id_plan
+    INNER JOIN empresas e ON c2.id_empresa = e.id
+    WHERE pds.id_app = id_app_busqueda
+    AND TREAT(pds.duracion AS rango_tiempo).fecha_fin > SIM_DATE()
+    AND (
+            pds.cancelado IS NULL
+            OR
+            TREAT(pds.cancelado AS cancelacion).fecha_cancelacion > SIM_DATE()
+        )
+    AND(
+        c2.cancelado IS NULL
+            OR
+            TREAT(c2.cancelado AS cancelacion).fecha_cancelacion > SIM_DATE()
+        )) yc
+    ON yc.id = pac.id_empresa
+    WHERE yc.id IS NULL
     ORDER BY dbms_random.value()
     FETCH FIRST ROW ONLY;
 
