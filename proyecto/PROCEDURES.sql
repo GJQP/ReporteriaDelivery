@@ -869,6 +869,13 @@ IS
                 FROM productos p2
                 WHERE p2.id_empresa = s.id_empresa
             ))
+              AND 0 = (
+                      SELECT COUNT(1)
+                      FROM rutas r
+                      WHERE r.proposito = 'PEDIDO'
+                        AND r.id_traking = p.tracking
+                        AND r.cancelado IS NOT NULL
+                    ) --SIN RUTAS EN CAMINO O CANCELADAS
         ORDER BY p.duracion.fecha_inicio
         FETCH FIRST capacidad ROWS ONLY;
 
