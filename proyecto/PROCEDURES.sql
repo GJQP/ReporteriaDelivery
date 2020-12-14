@@ -202,6 +202,15 @@ IS
         )
         RETURNING id INTO id_nuevo_plan;
 
+        IF dbms_random.VALUE(0,1) < 0.3 THEN
+        INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,14);
+        END IF;
+        IF dbms_random.VALUE(0,1) < 0.4 THEN
+        INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,16);
+        ELSE
+        INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,24);
+        END IF;
+
         IF in_id_empresa IS NOT NULL THEN
             crear_contrato(in_app_id,id_nuevo_plan,in_id_empresa);
         ELSE
@@ -413,7 +422,7 @@ BEGIN
            DECODE(s.id_zona,DECODE(in_direccion.id_zona,g.id_zona,s.id_zona,0),s.id_zona,0) as id_zona,
            DECODE(s.id_municipio,DECODE(in_direccion.id_municipio,g.id_municipio,s.id_municipio,0),s.id_municipio,0) as id_municipio,
            DECODE(s.id_estado,DECODE(in_direccion.id_estado,g.id_estado,s.id_estado,0),s.id_estado,0) as id_estado
-        --INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
+        INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
         FROM sucursales s
         JOIN garajes g ON s.id_estado = g.id_estado
         --JOIN direcciones d ON g.id_estado = d.id_estado
@@ -712,10 +721,11 @@ IS
         SELECT COUNT(1)
         INTO res
         FROM rutas r
+        INNER JOIN pedidos p ON p.tracking = r.id_traking
         WHERE
-              r.id_unidad = unidad_id
-            AND cancelado IS NULL
-            AND proposito IN ('PEDIDO','ENVIO');
+              r.id_unidad = 36
+            AND r.proposito IN ('PEDIDO','ENVIO')
+            AND (p.duracion.fecha_fin IS NULL AND p.cancelado IS NULL AND r.cancelado IS NULL);
 
         RETURN (res <= 0);
 
@@ -729,7 +739,8 @@ CREATE OR REPLACE PROCEDURE simular_accidente(
     nuevo_estado unidades_de_transporte.estado%TYPE,
     ruta_id rutas.id%TYPE,
     ruta_origen rutas.origen%TYPE,
-    rapidez tipos_de_unidades.velocidad_media%TYPE
+    rapidez tipos_de_unidades.velocidad_media%TYPE,
+    rehacer_pedido BOOLEAN DEFAULT FALSE
 )
 IS
     ruta rutas%ROWTYPE;
@@ -743,12 +754,12 @@ BEGIN
 
 
     IF nuevo_estado = 'DESCONTINUADA' THEN
-        --dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id || ' HA SUFRIDO UN ACCIDENTE QUE REQUEIRE DESCONTINUARLA');
+        dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id || ' HA SUFRIDO UN ACCIDENTE QUE REQUEIRE DESCONTINUARLA');
 
         UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
         WHERE id = unidad_id;
     ELSE
-        --dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id ||' HA SUFRIDO UN ACCIDENTE POR LO TANTO DEBE SER REPARADA');
+        dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id ||' HA SUFRIDO UN ACCIDENTE POR LO TANTO DEBE SER REPARADA');
         UPDATE unidades_de_transporte SET estado = 'REPARACION'
         WHERE id = unidad_id;
     END IF;
@@ -760,15 +771,22 @@ BEGIN
     nueva_ubi := ubicacion.OBTENER_POSICION(ruta.destino,ruta.origen,
         rapidez,  testo);
 
-    UPDATE rutas r SET r.destino = nueva_ubi
-    WHERE ruta.id = ruta_id;
+    UPDATE rutas r SET r.destino = nueva_ubi,
+                       r.cancelado = cancelacion(SIM_DATE(),'LA UNIDAD TIENE EL PEDIDO A MITAD DE CAMINO')
+    WHERE r.id = ruta_id;
 
-    IF nuevo_estado = 'DESCONTINUADA' THEN
+    IF nuevo_estado = 'DESCONTINUADA' OR rehacer_pedido THEN
 
-        dbms_output.PUT_LINE('## LA UNIDAD HA DAÑADO EL PEDIDO ' ||
-                             'SE HA NOTIFICADO A LA SUCURSAL PARA LA NUEVA ELABORACION DEL MISMO');
+        IF nuevo_estado = 'DESCONTINUADA' THEN
+            dbms_output.PUT_LINE('## LA UNIDAD HA DAÑADO EL PEDIDO ' || in_pedido.tracking ||
+                             ' SE HA NOTIFICADO A LA SUCURSAL PARA LA NUEVA ELABORACION DEL MISMO');
+        ELSE
+            dbms_output.PUT_LINE('### SE HA NOTIFICADO A LA SUCURSAL PARA LA NUEVA ELABORACIÓN DE PEDIDO '
+                || in_pedido.tracking);
+        END IF;
 
-        UPDATE pedidos p SET p.cancelado = cancelacion(SIM_DATE(),'EL PEDIDO FUE DESTRUIDO')
+
+        UPDATE pedidos p SET p.cancelado = cancelacion(SIM_DATE(),'EL PEDIDO FUE DESTRUIDO O DESCARTADO')
         WHERE p.tracking = in_pedido.tracking;
 
         INSERT INTO pedidos p VALUES (
@@ -807,98 +825,109 @@ BEGIN
 END;
 
 CREATE OR REPLACE PROCEDURE modulo_despacho
-IS
+    IS
 
     --CURSOR SI DE LAS UNIDADES QUE PUEDEN REALIZAR EL PEDIDO (APP,DIR,SUCURSAL)
     CURSOR unidades_permitidas(in_app_id aplicaciones_delivery.id%TYPE,
         in_sucursal sucursales%ROWTYPE,
         in_direccion direcciones%ROWTYPE
         )
-    IS
-    SELECT udt.id, udt.id_garaje, tdu.distancia_operativa, tdu.velocidad_media, tdu.cantidad_pedidos,
-           g.ubicacion as ubicacion_garaje
-    FROM garajes g
-    INNER JOIN unidades_de_transporte udt ON g.id_app = udt.id_app AND g.id = udt.id_garaje
-    INNER JOIN tipos_de_unidades tdu ON tdu.id = udt.id_tipo
-    WHERE g.id_app = in_app_id --APP
-    AND g.id_estado = in_direccion.id_estado --ESTADO
-    AND udt.estado = 'OPERATIVA'
-    AND (
-        (g.id_zona = in_sucursal.id_zona
-             AND
-         g.id_zona = in_direccion.id_zona) --ESTAN LOS 3 EN LA MISMA ZONA POR ENDE TODAS PUEDEN ENVIAR
-        OR
-        (tdu.distancia_operativa IN('MUNICIPIO','ESTADO')
-             AND (g.id_municipio = in_sucursal.id_municipio
-                      OR
-                  g.id_municipio = in_direccion.id_municipio)) --UNO SE ENCUENTRA EN MUNICIPIO DISTITNO
-        OR
-        (tdu.distancia_operativa = 'ESTADO'
-             AND g.id_estado = in_sucursal.id_estado
-             AND g.id_estado = in_direccion.id_estado) -- PUEDE ENTREGAR EN EL ESTADO
-        )
+        IS
+        SELECT udt.id,
+               udt.id_garaje,
+               tdu.distancia_operativa,
+               tdu.velocidad_media,
+               tdu.cantidad_pedidos,
+               g.ubicacion AS ubicacion_garaje
+        FROM garajes g
+                 INNER JOIN unidades_de_transporte udt ON g.id_app = udt.id_app AND g.id = udt.id_garaje
+                 INNER JOIN tipos_de_unidades tdu ON tdu.id = udt.id_tipo
+        WHERE g.id_app = in_app_id                 --APP
+          AND g.id_estado = in_direccion.id_estado --ESTADO
+          AND udt.estado = 'OPERATIVA'
+          AND (
+                (g.id_zona = in_sucursal.id_zona
+                    AND
+                 g.id_zona = in_direccion.id_zona) --ESTAN LOS 3 EN LA MISMA ZONA POR ENDE TODAS PUEDEN ENVIAR
+                OR
+                (tdu.distancia_operativa IN ('MUNICIPIO', 'ESTADO')
+                    AND (g.id_municipio = in_sucursal.id_municipio
+                        OR
+                         g.id_municipio = in_direccion.id_municipio)) --UNO SE ENCUENTRA EN MUNICIPIO DISTITNO
+                OR
+                (tdu.distancia_operativa = 'ESTADO'
+                    AND g.id_estado = in_sucursal.id_estado
+                    AND g.id_estado = in_direccion.id_estado) -- PUEDE ENTREGAR EN EL ESTADO
+            )
         ORDER BY tdu.distancia_operativa DESC
-        ;
-
+    ;
     CURSOR rutas_pedido(pedido_id pedidos.tracking%TYPE)
         IS
         SELECT *
         FROM rutas
         WHERE id_traking = pedido_id
-        AND proposito = 'ENVIO'
-        AND cancelado IS NOT NULL
+          AND proposito = 'ENVIO'
+          AND cancelado IS NOT NULL
         ORDER BY id DESC
-        FETCH FIRST ROW ONLY;
-
-    CURSOR pedidos_sucursal(capacidad tipos_de_unidades.cantidad_pedidos%TYPE, sucursal_id sucursales.id%TYPE)
+            FETCH FIRST ROW ONLY;
+    CURSOR pedidos_sucursal(
+        capacidad tipos_de_unidades.cantidad_pedidos%TYPE,
+        in_sucursal sucursales%ROWTYPE,
+        distancia tipos_de_unidades.distancia_operativa%TYPE
+        )
         IS
-        SELECT p.*, d4.ubicacion FROM pedidos p,
-                (
-                    SELECT d.id_tracking, d.id_sucursal, d.id_empresa
-                    FROM detalles d
-                    WHERE d.id_sucursal = sucursal_id
-                    GROUP BY d.id_tracking, d.id_sucursal, d.id_empresa
-                ) s,
-                direcciones d4
+        SELECT p.*, d4.ubicacion
+        FROM pedidos p,
+             (
+                 SELECT d.id_tracking, d.id_sucursal, d.id_empresa
+                 FROM detalles d
+                 WHERE d.id_sucursal = in_sucursal.id
+                 GROUP BY d.id_tracking, d.id_sucursal, d.id_empresa
+             ) s,
+             direcciones d4
         WHERE p.tracking = s.id_tracking --EQUI JOIN
           AND d4.id = p.id_direccion
           AND p.duracion.fecha_fin IS NULL
           AND p.cancelado IS NULL
-          AND p.duracion.fecha_inicio > (SIM_DATE() - (
-              SELECT MAX(NVL(p2.tiempo_de_preparacion,0))/24/60
-                FROM productos p2
-                WHERE p2.id_empresa = s.id_empresa
-            ))
+          AND p.duracion.fecha_inicio <= (sim_date() - (
+            SELECT MAX(NVL(p2.tiempo_de_preparacion, 0)) / 24 / 60
+            FROM productos p2
+            WHERE p2.id_empresa = s.id_empresa
+        ))
+          AND 0 = (
+            SELECT COUNT(1)
+            FROM rutas r
+            WHERE r.proposito = 'PEDIDO'
+              AND r.id_traking = p.tracking
+              AND r.cancelado IS NOT NULL
+        )                                --SIN RUTAS EN CAMINO O CANCELADAS
+            AND DECODE(distancia,'ESTADO',d4.id_estado,
+                'MUNICIPIO',d4.id_municipio,
+                d4.id_zona)
+                    = DECODE(distancia,'ESTADO',in_sucursal.id_estado,
+                        'MUNICIPIO',in_sucursal.id_municipio,
+                        in_sucursal.id_zona)
         ORDER BY p.duracion.fecha_inicio
         FETCH FIRST capacidad ROWS ONLY;
-
-    pedido_sel pedidos%ROWTYPE;
-    preparacion NUMBER;
-
-    sucursal_sel sucursales%ROWTYPE;
-    direccion_sel direcciones%ROWTYPE;
-
-
-    ruta_actual rutas%ROWTYPE;
-
-    ruta_id_actual rutas.id%TYPE;
+    pedido_sel         pedidos%ROWTYPE;
+    preparacion        NUMBER;
+    sucursal_sel       sucursales%ROWTYPE;
+    direccion_sel      direcciones%ROWTYPE;
+    ruta_actual        rutas%ROWTYPE;
+    ruta_id_actual     rutas.id%TYPE;
     ruta_origen_actual rutas.origen%TYPE;
-
-    unidad_trnsp unidades_permitidas%ROWTYPE;
-
-    TYPE pedido_ruta IS RECORD (
+    unidad_trnsp       unidades_permitidas%ROWTYPE;
+    TYPE PEDIDO_RUTA IS RECORD (
         pedido pedidos_sucursal%ROWTYPE,
         ruta rutas.id%TYPE
-    );
-
-    TYPE lote_pedido IS TABLE OF pedido_ruta;
-    maleta lote_pedido := lote_pedido();
-
-    pedido_aux pedidos%ROWTYPE;
-    pedidos_enviados NUMBER := 1;
+        );
+    TYPE LOTE_PEDIDO IS TABLE OF PEDIDO_RUTA;
+    maleta             LOTE_PEDIDO := lote_pedido();
+    pedido_aux         pedidos%ROWTYPE;
+    pedidos_enviados   NUMBER      := 1;
 
 BEGIN
-    dbms_output.PUT_LINE('# MÓDULO DE DESPACHO');
+    dbms_output.put_line('# MÓDULO DE DESPACHO');
 
     --selecciona el pedido mas antigo sin finalizar
     --Y SIN RUTAS CANCELADAS O QUE NO SEA RETORNO
@@ -906,286 +935,287 @@ BEGIN
     INTO pedido_sel
     FROM pedidos p
     WHERE p.duracion.fecha_fin IS NULL
-    AND p.cancelado IS NULL
+      AND p.cancelado IS NULL
+      --AND 0 = (SELECT COUNT(1) FROM rutas r WHERE r.cancelado IS NULL)
     ORDER BY p.duracion.fecha_inicio
-    FETCH FIRST ROW ONLY;
+        FETCH FIRST ROW ONLY;
 
-    dbms_output.PUT_LINE('## SE OBTIENE EL PEDIDO DE TRACKING '|| pedido_sel.tracking);
+    dbms_output.put_line('## SE OBTIENE EL PEDIDO DE TRACKING ' || pedido_sel.tracking);
 
     --TODO CANCELAR EL PEDIDO SI HA PASADO MUCHO TIEMPO (?)
 
     --veririficar si esta listo (pedido)
-    SELECT MAX(NVL(p2.tiempo_de_preparacion,0))/24/60
+    SELECT MAX(NVL(p2.tiempo_de_preparacion, 0)) / 24 / 60
     INTO preparacion
     FROM pedidos p
-    INNER JOIN detalles d ON p.tracking = d.id_tracking
-    INNER JOIN productos p2 ON d.id_empresa = p2.id_empresa
+             INNER JOIN detalles d ON p.tracking = d.id_tracking
+             INNER JOIN productos p2 ON d.id_empresa = p2.id_empresa
     WHERE p.tracking = pedido_sel.tracking;
 
-    dbms_output.PUT_LINE('## SE VERIFICA SI EL PEDIDO YA FUE ELEBORADO');
+    dbms_output.put_line('## SE VERIFICA SI EL PEDIDO YA FUE ELEBORADO');
 
-    IF pedido_sel.duracion.fecha_inicio + preparacion > SIM_DATE() THEN
-       dbms_output.PUT_LINE('## EL PEDIDO NO HA SIDO ELABORADO');
-       GOTO fin;
+    IF pedido_sel.duracion.fecha_inicio + preparacion > sim_date() THEN
+        dbms_output.put_line('## EL PEDIDO NO HA SIDO ELABORADO');
+        GOTO fin;
     END IF;
 
 --    IF pedido_sel.duracion.fecha_inicio + preparacion <= SIM_DATE() THEN
 
-        SELECT d3.*
-        INTO direccion_sel FROM sucursales s
-        INNER JOIN detalles d2 ON d2.id_tracking = pedido_sel.tracking
-        INNER JOIN direcciones d3 ON d3.id = pedido_sel.id_direccion
-        WHERE s.id = d2.id_sucursal
+    SELECT d3.*
+    INTO direccion_sel
+    FROM sucursales s
+             INNER JOIN detalles d2 ON d2.id_tracking = pedido_sel.tracking
+             INNER JOIN direcciones d3 ON d3.id = pedido_sel.id_direccion
+    WHERE s.id = d2.id_sucursal
         FETCH FIRST ROW ONLY;
 
-        SELECT s.*
-        INTO sucursal_sel FROM sucursales s
-        INNER JOIN detalles d2 ON d2.id_tracking = pedido_sel.tracking
-        INNER JOIN direcciones d3 ON d3.id = pedido_sel.id_direccion
-        WHERE s.id = d2.id_sucursal
+    SELECT s.*
+    INTO sucursal_sel
+    FROM sucursales s
+             INNER JOIN detalles d2 ON d2.id_tracking = pedido_sel.tracking
+             INNER JOIN direcciones d3 ON d3.id = pedido_sel.id_direccion
+    WHERE s.id = d2.id_sucursal
         FETCH FIRST ROW ONLY;
 
-        preparacion := 24;
-        dbms_output.PUT_LINE('## SE CONSULTAN LAS UNIDADES QUE PUEDEN DESPACHAR EL PEDIDO');
+    preparacion := 24;
+    dbms_output.put_line('## SE CONSULTAN LAS UNIDADES QUE PUEDEN DESPACHAR EL PEDIDO');
 
 
-        FOR l_unidad IN unidades_permitidas(pedido_sel.id_app
-            ,sucursal_sel
-            ,direccion_sel)
+    FOR l_unidad IN unidades_permitidas(pedido_sel.id_app
+        , sucursal_sel
+        , direccion_sel)
         LOOP
             unidad_trnsp := l_unidad;
             --dbms_output.PUT_LINE('AMAAA');
             IF unidad_disponible(l_unidad.id)
-                   AND preparacion > ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
-                    l_unidad.ubicacion_garaje,sucursal_sel.ubicacion,l_unidad.velocidad_media)
+                AND preparacion > ubicacion.obtener_tiempo_estimado_en_horas(
+                                          l_unidad.ubicacion_garaje, sucursal_sel.ubicacion, l_unidad.velocidad_media)
                     +
-                    ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
-                    sucursal_sel.ubicacion,direccion_sel.ubicacion,l_unidad.velocidad_media)
-                THEN
+                                  ubicacion.obtener_tiempo_estimado_en_horas(
+                                          sucursal_sel.ubicacion, direccion_sel.ubicacion, l_unidad.velocidad_media)
+            THEN
                 --dbms_output.PUT_LINE('AMAAA asignadaa');
                 unidad_trnsp := l_unidad;
-                preparacion := ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
-                    l_unidad.ubicacion_garaje,sucursal_sel.ubicacion,l_unidad.velocidad_media)
+                preparacion := ubicacion.obtener_tiempo_estimado_en_horas(
+                                       l_unidad.ubicacion_garaje, sucursal_sel.ubicacion, l_unidad.velocidad_media)
                     +
-                    ubicacion.OBTENER_TIEMPO_ESTIMADO_EN_HORAS(
-                    sucursal_sel.ubicacion,direccion_sel.ubicacion,l_unidad.velocidad_media);
+                               ubicacion.obtener_tiempo_estimado_en_horas(
+                                       sucursal_sel.ubicacion, direccion_sel.ubicacion, l_unidad.velocidad_media);
             END IF;
         END LOOP;
 
-        IF (unidad_trnsp.id IS NULL ) THEN
-            --CANCELAR PEDIDO
-            dbms_output.PUT_LINE('## LA APLICACION YA NO PUEDE REALIZAR ENVÍOS POR LO TANTO DEBERÁ SER CANCELADO');
-            UPDATE pedidos p SET p.cancelado = cancelacion(SIM_DATE(),'NO HAY UNIDADES QUE PUEDAN COMPLETAR EL PEDIDO')
-            WHERE p.tracking = pedido_sel.tracking;
-            GOTO fin;
-        ELSIF NOT unidad_disponible(unidad_trnsp.id) THEN
-            dbms_output.PUT_LINE('## LAS UNIDADES SE ENCUENTRAN REALIZANDO PEDIDOS, EL PEDIDO NO PUEDE SER ATENDIDO');
-            GOTO fin;
-        END IF;
---        ELSE
-        --
-        dbms_output.PUT_LINE('## SE HA ASIGNADO LA UNIDAD DE TRANSPORTE ' || unidad_trnsp.id);
-/*
-        --RELEVO
-        FOR l_ruta IN rutas_pedido(pedido_sel.tracking)
+    IF (unidad_trnsp.id IS NULL) THEN
+        --CANCELAR PEDIDO
+        dbms_output.put_line('## LA APLICACION YA NO PUEDE REALIZAR ENVÍOS POR LO TANTO DEBERÁ SER CANCELADO');
+        UPDATE pedidos p
+        SET p.cancelado = cancelacion(sim_date(), 'NO HAY UNIDADES QUE PUEDAN COMPLETAR EL PEDIDO')
+        WHERE p.tracking = pedido_sel.tracking;
+        GOTO fin;
+    ELSIF NOT unidad_disponible(unidad_trnsp.id) THEN
+        dbms_output.put_line('## LAS UNIDADES SE ENCUENTRAN REALIZANDO PEDIDOS, EL PEDIDO NO PUEDE SER ATENDIDO');
+        GOTO fin;
+    END IF;
+    --        ELSE
+    --
+    dbms_output.put_line('## SE HA ASIGNADO LA UNIDAD DE TRANSPORTE ' || unidad_trnsp.id);
+
+    --RELEVO
+    FOR l_ruta IN rutas_pedido(pedido_sel.tracking)
         LOOP
-            dbms_output.PUT_LINE('## LA UNIDAD VA A RETOMAR EL PEDIDO DE LA UNIDAD '|| l_ruta.id_unidad);
+            dbms_output.put_line('## LA UNIDAD VA A RETOMAR EL PEDIDO DE LA UNIDAD ' || l_ruta.id_unidad);
 
             --IR A LA ULTIMA UBICACION
-            INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,
-                                      pedido_sel.tracking,DEFAULT,
-                                      CREAR_UBICACION(unidad_trnsp.ubicacion_garaje),
-                                      CREAR_UBICACION(l_ruta.destino),'PEDIDO',NULL)
+            INSERT INTO rutas
+            VALUES (pedido_sel.id_app, unidad_trnsp.id_garaje, unidad_trnsp.id,
+                    pedido_sel.tracking, DEFAULT,
+                    crear_ubicacion(unidad_trnsp.ubicacion_garaje),
+                    crear_ubicacion(l_ruta.destino), 'PEDIDO', NULL)
             RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
 
             --ACCIDENTE
-            IF dbms_random.VALUE(0,1) < 0.1 THEN
-                UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
+            IF dbms_random.value(0, 1) < 0.1 THEN
+                UPDATE unidades_de_transporte
+                SET estado = 'DESCONTINUADA'
                 WHERE id = unidad_trnsp.id;
-                dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE GRAVE NO PUEDE RETOMAR EL PEDIDO');
+                dbms_output.put_line('### LA UNIDAD HA SUFRIDO UN ACCIDENTE GRAVE NO PUEDE RETOMAR EL PEDIDO');
                 GOTO fin;
-            ELSIF dbms_random.VALUE(0,1) < 0.1 THEN
-                UPDATE unidades_de_transporte SET estado = 'REPARACION'
+            ELSIF dbms_random.value(0, 1) < 0.1 THEN
+                UPDATE unidades_de_transporte
+                SET estado = 'REPARACION'
                 WHERE id = unidad_trnsp.id;
-                dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE MENOR NO PUEDE RETOMAR EL PEDIDO');
+                dbms_output.put_line('### LA UNIDAD HA SUFRIDO UN ACCIDENTE MENOR NO PUEDE RETOMAR EL PEDIDO');
                 GOTO fin;
             END IF;
 
-            INSERT INTO rutas VALUES (pedido_sel.id_app,l_ruta.id_garaje,l_ruta.id_unidad,
-                                      pedido_sel.tracking,DEFAULT,
-                                      CREAR_UBICACION(unidad_trnsp.ubicacion_garaje),
-                                      CREAR_UBICACION(l_ruta.destino),'PEDIDO',NULL)
+            INSERT INTO rutas
+            VALUES (pedido_sel.id_app, l_ruta.id_garaje, l_ruta.id_unidad,
+                    pedido_sel.tracking, DEFAULT,
+                    crear_ubicacion(unidad_trnsp.ubicacion_garaje),
+                    crear_ubicacion(l_ruta.destino), 'PEDIDO', NULL)
             RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
 
-            INSERT INTO rutas VALUES (pedido_sel.id_app,l_ruta.id_garaje,l_ruta.id_unidad,
-                                      pedido_sel.tracking,DEFAULT,CREAR_UBICACION(l_ruta.destino),CREAR_UBICACION(l_ruta.origen),'RETORNO',NULL);
+            INSERT INTO rutas
+            VALUES (pedido_sel.id_app, l_ruta.id_garaje, l_ruta.id_unidad,
+                    pedido_sel.tracking, DEFAULT, crear_ubicacion(l_ruta.destino), crear_ubicacion(l_ruta.origen),
+                    'RETORNO', NULL);
 
-            INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,
-                                      pedido_sel.tracking,DEFAULT,CREAR_UBICACION(l_ruta.destino),CREAR_UBICACION(direccion_sel.ubicacion),'ENVIO',NULL)
+            INSERT INTO rutas
+            VALUES (pedido_sel.id_app, unidad_trnsp.id_garaje, unidad_trnsp.id,
+                    pedido_sel.tracking, DEFAULT, crear_ubicacion(l_ruta.destino),
+                    crear_ubicacion(direccion_sel.ubicacion), 'ENVIO', NULL)
             RETURNING id, origen INTO ruta_id_actual, ruta_origen_actual;
 
-            dbms_output.PUT_LINE('## LA UNIDAD HA RETOMADO EL PEDIDO Y SE DIRIGE AL DESTINO');
+            dbms_output.put_line('## LA UNIDAD HA RETOMADO EL PEDIDO Y SE DIRIGE AL DESTINO');
             --ACCIDENTE
-            IF dbms_random.VALUE(0,1) > 0.5 THEN
+            IF dbms_random.value(0, 1) > 0.5 THEN
 
-                IF dbms_random.VALUE(0,1) > 0.5 THEN
-                simular_accidente(unidad_trnsp.id,pedido_sel,'REPARACION', ruta_id_actual, ruta_origen_actual,unidad_trnsp.velocidad_media);
+                IF dbms_random.value(0, 1) > 0.5 THEN
+                    simular_accidente(unidad_trnsp.id, pedido_sel, 'REPARACION', ruta_id_actual, ruta_origen_actual,
+                                      unidad_trnsp.velocidad_media);
                 ELSE
-                simular_accidente(unidad_trnsp.id,pedido_sel,'DESCONTINUADA', ruta_id_actual, ruta_origen_actual,unidad_trnsp.velocidad_media);
+                    simular_accidente(unidad_trnsp.id, pedido_sel, 'DESCONTINUADA', ruta_id_actual, ruta_origen_actual,
+                                      unidad_trnsp.velocidad_media);
                 END IF;
 
                 GOTO fin;
             END IF;
 
-            dbms_output.PUT_LINE('## LA UNIDAD HA ENTREGADO EL PEDIDO');
-            UPDATE pedidos p SET p.valoracion = FLOOR(dbms_random.value(3,5)),
-                               p.duracion = rango_tiempo(p.duracion.fecha_inicio,SIM_DATE())
+            dbms_output.put_line('## LA UNIDAD HA ENTREGADO EL PEDIDO');
+            UPDATE pedidos p
+            SET p.valoracion = FLOOR(dbms_random.value(3, 5)),
+                p.duracion   = rango_tiempo(p.duracion.fecha_inicio, sim_date())
             WHERE tracking = pedido_sel.tracking;
 
-            dbms_output.PUT_LINE('## LA UNIDAD SE REGRESA A SU GARAJE');
-            INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,
-                                      pedido_sel.tracking,DEFAULT,CREAR_UBICACION(direccion_sel.ubicacion),CREAR_UBICACION(unidad_trnsp.ubicacion_garaje),'RETORNO',NULL);
+            dbms_output.put_line('## LA UNIDAD SE REGRESA A SU GARAJE');
+            INSERT INTO rutas
+            VALUES (pedido_sel.id_app, unidad_trnsp.id_garaje, unidad_trnsp.id,
+                    pedido_sel.tracking, DEFAULT, crear_ubicacion(direccion_sel.ubicacion),
+                    crear_ubicacion(unidad_trnsp.ubicacion_garaje), 'RETORNO', NULL);
 
             GOTO fin;
-        END LOOP;*/
-        --IR A LA SUCURSAL
-        dbms_output.PUT_LINE('## LA UNIDAD SE DIRIGE A RETIRAR EL PEDIDO EN LA SUCURSAL');
-        --por cada pedido en la sucursal listo
+        END LOOP;
+    --IR A LA SUCURSAL
+    dbms_output.put_line('## LA UNIDAD SE DIRIGE A RETIRAR EL PEDIDO EN LA SUCURSAL');
+    --por cada pedido en la sucursal listo
 
-        --CARGO LOTE
-        FOR n_pedido IN pedidos_sucursal(unidad_trnsp.cantidad_pedidos,sucursal_sel.id)
+    --CARGO LOTE
+    FOR n_pedido IN pedidos_sucursal(unidad_trnsp.cantidad_pedidos, sucursal_sel, unidad_trnsp.distancia_operativa)
         LOOP
             maleta.extend();
             maleta(maleta.last).pedido := n_pedido;
         END LOOP;
 
-        ruta_origen_actual := CREAR_UBICACION(unidad_trnsp.ubicacion_garaje);
+    ruta_origen_actual := crear_ubicacion(unidad_trnsp.ubicacion_garaje);
 
-        --CREO RUTA A PEDIDO DE TODOS
-        FOR l_ped_rut IN maleta.first..maleta.last
+
+    --ACCIDENTE
+    IF dbms_random.value(0, 1) < 0.1 THEN
+        UPDATE unidades_de_transporte
+        SET estado = 'DESCONTINUADA'
+        WHERE id = unidad_trnsp.id;
+        dbms_output.put_line('### LA UNIDAD HA SUFRIDO UN ACCIDENTE NO SE PUEDE ATENDER EL PEDIDO POR ESTA UNIDAD');
+        GOTO fin;
+    ELSIF dbms_random.value(0, 1) < 0.1 THEN
+        UPDATE unidades_de_transporte
+        SET estado = 'REPARACION'
+        WHERE id = unidad_trnsp.id;
+        dbms_output.put_line(
+                '### LA UNIDAD HA SUFRIDO UN ACCIDENTE MENOR NO SE PUEDE ATENDER EL PEDIDO POR ESTA UNIDAD');
+        GOTO fin;
+    END IF;
+
+    --CREO RUTA A PEDIDO DE TODOS
+    FOR l_ped_rut IN maleta.first .. maleta.last
         LOOP
-            INSERT INTO rutas VALUES (
-                                  maleta(l_ped_rut).pedido.id_app,
-                                  unidad_trnsp.id_garaje,
-                                  unidad_trnsp.id,
-                                  maleta(l_ped_rut).pedido.tracking,
-                                  DEFAULT,
-                                  ruta_origen_actual,
-                                  CREAR_UBICACION(sucursal_sel.ubicacion),
-                                  'PEDIDO',
-                                  NULL
-                                )
-            RETURNING id INTO maleta(l_ped_rut).ruta;
-        END LOOP;
-
-/*
-        --ACCIDENTE
-        IF dbms_random.VALUE(0,1) < 0.1 THEN
-                UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
-                WHERE id = unidad_trnsp.id;
-                dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE NO SE PUEDE ATENDER EL PEDIDO POR ESTA UNIDAD');
-                GOTO fin;
-        ELSIF dbms_random.VALUE(0,1) < 0.1 THEN
-                UPDATE unidades_de_transporte SET estado = 'REPARACION'
-                WHERE id = unidad_trnsp.id;
-                dbms_output.PUT_LINE('### LA UNIDAD HA SUFRIDO UN ACCIDENTE MENOR NO SE PUEDE ATENDER EL PEDIDO POR ESTA UNIDAD');
-                GOTO fin;
-        END IF;*/
-
-        dbms_output.PUT_LINE('## LA UNIDAD SE DIRIGE A ENVIAR  ' || maleta.count || ' PEDIDO(S)');
-        ruta_origen_actual := CREAR_UBICACION(sucursal_sel.ubicacion);
-        <<despacho_a_enesimo_destino>>
-        IF (pedidos_enviados > 1) THEN
-            ruta_origen_actual := CREAR_UBICACION(maleta(pedidos_enviados - 1).pedido.ubicacion);
-        END IF;
-        --AQUI HACE
-        FOR l_ped_rut IN pedidos_enviados..maleta.last
-        LOOP
-            INSERT INTO rutas VALUES (
-                                  maleta(l_ped_rut).pedido.id_app,
-                                  unidad_trnsp.id_garaje,
-                                  unidad_trnsp.id,
-                                  maleta(l_ped_rut).pedido.tracking,
-                                  DEFAULT,
-                                  ruta_origen_actual,
-                                  CREAR_UBICACION(maleta(pedidos_enviados).pedido.ubicacion),
-                                  'ENVIO',
-                                  NULL
-                                )
-            RETURNING id INTO maleta(l_ped_rut).ruta;
-        END LOOP;
-
-        --ACCIDENTE
-        IF dbms_random.VALUE(0,1) > 0.5 THEN
-            IF dbms_random.VALUE(0,1) > 0.5 THEN
-               FOR l_ped_rut IN pedidos_enviados..maleta.last
-                LOOP
-
-                simular_accidente(
+            INSERT INTO rutas
+            VALUES (maleta(l_ped_rut).pedido.id_app,
+                    unidad_trnsp.id_garaje,
                     unidad_trnsp.id,
-                    pedido_sel,
-                    'REPARACION',
-                    maleta(l_ped_rut).ruta,
+                    maleta(l_ped_rut).pedido.tracking,
+                    DEFAULT,
                     ruta_origen_actual,
-                    unidad_trnsp.velocidad_media);
-                END LOOP;
-            ELSE
-                FOR l_ped_rut IN pedidos_enviados..maleta.last
-                LOOP
-                    simular_accidente(unidad_trnsp.id,
-                    pedido_sel,
-                    'DESCONTINUADA',
-                    maleta(l_ped_rut).ruta,
-                    ruta_origen_actual,
-                    unidad_trnsp.velocidad_media);
-                END LOOP;
-            END IF;
-            GOTO fin;
-        END IF;
+                    crear_ubicacion(sucursal_sel.ubicacion),
+                    'PEDIDO',
+                    NULL)
+            RETURNING id INTO maleta(l_ped_rut).ruta;
+        END LOOP;
 
-        dbms_output.PUT_LINE('## LA UNIDAD HA ENTREGADO EL PEDIDO ' || pedidos_enviados);
-/*        FOR l_ped_rut IN pedidos_enviados..maleta.last
+    dbms_output.put_line('## LA UNIDAD SE DIRIGE A ENVIAR  ' || maleta.count || ' PEDIDO(S)');
+    ruta_origen_actual := crear_ubicacion(sucursal_sel.ubicacion);
+    <<despacho_a_enesimo_destino>>
+        IF (pedidos_enviados > 1) THEN
+        ruta_origen_actual := crear_ubicacion(maleta(pedidos_enviados - 1).pedido.ubicacion);
+    END IF;
+    --AQUI HACE
+    FOR l_ped_rut IN pedidos_enviados .. maleta.last
         LOOP
-            IF l_ped_rut = pedidos_enviados THEN
-               UPDATE pedidos p SET p.valoracion = dbms_random.VALUE(4,5),
-                            p.duracion = rango_tiempo(p.duracion.fecha_inicio,SIM_DATE())
-                WHERE tracking = maleta(pedidos_enviados).pedido.tracking;
-            ELSIF l_ped_rut > pedidos_enviados THEN
-                INSERT INTO rutas VALUES (
-                                  maleta(l_ped_rut).pedido.id_app,
-                                  unidad_trnsp.id_garaje,
-                                  unidad_trnsp.id,
-                                  maleta(l_ped_rut).pedido.tracking,
-                                  DEFAULT,
-                                  CREAR_UBICACION(maleta(pedidos_enviados).pedido.ubicacion),
-                                  CREAR_UBICACION(maleta(pedidos_enviados+1).pedido.ubicacion),
-                                  'ENVIO',
-                                  NULL
-                                )
-                RETURNING id INTO maleta(l_ped_rut).ruta;
-            END IF;
+            INSERT INTO rutas
+            VALUES (maleta(l_ped_rut).pedido.id_app,
+                    unidad_trnsp.id_garaje,
+                    unidad_trnsp.id,
+                    maleta(l_ped_rut).pedido.tracking,
+                    DEFAULT,
+                    ruta_origen_actual,
+                    crear_ubicacion(maleta(pedidos_enviados).pedido.ubicacion),
+                    'ENVIO',
+                    NULL)
+            RETURNING id INTO maleta(l_ped_rut).ruta;
+        END LOOP;
 
-        END LOOP;*/
-
-        UPDATE pedidos p SET p.valoracion = dbms_random.VALUE(4,5),
-                            p.duracion = rango_tiempo(p.duracion.fecha_inicio,SIM_DATE())
-        WHERE tracking = maleta(pedidos_enviados).pedido.tracking;
-
-        IF (pedidos_enviados < maleta.count) THEN
-            pedidos_enviados := pedidos_enviados + 1;
-            GOTO despacho_a_enesimo_destino;
+    --ACCIDENTE
+    IF dbms_random.value(0, 1) > 0.5 THEN
+        IF dbms_random.value(0, 1) > 0.5 THEN
+            FOR l_ped_rut IN pedidos_enviados..maleta.last
+                LOOP
+                    SELECT * INTO pedido_aux FROM pedidos p where maleta(l_ped_rut).pedido.tracking = p.tracking;
+                    simular_accidente(
+                            unidad_trnsp.id,
+                            pedido_aux,
+                            'REPARACION',
+                            maleta(l_ped_rut).ruta,
+                            ruta_origen_actual,
+                            unidad_trnsp.velocidad_media,
+                            maleta.count > 1);
+                END LOOP;
         ELSE
-            dbms_output.PUT_LINE('## LA UNIDAD SE REGRESA A SU GARAJE');
-            INSERT INTO rutas VALUES (pedido_sel.id_app,unidad_trnsp.id_garaje,unidad_trnsp.id,pedido_sel.tracking,
-                                  DEFAULT,direccion_sel.ubicacion,unidad_trnsp.ubicacion_garaje,'RETORNO',NULL);
+            FOR l_ped_rut IN pedidos_enviados..maleta.last
+                LOOP
+                    SELECT * INTO pedido_aux FROM pedidos p where maleta(l_ped_rut).pedido.tracking = p.tracking;
+                    simular_accidente(unidad_trnsp.id,
+                                      pedido_aux,
+                                      'DESCONTINUADA',
+                                      maleta(l_ped_rut).ruta,
+                                      ruta_origen_actual,
+                                      unidad_trnsp.velocidad_media,
+                                      TRUE);
+                END LOOP;
         END IF;
+        GOTO fin;
+    END IF;
 
- --       END IF;
+    dbms_output.put_line('## LA UNIDAD HA ENTREGADO EL PEDIDO ' || pedidos_enviados);
+
+    UPDATE pedidos p
+    SET p.valoracion = dbms_random.value(4, 5),
+        p.duracion   = rango_tiempo(p.duracion.fecha_inicio, sim_date())
+    WHERE tracking = maleta(pedidos_enviados).pedido.tracking;
+
+    IF (pedidos_enviados < maleta.count) THEN
+        pedidos_enviados := pedidos_enviados + 1;
+        GOTO despacho_a_enesimo_destino;
+    ELSE
+        dbms_output.put_line('## LA UNIDAD SE REGRESA A SU GARAJE');
+        INSERT INTO rutas
+        VALUES (pedido_sel.id_app, unidad_trnsp.id_garaje, unidad_trnsp.id, pedido_sel.tracking,
+                DEFAULT, direccion_sel.ubicacion, unidad_trnsp.ubicacion_garaje, 'RETORNO', NULL);
+    END IF;
+
+    --       END IF;
 
 --    END IF;
 
     <<fin>>
-    NULL;
+        NULL;
 
 /*    EXCEPTION
         WHEN OTHERS THEN dbms_output.PUT_LINE('NO HAY PEDIDOS QUE ATENDER ?');*/
