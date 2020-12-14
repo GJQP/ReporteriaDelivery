@@ -712,10 +712,11 @@ IS
         SELECT COUNT(1)
         INTO res
         FROM rutas r
+        INNER JOIN pedidos p ON p.tracking = r.id_traking
         WHERE
-              r.id_unidad = unidad_id
-            AND cancelado IS NULL
-            AND proposito IN ('PEDIDO','ENVIO');
+              r.id_unidad = 36
+            AND r.proposito IN ('PEDIDO','ENVIO')
+            AND (p.duracion.fecha_fin IS NULL AND p.cancelado IS NULL AND r.cancelado IS NULL);
 
         RETURN (res <= 0);
 
@@ -744,12 +745,12 @@ BEGIN
 
 
     IF nuevo_estado = 'DESCONTINUADA' THEN
-        --dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id || ' HA SUFRIDO UN ACCIDENTE QUE REQUEIRE DESCONTINUARLA');
+        dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id || ' HA SUFRIDO UN ACCIDENTE QUE REQUEIRE DESCONTINUARLA');
 
         UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
         WHERE id = unidad_id;
     ELSE
-        --dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id ||' HA SUFRIDO UN ACCIDENTE POR LO TANTO DEBE SER REPARADA');
+        dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id ||' HA SUFRIDO UN ACCIDENTE POR LO TANTO DEBE SER REPARADA');
         UPDATE unidades_de_transporte SET estado = 'REPARACION'
         WHERE id = unidad_id;
     END IF;
@@ -761,8 +762,9 @@ BEGIN
     nueva_ubi := ubicacion.OBTENER_POSICION(ruta.destino,ruta.origen,
         rapidez,  testo);
 
-    UPDATE rutas r SET r.destino = nueva_ubi, r.cancelado = cancelacion(SIM_DATE(),'LA UNIDAD TIENE EL PEDIDO A MITAD DE CAMINO')
-    WHERE ruta.id = ruta_id;
+    UPDATE rutas r SET r.destino = nueva_ubi,
+                       r.cancelado = cancelacion(SIM_DATE(),'LA UNIDAD TIENE EL PEDIDO A MITAD DE CAMINO')
+    WHERE r.id = ruta_id;
 
     IF nuevo_estado = 'DESCONTINUADA' OR rehacer_pedido THEN
 
@@ -1156,21 +1158,22 @@ BEGIN
         IF dbms_random.value(0, 1) > 0.5 THEN
             FOR l_ped_rut IN pedidos_enviados..maleta.last
                 LOOP
-
+                    SELECT * INTO pedido_aux FROM pedidos p where maleta(l_ped_rut).pedido.tracking = p.tracking;
                     simular_accidente(
                             unidad_trnsp.id,
-                            pedido_sel,
+                            pedido_aux,
                             'REPARACION',
                             maleta(l_ped_rut).ruta,
                             ruta_origen_actual,
                             unidad_trnsp.velocidad_media,
-                            TRUE);
+                            maleta.count > 1);
                 END LOOP;
         ELSE
             FOR l_ped_rut IN pedidos_enviados..maleta.last
                 LOOP
+                    SELECT * INTO pedido_aux FROM pedidos p where maleta(l_ped_rut).pedido.tracking = p.tracking;
                     simular_accidente(unidad_trnsp.id,
-                                      pedido_sel,
+                                      pedido_aux,
                                       'DESCONTINUADA',
                                       maleta(l_ped_rut).ruta,
                                       ruta_origen_actual,
