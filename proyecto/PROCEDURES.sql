@@ -413,7 +413,7 @@ BEGIN
            DECODE(s.id_zona,DECODE(in_direccion.id_zona,g.id_zona,s.id_zona,0),s.id_zona,0) as id_zona,
            DECODE(s.id_municipio,DECODE(in_direccion.id_municipio,g.id_municipio,s.id_municipio,0),s.id_municipio,0) as id_municipio,
            DECODE(s.id_estado,DECODE(in_direccion.id_estado,g.id_estado,s.id_estado,0),s.id_estado,0) as id_estado
-        --INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
+        INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
         FROM sucursales s
         JOIN garajes g ON s.id_estado = g.id_estado
         --JOIN direcciones d ON g.id_estado = d.id_estado
