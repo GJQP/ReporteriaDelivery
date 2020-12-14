@@ -274,27 +274,45 @@ BEGIN
 END;
 
 
-CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
-BEGIN -- Falta validar estado
+CREATE OR REPLACE PROCEDURE reporte5(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
+BEGIN
     OPEN test_cur FOR
-    SELECT
-    COUNT (pe.TRACKING) CANT_PEDIDOS,
-    e.NOMBRE NOMBRE_ESTADO,
-    app.APP.nombre NOMBRE_APP,
-    --app.APP.logo LOGO_APP,
-    emp.EMPRESA.nombre NOMBRE_EMPRESA,
-    --emp.EMPRESA.logo LOGO_EMPRESA,
-    mun.NOMBRE NOMBRE_MUNICIPIO
-    FROM PEDIDOS pe, DIRECCIONES dir, ESTADOS e, MUNICIPIOS mun, EMPRESAS emp, APLICACIONES_DELIVERY app
-    WHERE
-    pe.CANCELADO IS NULL
-    AND pe.DURACION.fecha_fin IS NOT NULL
-    AND dir.ID = pe.ID_DIRECCION
-    AND e.ID = dir.ID_ESTADO
-    AND mun.ID = dir.ID_MUNICIPIO
-    AND emp.ID = pe.ID_EMPRESA
-    AND app.ID = pe.ID_APP
-    GROUP BY
-    e.NOMBRE, app.APP.nombre, emp.EMPRESA.nombre, mun.NOMBRE;
-
+       SELECT
+            s.NOMBRE_ESTADO,
+            s.NOMBRE_MUNICIPIO,
+            s.NOMBRE_EMPRESA,
+            s.NOMBRE_APP,
+            s.NUMERO_PEDIDOS,
+            TREAT(emp.empresa AS MARCA).LOGO as LOGO_EMP,
+            TREAT(apps.app AS MARCA).LOGO as LOGO_APP
+            FROM(SELECT
+                e.ID ID_ESTADO,
+                emp.ID ID_EMP,
+                app.ID ID_APP,
+                e.NOMBRE NOMBRE_ESTADO,
+                mun.NOMBRE NOMBRE_MUNICIPIO,
+                ROW_NUMBER() over (
+                    PARTITION BY e.NOMBRE
+                    ORDER BY COUNT(pe.TRACKING) DESC
+                ) row_number,
+                COUNT(pe.TRACKING) NUMERO_PEDIDOS,
+                app.APP.nombre NOMBRE_APP,
+                emp.EMPRESA.nombre NOMBRE_EMPRESA
+                FROM PEDIDOS pe, DIRECCIONES dir, ESTADOS e, MUNICIPIOS mun, EMPRESAS emp, APLICACIONES_DELIVERY app
+                WHERE
+                pe.CANCELADO IS NULL
+                AND pe.DURACION.fecha_fin IS NOT NULL
+                AND dir.ID = pe.ID_DIRECCION
+                AND e.ID = dir.ID_ESTADO
+                AND mun.ID = dir.ID_MUNICIPIO
+                AND emp.ID = pe.ID_EMPRESA
+                AND app.ID = pe.ID_APP
+                AND (p_estado IS NULL OR e.NOMBRE = p_estado)
+                GROUP BY
+                e.NOMBRE, app.APP.nombre, emp.EMPRESA.nombre, mun.NOMBRE, e.ID, emp.ID, app.ID
+                ORDER BY e.NOMBRE, mun.NOMBRE) s, APLICACIONES_DELIVERY apps, EMPRESAS emp
+        WHERE row_number <=5
+        AND s.ID_EMP = emp.ID
+        AND s.ID_APP = apps.ID
+        ORDER BY NOMBRE_ESTADO, NUMERO_PEDIDOS DESC;
 END;
