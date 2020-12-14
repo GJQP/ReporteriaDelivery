@@ -633,8 +633,8 @@ BEGIN
     SELECT r.id_app
     INTO app_id
     FROM registros r
-    INNER JOIN planes_de_servicio pds ON c2.id_app = pds.id_app AND c2.id_plan = pds.id
     INNER JOIN contratos c2 ON r.id_app = c2.id_app
+    INNER JOIN planes_de_servicio pds ON c2.id_app = pds.id_app AND c2.id_plan = pds.id
     WHERE r.id_usuario = rand_usuario_id
     AND c2.duracion.fecha_fin >= SIM_DATE() AND c2.cancelado IS NULL
     AND pds.duracion.fecha_fin >= SIM_DATE() AND pds.cancelado IS NULL
