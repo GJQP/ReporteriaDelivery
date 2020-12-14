@@ -289,6 +289,67 @@ END;
 
 
 
+CREATE OR REPLACE PROCEDURE reporte6Version1Direccion(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL, p_fecha_registro DATE DEFAULT NULL)
+IS
+    l_count PLS_INTEGER;
+    l_array dbms_utility.lname_array;
+BEGIN
+    IF p_estado IS NOT NULL THEN
+        dbms_utility.COMMA_TO_TABLE(p_estado,l_count,l_array);
+    END IF;
+    OPEN test_cur FOR
+    SELECT s.*, u.foto FOTO, TREAT(app.APP AS MARCA).LOGO LOGO_APP FROM
+    (SELECT
+        --USUARIOS.FOTO,
+        USUARIOS.PRIMER_NOMBRE,
+        USUARIOS.SEGUNDO_NOMBRE,
+        USUARIOS.PRIMER_APELLIDO,
+        USUARIOS.SEGUNDO_APELLIDO,
+        USUARIOS.TIPO_DE_CEDULA,
+        USUARIOS.NUMERO_DE_CEDULA,
+        USUARIOS.EMAIL,
+        TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO,
+        TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
+        MAX(D.DESCRIPCION) DESCRIPCION,
+        E.NOMBRE,
+        D.ID_ESTADO,
+        AD.ID APP_ID,
+        USUARIOS.ID U_ID
+    FROM
+        USUARIOS
+    INNER JOIN
+        REGISTROS R ON USUARIOS.ID = R.ID_USUARIO
+    INNER JOIN
+        APLICACIONES_DELIVERY AD ON R.ID_APP = AD.ID
+    INNER JOIN
+        DIRECCIONES D ON USUARIOS.ID = D.ID_USUARIO
+    INNER JOIN
+        ESTADOS E ON E.ID = D.ID_ESTADO
+    WHERE
+        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR E.NOMBRE = buscar(l_array,E.nombre)) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro)
+    GROUP BY
+        D.ID_ESTADO,
+        E.NOMBRE,
+        E.ID,
+        AD.ID,
+        USUARIOS.PRIMER_NOMBRE,
+        USUARIOS.SEGUNDO_NOMBRE,
+        USUARIOS.PRIMER_APELLIDO,
+        USUARIOS.SEGUNDO_APELLIDO,
+        USUARIOS.TIPO_DE_CEDULA,
+        USUARIOS.NUMERO_DE_CEDULA,
+        USUARIOS.ID,
+        TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO,
+        TREAT(AD.APP AS MARCA).NOMBRE,
+        USUARIOS.EMAIL
+    ORDER BY
+        E.NOMBRE,
+        MAX(TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO)) s, USUARIOS u, APLICACIONES_DELIVERY app
+    WHERE app.ID = s.APP_ID AND u.ID = s.U_ID;
+END;
+
+
+
 CREATE OR REPLACE PROCEDURE pruebaimagenes(test_cur OUT sys_refcursor) IS
 BEGIN
     OPEN test_cur FOR
@@ -316,8 +377,14 @@ BEGIN
 END;
 
 
-CREATE OR REPLACE PROCEDURE reporte5(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL) IS
+CREATE OR REPLACE PROCEDURE reporte5(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL)
+IS
+    l_count PLS_INTEGER;
+    l_array dbms_utility.lname_array;
 BEGIN
+    IF p_estado IS NOT NULL THEN
+        dbms_utility.COMMA_TO_TABLE(p_estado,l_count,l_array);
+    END IF;
     OPEN test_cur FOR
        SELECT
             s.NOMBRE_ESTADO,
@@ -334,7 +401,7 @@ BEGIN
                 e.NOMBRE NOMBRE_ESTADO,
                 mun.NOMBRE NOMBRE_MUNICIPIO,
                 ROW_NUMBER() over (
-                    PARTITION BY e.NOMBRE
+                    PARTITION BY e.ID, mun.ID
                     ORDER BY COUNT(pe.TRACKING) DESC
                 ) row_number,
                 COUNT(pe.TRACKING) NUMERO_PEDIDOS,
@@ -349,10 +416,10 @@ BEGIN
                 AND mun.ID = dir.ID_MUNICIPIO
                 AND emp.ID = pe.ID_EMPRESA
                 AND app.ID = pe.ID_APP
-                AND (p_estado IS NULL OR e.NOMBRE = p_estado)
+                AND (p_estado IS NULL OR e.NOMBRE = buscar(l_array,E.nombre))
                 GROUP BY
-                e.NOMBRE, app.APP.nombre, emp.EMPRESA.nombre, mun.NOMBRE, e.ID, emp.ID, app.ID
-                ORDER BY e.NOMBRE, mun.NOMBRE) s, APLICACIONES_DELIVERY apps, EMPRESAS emp
+                e.NOMBRE, app.APP.nombre, emp.EMPRESA.nombre, mun.NOMBRE, e.ID, emp.ID, app.ID, mun.ID
+                ORDER BY e.NOMBRE,MAX(pe.DURACION.fecha_fin) DESC,mun.NOMBRE) s, APLICACIONES_DELIVERY apps, EMPRESAS emp
         WHERE row_number <=5
         AND s.ID_EMP = emp.ID
         AND s.ID_APP = apps.ID
