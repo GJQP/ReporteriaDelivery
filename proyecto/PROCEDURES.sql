@@ -760,7 +760,7 @@ BEGIN
     nueva_ubi := ubicacion.OBTENER_POSICION(ruta.destino,ruta.origen,
         rapidez,  testo);
 
-    UPDATE rutas r SET r.destino = nueva_ubi
+    UPDATE rutas r SET r.destino = nueva_ubi, r.cancelado = cancelacion(SIM_DATE(),'LA UNIDAD TIENE EL PEDIDO A MITAD DE CAMINO')
     WHERE ruta.id = ruta_id;
 
     IF nuevo_estado = 'DESCONTINUADA' THEN
