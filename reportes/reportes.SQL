@@ -34,7 +34,11 @@ IF p_estado IS NOT NULL THEN
     SELECT
         EP.EMPRESA.LOGO LOGO,
         EP.EMPRESA.NOMBRE NOMBRE,
-        S.*
+        S.*,
+       (SELECT LISTAGG(EST.NOMBRE,', ') WITHIN GROUP (ORDER BY EST.NOMBRE)
+       FROM ESTADOS EST
+       INNER JOIN ubicaciones_aplicables ua ON est.id = ua.id_estado
+       WHERE ua.ID_PLAN = S.ID_PAN) ESTADOS
     FROM
     (SELECT
         C.ID_EMPRESA EMPRESA_ID,
@@ -46,7 +50,7 @@ IF p_estado IS NOT NULL THEN
         PS.MODALIDAD MODALIDAD,
         PS.CANTIDAD_ENVIOS CANTIDAD_ENVIOS,
         PS.PRECIO PRECIO,
-        LISTAGG(E.NOMBRE,', ') WITHIN GROUP (ORDER BY E.NOMBRE) AS ESTADOS
+        PS.id id_pan
     FROM
         PLANES_DE_SERVICIO PS
     INNER JOIN
@@ -56,13 +60,11 @@ IF p_estado IS NOT NULL THEN
     INNER JOIN
         ESTADOS E ON E.id = UAP.ID_ESTADO
     INNER JOIN
-        ESTADOS ESTA ON 0 < buscar(p_estado,ESTA.nombre)
-    INNER JOIN
-        UBICACIONES_APLICABLES UBI ON UBI.ID_APP = PS.ID_APP AND UBI.ID_PLAN = PS.ID AND UBI.ID_ESTADO = ESTA.ID
+        UBICACIONES_APLICABLES UBI ON UBI.ID_APP = PS.ID_APP AND UBI.ID_PLAN = PS.ID AND UBI.ID_ESTADO = E.ID
     INNER JOIN
         CONTRATOS C ON C.id_plan = PS.id AND C.id_app = PS.id_app AND C.cancelado IS NULL
     WHERE
-        PS.cancelado IS NULL
+        PS.cancelado IS NULL AND 0 < buscar(p_estado,E.nombre)
     GROUP BY
         C.ID_EMPRESA,
         AD.APP.NOMBRE,
@@ -71,7 +73,8 @@ IF p_estado IS NOT NULL THEN
         PS.MODALIDAD,
         PS.CANTIDAD_ENVIOS,
         PS.PRECIO,
-        C.PORCENTAJE_DESCUENTO
+        C.PORCENTAJE_DESCUENTO,
+        PS.id
     ORDER BY
         AD.APP.NOMBRE,
         C.DURACION.FECHA_INICIO) S
