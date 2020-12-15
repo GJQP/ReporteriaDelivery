@@ -808,7 +808,7 @@ BEGIN
     INTO res
     FROM rutas r
              INNER JOIN pedidos p ON p.tracking = r.id_traking
-    WHERE r.id_unidad = 36
+    WHERE r.id_unidad = unidad_id
       AND r.proposito IN ('PEDIDO', 'ENVIO')
       AND (p.duracion.fecha_fin IS NULL AND p.cancelado IS NULL AND r.cancelado IS NULL);
 
