@@ -84,7 +84,7 @@ BEGIN
         (DEFAULT, RANGO_TIEMPO(d+15/24/60), p_descripcion)
     RETURNING
         id INTO ids;
-    --DBMS_OUTPUT.PUT_LINE('# Se ha actualizado la fecha de la simulación de ' || d || ' a ' || d + 1/4/24 || ' en ' || p_descripcion);
+    DBMS_OUTPUT.PUT_LINE('# SE HA ACTUALIZADO LA FECHA DE LA SIMULACIÓN DE ' || d || ' A ' || d + 1/4/24 || ' POR ' || p_descripcion);
 END;
 
 CREATE OR REPLACE FUNCTION sim_date RETURN DATE IS
@@ -101,8 +101,12 @@ END;
 CREATE OR REPLACE FUNCTION obtener_empresa_no_contratada(id_app_busqueda aplicaciones_delivery.id%TYPE, fecha_sim DATE DEFAULT SIM_DATE())
 RETURN empresas.id%TYPE
 IS
+    appl aplicaciones_delivery%ROWTYPE;
+    san_empresa empresas%ROWTYPE;
     rand_empresa empresas.id%TYPE;
 BEGIN
+    SELECT AD.* INTO appl FROM APLICACIONES_DELIVERY AD WHERE AD.ID = id_app_busqueda;
+    DBMS_OUTPUT.PUT_LINE('## SELECIONAMOS UNA EMPRESA AL AZAR NO TIENE CONTRADOS POR LA APLICACIÓN (' ||id_app_busqueda || ') ' || appl.app.nombre);
     SELECT pac.id_empresa
     INTO rand_empresa
     FROM
@@ -138,6 +142,9 @@ BEGIN
     ORDER BY dbms_random.value()
     FETCH FIRST ROW ONLY;
 
+    SELECT EP.* INTO san_empresa FROM EMPRESAS EP WHERE EP.ID = rand_empresa;
+    DBMS_OUTPUT.PUT_LINE('# LA EMPRESA (' || san_empresa.ID || ') ' || san_empresa.empresa.nombre);
+
     RETURN rand_empresa;
 
     EXCEPTION
@@ -149,27 +156,33 @@ CREATE OR REPLACE PROCEDURE crear_contrato(in_id_app aplicaciones_delivery.id%TY
 IS
     cantidad_contratos_anteriores NUMBER;
     descuento contratos.porcentaje_descuento%TYPE;
-    BEGIN
 
-    dbms_output.PUT_LINE('## SE VERIFICAN LOS DESCUENTOS POR ANTIGÜEDAD');
+    api APLICACIONES_DELIVERY%ROWTYPE;
+    emp EMPRESAS%ROWTYPE;
+    plan PLANES_DE_SERVICIO%ROWTYPE;
+    id_ctro INTEGER;
+BEGIN
+    SELECT AP.* INTO api FROM APLICACIONES_DELIVERY AP WHERE AP.ID = in_id_app;
+    SELECT PS.* INTO plan FROM PLANES_DE_SERVICIO PS WHERE PS.ID = in_id_plan;
+    SELECT EP.* INTO emp FROM EMPRESAS EP WHERE EP.ID = in_id_empresa;
+    dbms_output.PUT_LINE('## SE PROCEDE A GENERAR UN CONTRATO ENTRE LA APP (' || api.ID || ') ' || api.app.nombre  ||' Y LA EMPRESA (' || emp.ID || ') ' || emp.empresa.nombre);
+    DBMS_OUTPUT.PUT_LINE('## EL PLAN SELECIONADO TIENE EL ID ' || in_id_plan);
+    dbms_output.PUT_LINE('## SE VERIFICAN LOS DESCUENTOS POR ANTIGÜEDAD PARA EL CONTRATO');
     SELECT COUNT(1) INTO cantidad_contratos_anteriores
     FROM contratos
     WHERE id_app=in_id_app AND id_empresa = in_id_empresa;
 
     IF cantidad_contratos_anteriores > 4 THEN
-        dbms_output.PUT_LINE('### APLICA PARA DESCUENTO');
         descuento := ROUND(dbms_random.VALUE(0,30),2);
+        dbms_output.PUT_LINE('### SE APLICA UN DESCUENTO (DE 0% a 30%) POR ANTIGUEDAD (>4) EN EL CONTRATO DE ' || descuento || '%');
     ELSIF cantidad_contratos_anteriores > 2 THEN
-        dbms_output.PUT_LINE('### APLICA PARA DESCUENTO');
         descuento := ROUND(dbms_random.VALUE(0,10),2);
+        dbms_output.PUT_LINE('### SE APLICA UN DESCUENTO (DE 0% a 10%) POR ANTIGUEDAD (>2) EN EL CONTRATO DE ' || descuento || '%');
     ELSE
-        dbms_output.PUT_LINE('### NO APLICA PARA DESCUENTO');
+        dbms_output.PUT_LINE('### NO SE APLICA PARA DESCUENTO YA QUE EXISTEN MENOS DE 2 CONTRATOS ENTRE AMBOS');
         descuento := 0;
     END IF;
 
-    dbms_output.PUT_LINE('## SE GENERA UN CONTRATO DE LA APP ' || in_id_app ||
-                         ' CON LA EMPRESA ' || in_id_empresa ||
-                         ' CON EL PLAN ' || in_id_plan);
            INSERT INTO contratos
            VALUES (
                    in_id_app,
@@ -179,8 +192,8 @@ IS
                    RANGO_TIEMPO(SIM_DATE(),SIM_DATE() + ROUND(dbms_random.VALUE(0,365))),
                    descuento,
                    NULL
-                  );
-
+                  ) RETURN ID INTO id_ctro;
+        DBMS_OUTPUT.PUT_LINE('## EL SE HA CONTRATO GENERADO EXITOSAMENTE CON EL ID ' || id_ctro);
     END;
 
 CREATE OR REPLACE PROCEDURE crear_plan_servicio(in_app_id aplicaciones_delivery.id%TYPE, in_id_empresa empresas.id%TYPE DEFAULT NULL)
@@ -188,8 +201,11 @@ IS
     random_val NUMBER;
     plan_modalidad planes_de_servicio.modalidad%TYPE;
     id_nuevo_plan planes_de_servicio.id%TYPE;
+    api APLICACIONES_DELIVERY%ROWTYPE;
     BEGIN
-
+        SELECT AP.* INTO api FROM APLICACIONES_DELIVERY AP WHERE AP.ID = in_app_id;
+        DBMS_OUTPUT.PUT_LINE('## GENERAMOS UN PLAN DE SERVICIO PARA LA APP (' || api.ID || ') ' || api.app.nombre);
+        DBMS_OUTPUT.PUT_LINE('### GENERAMOS UN VALOR ALEATORIO ENTRE 0 Y 1 PARA ELEGIR LA MODALIDAD DEL PLAN DE SERVICIO');
         random_val := dbms_random.VALUE(0,1);
 
         IF random_val < 0.25 THEN
@@ -201,7 +217,7 @@ IS
         ELSE
             plan_modalidad := 'ANUAL';
         END IF;
-
+        DBMS_OUTPUT.PUT_LINE('### EL VALOR ALEATORIO ES ' || random_val || ' Y LA MODALIDAD ESCOGIDA ES ' || plan_modalidad);
 
         INSERT INTO planes_de_servicio VALUES
         (in_app_id,
@@ -213,6 +229,8 @@ IS
          NULL --cancelacion
         )
         RETURNING id INTO id_nuevo_plan;
+
+        DBMS_OUTPUT.PUT_LINE('### SE HA GENERADO UN NUEVO PLAN DE SERVICIO CON EL ID ' || id_nuevo_plan);
 
         IF dbms_random.VALUE(0,1) < 0.3 THEN
         INSERT INTO ubicaciones_aplicables VALUES (in_app_id,id_nuevo_plan,14);
@@ -252,40 +270,43 @@ IS
                 )
             ORDER BY dbms_random.value()
             FETCH FIRST ROW ONLY;
-
+    san_app APLICACIONES_DELIVERY%ROWTYPE;
     BEGIN
     --se obtiene la app
-    dbms_output.PUT_LINE('# GESTION CONTRATOS');
+    dbms_output.PUT_LINE(' ');
+    dbms_output.PUT_LINE('# SE INICIA EL MÓDULO PARA LA GESTIÓN CONTRATOS');
 
-    dbms_output.PUT_LINE('## SE SELECCIONA UNA APLICACION AL AZAR');
+    dbms_output.PUT_LINE('## SE SELECCIONA UNA APLICACION REGISTRADA ALEATORIAMENTE');
     SELECT id
         INTO id_app_rand
         FROM aplicaciones_delivery
         ORDER BY DBMS_RANDOM.VALUE()
         FETCH FIRST ROW ONLY;
-
-    dbms_output.PUT_LINE('## SE VERIFICAN LOS PLANES DE LA APP ' || id_app_rand);
+    -- Prefiero no tocar el Query :)
+    SELECT AD.* INTO san_app FROM APLICACIONES_DELIVERY AD WHERE AD.ID = id_app_rand;
+    dbms_output.PUT_LINE('## SE VERIFICAN LOS PLANES DE SERVICIO DE LA APP (' || san_app.id || ') ' || san_app.app.nombre);
 
     OPEN cursor_planes_app(id_app_rand);
+    dbms_output.PUT_LINE('## SE ELIGE UN PLAN DE SERVICIO PARA LA APLICACIÓN ALEATORIAMENTE');
     --se obtiene un plan al azar
     FETCH cursor_planes_app INTO id_plan_selec;
 
+
     --NO EXISTEN PLANES VIGENTES O ESTAN CANCELADOS
     IF cursor_planes_app%NOTFOUND = TRUE THEN
-        dbms_output.PUT_LINE('### NO EXISTEN PLANES VIGENTES PARA LA APLICACION');
-        dbms_output.PUT_LINE('## SE DECIDE GENERAR UN NUEVO PLAN DE SERVICIO A LA APP ' || id_app_rand);
+        dbms_output.PUT_LINE('### NO EXISTEN PLANES VIGENTES PARA LA APLICACIÓN  (' || san_app.id || ') ' || san_app.app.nombre);
         crear_plan_servicio(id_app_rand);
     ELSE
-    dbms_output.PUT_LINE('## SE VERIFICAN SI HAY EMPRESAS CONTRADAS');
+    dbms_output.PUT_LINE('## SE VERIFICAN SI HAY EMPRESAS NO CONTRADAS VÁLIDAS PARA EL PLAN ('|| id_plan_selec ||')');
     id_empresa_rand := obtener_empresa_no_contratada(id_app_rand,fecha_sim);
         IF id_empresa_rand = 0 THEN
             --se usa el plan al azar
-            dbms_output.PUT_LINE('### NO HAY PROVEEDORES A CONTRATARSE');
+            dbms_output.PUT_LINE('## NO HAY EMPRESAS DISPONIBLES PARA SE CONTRATADAS');
             dbms_output.PUT_LINE('## SE SELECCIONA UN PLAN PARA EVALUAR UN CONTRATO VIGENTE');
             IF dbms_random.VALUE(0,1) > 0.5 THEN
                 dbms_output.PUT_LINE('### SE DECIDE CANCELAR UN CONTRATO DEL PLAN ' || id_plan_selec);
                 --CANCELAR UN CONTRATO AL AZAR DE DICHO PLAN
-                UPDATE contratos SET cancelado = cancelacion(fecha_sim,'Contrato no factible por revisión programada')
+                UPDATE contratos SET cancelado = cancelacion(fecha_sim,'CONTRATO NO FACTIBLE POR REVISIÓN PROGRAMADA')
                 WHERE id = (
                     SELECT id
                     FROM contratos
@@ -307,7 +328,7 @@ IS
         END IF;
 
     END IF;
-
+        dbms_output.PUT_LINE('## FIN DEL MÓDULO PARA LA GESTIÓN DE CONTRATOS');
     CLOSE cursor_planes_app;
     END;
 
@@ -342,13 +363,14 @@ IS
             FETCH FIRST ROW ONLY;
 
 BEGIN
-
+    dbms_output.PUT_LINE(' ');
+    dbms_output.PUT_LINE('# SE INICIA EL MÓDULO PARA LA GESTIÓN DE MANTENIMIENTO DE LAS UNIDADES DE TRANSPORTE');
     FOR unidad IN unidades_app(in_app)
     LOOP
-        dbms_output.PUT_LINE('## SE VERIFICA EL ESTADO DE LA UNIDAD '|| unidad.id);
+        dbms_output.PUT_LINE('## SE VERIFICA EL ESTADO DE LA UNIDAD ('|| unidad.id || ')');
 
         IF unidad.estado = 'REPARACION' THEN
-            dbms_output.PUT_LINE('### LA UNIDAD ESTÁ DAÑADA SE DECIDE SI REALIZAR O NO EL MANTENIMIENTO A LA UNIDAD');
+            dbms_output.PUT_LINE('### LA UNIDAD ESTÁ DAÑADA SE DECIDE SI REALIZAR O NO EL MANTENIMIENTO (ALEATORIAMENTE) A LA UNIDAD');
             IF dbms_random.VALUE(0,1) > 0.5 THEN
 
                 dbms_output.PUT_LINE('## SE DECIDE SI REALIZAR MANTENIMIENTO CORRECTIVO ' ||
@@ -375,7 +397,7 @@ BEGIN
                 END IF;
 
             ELSE
-                dbms_output.PUT_LINE('### SE DECIDE NO REALIZAR MANTENIMIENTO A LA UNIDAD Y CONTINUARA EN MANTENIMIENTO');
+                dbms_output.PUT_LINE('### SE DECIDE NO REALIZAR MANTENIMIENTO A LA UNIDAD Y CONTINUARÁ EN MANTENIMIENTO');
             END IF;
         ELSIF unidad.estado = 'OPERATIVA' THEN
 
@@ -413,7 +435,7 @@ BEGIN
 
         END IF;
     END LOOP;
-
+    dbms_output.PUT_LINE('## FIN DEL MÓDULO PARA La GESTIÓN DE MANTENIMIENTO DE LAS UNIDADES DE TRANSPORTE');
 END;
 
 --FIN MANTENIMIENTO
@@ -429,11 +451,22 @@ IS
     id_zona NUMBER;
     id_municipio NUMBER;
     id_estado NUMBER;
+
+    san_app APLICACIONES_DELIVERY%ROWTYPE;
+    san_empresa EMPRESAS%ROWTYPE;
+    n_e VARCHAR2(80);
+    n_m VARCHAR2(80);
+    n_z VARCHAR2(80);
 BEGIN
+        SELECT AD.* INTO san_app FROM APLICACIONES_DELIVERY AD WHERE AD.id = in_id_app;
+        SELECT EP.* INTO san_empresa FROM EMPRESAS EP WHERE EP.id = in_id_empresa;
+        SELECT E.NOMBRE, M.NOMBRE, Z.NOMBRE INTO n_e, n_m, n_z FROM ZONAS Z INNER JOIN MUNICIPIOS M ON M.ID = Z.ID_MUNICIPIO INNER JOIN ESTADOS E ON E.ID = Z.ID_ESTADO WHERE Z.ID = in_direccion.ID_ZONA;
+
+        DBMS_OUTPUT.PUT_LINE('SELECIONAMOS LA SUCURSAL FACTIBLE MÁS CERCANA PARA LA EMPRESA (' || san_empresa.id ||') ' || san_empresa.empresa.nombre || ' CERCANO ' || n_e ||', ' || n_m || ', ' || n_z);
         SELECT DISTINCT s.id,
-           DECODE(s.id_zona,DECODE(in_direccion.id_zona,g.id_zona,s.id_zona,0),s.id_zona,0) as id_zona,
+           DECODE(s.id_zona,DECODE(in_direccion.id_zona,g.id_zona,s.id_zona,0),s.id_zona,0) AS id_zona,
            DECODE(s.id_municipio,DECODE(in_direccion.id_municipio,g.id_municipio,s.id_municipio,0),s.id_municipio,0) as id_municipio,
-           DECODE(s.id_estado,DECODE(in_direccion.id_estado,g.id_estado,s.id_estado,0),s.id_estado,0) as id_estado
+           DECODE(s.id_estado,DECODE(in_direccion.id_estado,g.id_estado,s.id_estado,0),s.id_estado,0) AS id_estado
         INTO sucursal_factible.id_sucursal, sucursal_factible.id_zona, sucursal_factible.id_municipio, sucursal_factible.id_estado
         FROM sucursales s
         JOIN garajes g ON s.id_estado = g.id_estado
@@ -468,7 +501,7 @@ RETURN eventos.porcentaje_descuento%TYPE
 IS
     res eventos.porcentaje_descuento%TYPE := 0;
 BEGIN
-
+    DBMS_OUTPUT.PUT_LINE('## BUSCAMOS SI LA SUCURSAL (' || sucursal_id ||') TIENE ALGÚN EVENTO DE DESCUENTO');
     SELECT e.porcentaje_descuento
     INTO res
     FROM eventos e
@@ -526,7 +559,7 @@ IS
 
     pedido pedidos.tracking%TYPE;
 BEGIN
-
+    DBMS_OUTPUT.PUT_LINE('## SE PRODCE A CREAR UN PEDIDO PARA LA EMPRESA (' || empresa_id || ') CON EL CONTRATO ('|| contrato_id || ') PARA EL USUARIO (' || usuario_id || ')');
     descuento := obtener_descuentos(empresa_id,sucursal_id);
     FOR producto IN disponibilidad_producto(empresa_id,sucursal_id)
     LOOP
@@ -545,7 +578,7 @@ BEGIN
     END LOOP;
 
     IF descuento > 0 THEN
-        dbms_output.PUT_LINE('### EL PEDIDO HA APLICADO UN DESCUENTO DE ' || descuento);
+        dbms_output.PUT_LINE('### EL PEDIDO HA APLICADO UN DESCUENTO DE ' || descuento || '% A LOS PRODUCTOS DEL CONTRATO');
     END IF;
 
     INSERT INTO pedidos VALUES (app_id,
@@ -579,8 +612,6 @@ BEGIN
         UPDATE almacenes SET disponibilidad = disponibilidad - detalle_orden(l_orden).cantidad
         WHERE id_sucursal = sucursal_id AND id_empresa = empresa_id AND id_producto = producto.id;
     END LOOP;
-
-
 END;
 
 CREATE OR REPLACE FUNCTION obtener_usuario_azar_pedido
@@ -642,15 +673,24 @@ IS
 
     id_suc sucursales.id%TYPE := 0;
 
+    san_usuario USUARIOS%ROWTYPE;
+    san_app APLICACIONES_DELIVERY%ROWTYPE;
+    san_empresa EMPRESAS%ROWTYPE;
 BEGIN
-
+    dbms_output.PUT_LINE(' ');
+    dbms_output.PUT_LINE('# SE INICIA EL MÓDULO PARA LA GESTIÓN DE PEDIDOS');
+    dbms_output.PUT_LINE('## SE SELECIONA UN USUARIO ALEATORIAMENTE');
     --SELECCIONA UN USUARIO AL AZAR REGISTRADO
     rand_usuario_id := obtener_usuario_azar_pedido();
 
     IF rand_usuario_id = 0 THEN
+        dbms_output.PUT_LINE('### NO SE HA OBTENIDO UN USUARIO VÁLIDO');
         GOTO fin;
     END IF;
-    --CONSULTA ALGUNA APLICACION VALIDA AL AZAR DONDE ESTE REGISTRADO
+    SELECT U.* INTO san_usuario FROM USUARIOS U WHERE U.ID = rand_usuario_id;
+    dbms_output.PUT_LINE('### EL USUARIO ELEGIDO ES (' || san_usuario.id || ') '|| san_usuario.primer_nombre || ' ' || san_usuario.primer_apellido);
+
+    dbms_output.PUT_LINE('## SE ELIGE UNA APLICACIÓN ALEATORIAMENTE DONDE SE ENCUENTRE REGISTRADO EL USUARIO');
     SELECT r.id_app
     INTO app_id
     FROM registros r
@@ -662,13 +702,12 @@ BEGIN
     ORDER BY dbms_random.VALUE()
     FETCH FIRST ROW ONLY;
 
-    dbms_output.PUT_LINE('## SE SELECCIONA LA APP DE ID '|| APP_id);
+    SELECT AP.* INTO san_app FROM APLICACIONES_DELIVERY AP WHERE AP.ID = APP_id;
+    dbms_output.PUT_LINE('## SE SELECCIONA LA APP ('|| APP_id || ') ' || san_app.app.nombre);
 
+    dbms_output.PUT_LINE('## SE OBTIENEN LOS CONTRATOS QUE APLIQUEN DE LA APP Y LAS EMPRESAS DE LOS CONTRATOS');
     --CONSULTA LAS SUCURSALES APLICABLES PARA ESA APP
     OPEN empresas_elegibles(app_id,rand_usuario_id);
-
-    dbms_output.PUT_LINE('## SE OBTIENEN LOS CONTRATOS QUE APLIQUEN DE LA APP ' || app_id);
-    dbms_output.PUT_LINE('## SE OBTIENEN LAS EMPRESAS DE LOS CONTRATOS');
     FETCH empresas_elegibles INTO fk_pedidos_sucursal;
 
     --verifica si existe
@@ -682,8 +721,9 @@ BEGIN
 
         LOOP
         EXIT WHEN empresas_elegibles%NOTFOUND;
-        dbms_output.PUT_LINE('## SE VERIFICA SI LA SUCURSAL MAS CERCANA DE LA EMPRESA ' ||
-                            fk_pedidos_sucursal.id_empresa ||
+        SELECT EP.* INTO san_empresa FROM EMPRESAS EP WHERE EP.ID = fk_pedidos_sucursal.id_empresa;
+        dbms_output.PUT_LINE('## SE VERIFICA SI LA SUCURSAL MAS CERCANA DE LA EMPRESA (' ||
+                            fk_pedidos_sucursal.id_empresa || ') ' || san_empresa.empresa.nombre ||
                              ' PUEDE ATENDER EL PEDIDO CON LAS UNIDADES DISPONIBLES DE LA APP');
 
         id_suc := sucursal_factible(app_id,fk_pedidos_sucursal.id_empresa,direccion_usuario);
@@ -715,9 +755,10 @@ BEGIN
     ELSE
         dbms_output.PUT_LINE('### LA APLICACIÓN NO PRESENTA SERVICIOS O SUCURSALES DISPONIBLES');
     END IF;
-
+     dbms_output.PUT_LINE('# SE FINALIZA EL MÓDULO PARA LA GESTIÓN DE PEDIDOS');
     <<fin>>
     NULL;
+
 END;
 
 -- FIN PEDIDOS
@@ -729,7 +770,7 @@ RETURN BOOLEAN
 IS
     res NUMBER;
     BEGIN
-
+        DBMS_OUTPUT.PUT_LINE('VERIFICAMOS SI LA UNIDAD ('|| unidad_id ||') ESTÁ DISPONIBLE');
         SELECT COUNT(1)
         INTO res
         FROM rutas r
@@ -766,7 +807,7 @@ BEGIN
 
 
     IF nuevo_estado = 'DESCONTINUADA' THEN
-        dbms_output.PUT_LINE('### LA UNIDAD ' || unidad_id || ' HA SUFRIDO UN ACCIDENTE QUE REQUEIRE DESCONTINUARLA');
+        dbms_output.PUT_LINE('### LA UNIDAD (' || unidad_id || ') HA SUFRIDO UN ACCIDENTE QUE REQUEIRE DESCONTINUARLA');
 
         UPDATE unidades_de_transporte SET estado = 'DESCONTINUADA'
         WHERE id = unidad_id;
@@ -939,10 +980,11 @@ CREATE OR REPLACE PROCEDURE modulo_despacho
     pedidos_enviados   NUMBER      := 1;
 
 BEGIN
-    dbms_output.put_line('# MÓDULO DE DESPACHO');
+    dbms_output.put_line('# SE INICIA EL MÓDULO PARA LA GESTIÓN DE DESPACHOS');
 
     --selecciona el pedido mas antigo sin finalizar
     --Y SIN RUTAS CANCELADAS O QUE NO SEA RETORNO
+    dbms_output.put_line('## SE SELECIONA EL PEDIDO MÁS ANTIGUO SIN FINALIZAR');
     SELECT *
     INTO pedido_sel
     FROM pedidos p
@@ -952,9 +994,8 @@ BEGIN
     ORDER BY p.duracion.fecha_inicio
         FETCH FIRST ROW ONLY;
 
-    dbms_output.put_line('## SE OBTIENE EL PEDIDO DE TRACKING ' || pedido_sel.tracking);
+    dbms_output.put_line('## SE OBTIENE EL PEDIDO CON EL NÚMERO DE TRACKING ' || pedido_sel.tracking);
 
-    --TODO CANCELAR EL PEDIDO SI HA PASADO MUCHO TIEMPO (?)
 
     --veririficar si esta listo (pedido)
     SELECT MAX(NVL(p2.tiempo_de_preparacion, 0)) / 24 / 60
@@ -967,7 +1008,7 @@ BEGIN
     dbms_output.put_line('## SE VERIFICA SI EL PEDIDO YA FUE ELEBORADO');
 
     IF pedido_sel.duracion.fecha_inicio + preparacion > sim_date() THEN
-        dbms_output.put_line('## EL PEDIDO NO HA SIDO ELABORADO');
+        dbms_output.put_line('## EL PEDIDO NO HA SIDO ELABORADO, POR ENDE NO PUEDE SER RECOGIDO');
         GOTO fin;
     END IF;
 
@@ -990,7 +1031,7 @@ BEGIN
         FETCH FIRST ROW ONLY;
 
     preparacion := 24;
-    dbms_output.put_line('## SE CONSULTAN LAS UNIDADES QUE PUEDEN DESPACHAR EL PEDIDO');
+    dbms_output.put_line('## SE CONSULTAN LAS UNIDADES QUE PUEDEN DESPACHAR EL PEDIDO EN FUNCIÓN DE SU PROXIMIDAD Y ALCANCE');
 
 
     FOR l_unidad IN unidades_permitidas(pedido_sel.id_app
@@ -1205,7 +1246,7 @@ BEGIN
         GOTO fin;
     END IF;
 
-    dbms_output.put_line('## LA UNIDAD HA ENTREGADO EL PEDIDO ' || pedidos_enviados);
+    dbms_output.put_line('## LA UNIDAD HA ENTREGADO EL PEDIDO ' || pedidos_enviados || ' EN SU LISTA DE ENVIOS');
 
     UPDATE pedidos p
     SET p.valoracion = dbms_random.value(4, 5),
@@ -1228,7 +1269,7 @@ BEGIN
 
     <<fin>>
         NULL;
-
+    dbms_output.put_line('# FINALIZA EL MÓDULO PARA LA GESTIÓN DE DESPACHOS');
 /*    EXCEPTION
         WHEN OTHERS THEN dbms_output.PUT_LINE('NO HAY PEDIDOS QUE ATENDER ?');*/
 
