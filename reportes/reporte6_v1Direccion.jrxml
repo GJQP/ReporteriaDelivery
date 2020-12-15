@@ -5,7 +5,7 @@
 	<parameter name="FechaRegistro" class="java.sql.Date"/>
 	<parameter name="Estado" class="java.lang.String"/>
 	<queryString language="plsql">
-		<![CDATA[{call reporte6($P{ORACLE_REF_CURSOR},$P{Estado},$P{FechaRegistro})}]]>
+		<![CDATA[{call reporte6Version1Direccion($P{ORACLE_REF_CURSOR},$P{Estado},$P{FechaRegistro})}]]>
 	</queryString>
 	<field name="FOTO" class="java.sql.Blob">
 		<property name="com.jaspersoft.studio.field.name" value="FOTO"/>
