@@ -411,6 +411,14 @@ BEGIN
                         WHERE id = unidad.id
                           AND id_garaje = unidad.id_garaje
                           AND id_app = unidad.id_app;
+                    ELSE
+                        dbms_output.put_line('### SE DECIDE REALIZAR MANTENIMIENTO Y REPARAR LA UNIDAD');
+
+                        UPDATE unidades_de_transporte
+                        SET estado = 'OPERATIVA'
+                        WHERE id = unidad.id
+                          AND id_garaje = unidad.id_garaje
+                          AND id_app = unidad.id_app;
 
                     END IF;
 
@@ -1146,7 +1154,7 @@ BEGIN
 
             dbms_output.put_line('## LA UNIDAD HA RETOMADO EL PEDIDO Y SE DIRIGE AL DESTINO');
             --ACCIDENTE
-            IF dbms_random.value(0, 1) > 0.5 THEN
+            IF dbms_random.value(0, 1) > 0.7 THEN
 
                 IF dbms_random.value(0, 1) > 0.5 THEN
                     simular_accidente(unidad_trnsp.id, pedido_sel, 'REPARACION', ruta_id_actual, ruta_origen_actual,
@@ -1242,7 +1250,7 @@ BEGIN
         END LOOP;
 
     --ACCIDENTE
-    IF dbms_random.value(0, 1) > 0.5 THEN
+    IF dbms_random.value(0, 1) > 0.7 THEN
         IF dbms_random.value(0, 1) > 0.5 THEN
             FOR l_ped_rut IN pedidos_enviados..maleta.last
                 LOOP
@@ -1350,7 +1358,7 @@ BEGIN
     c_mantenimiento := 0;
     IF n_contratos >= 0 AND n_pedidos >= 0 AND n_despachos >=0 AND n_max_manteniminto >=0 THEN
         DBMS_OUTPUT.PUT_LINE(' INICIANDO LA SIMULACIÓN DEL SISTEMA DE DELIVERY');
-        DBMS_OUTPUT.PUT_LINE(' EL TIEMPO DE LA SIMULACIÓN ES: ' || TO_DATE(SIM_DATE(),'dd-mm-yyyy HH:MI:SS'));
+        DBMS_OUTPUT.PUT_LINE(' EL TIEMPO DE LA SIMULACIÓN ES: ' || TO_CHAR(SIM_DATE(),'dd-mm-yyyy HH:MI:SS'));
         LOOP
             EXIT WHEN c_contratos >= n_contratos;
             modulo_contratos(NULL);
@@ -1363,7 +1371,7 @@ BEGIN
         END LOOP;
         LOOP
             EXIT WHEN c_despachos >= n_despachos;
-            modulo_contratos(NULL);
+            realizar_envios();
             UPDATE_SIM_TIME('AUMENTO DESDE ' || TO_DATE(SIM_DATE(),'dd-mm-yyyy HH:MI:SS'));
             c_despachos := c_despachos + 1;
         END LOOP;

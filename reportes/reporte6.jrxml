@@ -105,7 +105,7 @@
 				<text><![CDATA[ESTADO:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="670" y="97" width="129" height="20" forecolor="#5048C2" uuid="11bf4406-1267-4bff-9779-c751a9f32853">
+				<reportElement x="670" y="97" width="129" height="43" forecolor="#5048C2" uuid="11bf4406-1267-4bff-9779-c751a9f32853">
 					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
