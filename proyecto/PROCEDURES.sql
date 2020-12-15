@@ -81,7 +81,7 @@ BEGIN
     VALUES (DEFAULT, rango_tiempo(d + 15 / 24 / 60), p_descripcion)
     RETURNING id INTO ids;
     dbms_output.put_line(
-                    '# SE HA ACTUALIZADO LA FECHA DE LA SIMULACIÓN DE ' || d || ' A ' || d + 1 / 4 / 24 || ' POR ' ||
+                    '# SE HA ACTUALIZADO LA FECHA DE LA SIMULACIÓN DE ' || TO_CHAR(d,'dd-mm-yyyy HH:MI:SS') || ' A ' || TO_CHAR(d + 1 / 4 / 24,'dd-mm-yyyy HH:MI:SS') || ' POR ' ||
                     p_descripcion);
 END;
 
