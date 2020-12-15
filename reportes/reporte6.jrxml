@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="842" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
-	<parameter name="FechaRegistro" class="java.sql.Date"/>
-	<parameter name="Estado" class="java.lang.String"/>
+	<parameter name="FechaRegistro" class="java.sql.Date">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
+	<parameter name="Estado" class="java.lang.String">
+		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
+	</parameter>
 	<queryString language="plsql">
 		<![CDATA[{call reporte6($P{ORACLE_REF_CURSOR},$P{Estado},$P{FechaRegistro})}]]>
 	</queryString>
@@ -92,7 +96,9 @@
 				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="715" y="80" width="82" height="20" forecolor="#5048C2" uuid="33b857ac-78e6-45c7-b641-2cc731985f0b"/>
+				<reportElement x="715" y="80" width="82" height="20" forecolor="#5048C2" uuid="33b857ac-78e6-45c7-b641-2cc731985f0b">
+					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial Black" size="12"/>
 				</textElement>
@@ -108,7 +114,9 @@
 				<textFieldExpression><![CDATA[$P{Estado}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="484" y="80" width="170" height="20" forecolor="#554ED4" uuid="6b9e59bd-c7c3-4ce4-b800-b40350fc61b3"/>
+				<reportElement x="484" y="80" width="170" height="20" forecolor="#554ED4" uuid="6b9e59bd-c7c3-4ce4-b800-b40350fc61b3">
+					<printWhenExpression><![CDATA[$P{FechaRegistro} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial Black" size="12"/>
 				</textElement>
