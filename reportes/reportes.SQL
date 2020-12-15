@@ -1,391 +1,374 @@
-CREATE OR REPLACE FUNCTION buscar(l_palabra VARCHAR2,busq VARCHAR2)
-RETURN NUMBER
-IS
+CREATE OR REPLACE FUNCTION buscar(l_palabra VARCHAR2, busq VARCHAR2)
+    RETURN NUMBER
+    IS
 BEGIN
-    RETURN INSTR(l_palabra,busq);
+    RETURN INSTR(l_palabra, busq);
 END;
 
-CREATE OR REPLACE PROCEDURE reporte1(test_cur OUT sys_refcursor) IS
+CREATE OR REPLACE PROCEDURE reporte1(test_cur OUT SYS_REFCURSOR) IS
 BEGIN
     OPEN test_cur FOR
-    SELECT
-        TREAT(APLICACIONES_DELIVERY.app AS MARCA).LOGO as LOGO,
-        TREAT(APLICACIONES_DELIVERY.app AS MARCA).NOMBRE as NOMBRE,
-        PLANES_DE_SERVICIO.cantidad_envios,
-        PLANES_DE_SERVICIO.modalidad,
-        TREAT(PLANES_DE_SERVICIO.duracion AS RANGO_TIEMPO).FECHA_INICIO AS FECHA_INICIO,
-        TREAT(PLANES_DE_SERVICIO.DURACION AS RANGO_TIEMPO).FECHA_FIN AS FECHA_FIN,
-        PLANES_DE_SERVICIO.precio
-    FROM
-         PLANES_DE_SERVICIO
-    INNER JOIN
-        APLICACIONES_DELIVERY
-    ON
-        PLANES_DE_SERVICIO.ID_APP = APLICACIONES_DELIVERY.ID AND PLANES_DE_SERVICIO.CANCELADO IS NULL
-    ORDER BY NOMBRE, TREAT(PLANES_DE_SERVICIO.duracion AS RANGO_TIEMPO).FECHA_INICIO;
+        SELECT TREAT(aplicaciones_delivery.app AS MARCA).logo                  AS logo,
+               TREAT(aplicaciones_delivery.app AS MARCA).nombre                AS nombre,
+               planes_de_servicio.cantidad_envios,
+               planes_de_servicio.modalidad,
+               TREAT(planes_de_servicio.duracion AS RANGO_TIEMPO).fecha_inicio AS fecha_inicio,
+               TREAT(planes_de_servicio.duracion AS RANGO_TIEMPO).fecha_fin    AS fecha_fin,
+               planes_de_servicio.precio
+        FROM planes_de_servicio
+                 INNER JOIN
+             aplicaciones_delivery
+             ON
+                     planes_de_servicio.id_app = aplicaciones_delivery.id AND planes_de_servicio.cancelado IS NULL
+        ORDER BY nombre, TREAT(planes_de_servicio.duracion AS RANGO_TIEMPO).fecha_inicio;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL)
-IS
+CREATE OR REPLACE PROCEDURE reporte2(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL)
+    IS
 BEGIN
 
-IF p_estado IS NOT NULL THEN
-    OPEN test_cur FOR
-    SELECT
-        EP.EMPRESA.LOGO LOGO,
-        EP.EMPRESA.NOMBRE NOMBRE,
-        S.*,
-       (SELECT LISTAGG(EST.NOMBRE,', ') WITHIN GROUP (ORDER BY EST.NOMBRE)
-       FROM ESTADOS EST
-       INNER JOIN ubicaciones_aplicables ua ON est.id = ua.id_estado
-       WHERE ua.ID_PLAN = S.ID_PAN) ESTADOS
-    FROM
-    (SELECT
-        C.ID_EMPRESA EMPRESA_ID,
-        AD.APP.NOMBRE NOMBRE_APP,
-        TO_CHAR(C.DURACION.FECHA_INICIO, 'DD-MM-YYYY') FECHA_REGISTRO,
-        TO_CHAR(C.DURACION.FECHA_INICIO, 'DD-MM-YYYY') FECHA_INICIO,
-        TO_CHAR(C.DURACION.FECHA_FIN, 'DD-MM-YYYY') FECHA_FIN,
-        C.PORCENTAJE_DESCUENTO DESCUENTO,
-        PS.MODALIDAD MODALIDAD,
-        PS.CANTIDAD_ENVIOS CANTIDAD_ENVIOS,
-        PS.PRECIO PRECIO,
-        PS.id id_pan
-    FROM
-        PLANES_DE_SERVICIO PS
-    INNER JOIN
-        APLICACIONES_DELIVERY AD ON AD.id = PS.id_app
-    INNER JOIN
-        UBICACIONES_APLICABLES UAP ON UAP.ID_APP = PS.ID_APP AND UAP.ID_PLAN = PS.ID
-    INNER JOIN
-        ESTADOS E ON E.id = UAP.ID_ESTADO
-    INNER JOIN
-        UBICACIONES_APLICABLES UBI ON UBI.ID_APP = PS.ID_APP AND UBI.ID_PLAN = PS.ID AND UBI.ID_ESTADO = E.ID
-    INNER JOIN
-        CONTRATOS C ON C.id_plan = PS.id AND C.id_app = PS.id_app AND C.cancelado IS NULL
-    WHERE
-        PS.cancelado IS NULL AND 0 < buscar(p_estado,E.nombre)
-    GROUP BY
-        C.ID_EMPRESA,
-        AD.APP.NOMBRE,
-        C.DURACION.FECHA_INICIO,
-        C.DURACION.FECHA_FIN,
-        PS.MODALIDAD,
-        PS.CANTIDAD_ENVIOS,
-        PS.PRECIO,
-        C.PORCENTAJE_DESCUENTO,
-        PS.id
-    ORDER BY
-        AD.APP.NOMBRE,
-        C.DURACION.FECHA_INICIO) S
-    INNER JOIN
-        EMPRESAS EP ON EP.id = S.EMPRESA_ID
-    ORDER BY 2;
-ELSIF p_estado IS NULL THEN
- OPEN test_cur FOR
-    SELECT
-            EP.EMPRESA.LOGO LOGO,
-            EP.EMPRESA.NOMBRE NOMBRE,
-            S.*
-        FROM
-        (SELECT
-            C.ID_EMPRESA EMPRESA_ID,
-            AD.APP.NOMBRE NOMBRE_APP,
-            TO_CHAR(C.DURACION.FECHA_INICIO, 'DD-MM-YYYY') FECHA_REGISTRO,
-            TO_CHAR(C.DURACION.FECHA_INICIO, 'DD-MM-YYYY') FECHA_INICIO,
-            TO_CHAR(C.DURACION.FECHA_FIN, 'DD-MM-YYYY') FECHA_FIN,
-            C.PORCENTAJE_DESCUENTO DESCUENTO,
-            PS.MODALIDAD MODALIDAD,
-            PS.CANTIDAD_ENVIOS CANTIDAD_ENVIOS,
-            PS.PRECIO PRECIO,
-            LISTAGG(E.NOMBRE,', ') WITHIN GROUP (ORDER BY E.NOMBRE) AS ESTADOS
-        FROM
-            PLANES_DE_SERVICIO PS
-        INNER JOIN
-            APLICACIONES_DELIVERY AD ON AD.id = PS.id_app
-        INNER JOIN
-            UBICACIONES_APLICABLES UAP ON UAP.ID_APP = PS.ID_APP AND UAP.ID_PLAN = PS.ID
-        INNER JOIN
-            ESTADOS E ON E.id = UAP.ID_ESTADO
-        INNER JOIN
-            CONTRATOS C ON C.id_plan = PS.id AND C.id_app = PS.id_app AND C.cancelado IS NULL
-        WHERE
-            PS.cancelado IS NULL
-        GROUP BY
-            C.ID_EMPRESA,
-            AD.APP.NOMBRE,
-            C.DURACION.FECHA_INICIO,
-            C.DURACION.FECHA_FIN,
-            PS.MODALIDAD,
-            PS.CANTIDAD_ENVIOS,
-            PS.PRECIO,
-            C.PORCENTAJE_DESCUENTO
-        ORDER BY
-            AD.APP.NOMBRE,
-            C.DURACION.FECHA_INICIO) S
-        INNER JOIN
-            EMPRESAS EP ON EP.id = S.EMPRESA_ID
-        ORDER BY 2;
-END IF;
+    IF p_estado IS NOT NULL THEN
+        OPEN test_cur FOR
+            SELECT ep.empresa.logo               logo,
+                   ep.empresa.nombre             nombre,
+                   s.*,
+                   (SELECT LISTAGG(est.nombre, ', ') WITHIN GROUP (ORDER BY est.nombre)
+                    FROM estados est
+                             INNER JOIN ubicaciones_aplicables ua ON est.id = ua.id_estado
+                    WHERE ua.id_plan = s.id_pan) estados
+            FROM (SELECT c.id_empresa                                   empresa_id,
+                         ad.app.nombre                                  nombre_app,
+                         TO_CHAR(c.duracion.fecha_inicio, 'DD-MM-YYYY') fecha_registro,
+                         TO_CHAR(c.duracion.fecha_inicio, 'DD-MM-YYYY') fecha_inicio,
+                         TO_CHAR(c.duracion.fecha_fin, 'DD-MM-YYYY')    fecha_fin,
+                         c.porcentaje_descuento                         descuento,
+                         ps.modalidad                                   modalidad,
+                         ps.cantidad_envios                             cantidad_envios,
+                         ps.precio                                      precio,
+                         ps.id                                          id_pan
+                  FROM planes_de_servicio ps
+                           INNER JOIN
+                       aplicaciones_delivery ad ON ad.id = ps.id_app
+                           INNER JOIN
+                       ubicaciones_aplicables uap ON uap.id_app = ps.id_app AND uap.id_plan = ps.id
+                           INNER JOIN
+                       estados e ON e.id = uap.id_estado
+                           INNER JOIN
+                       ubicaciones_aplicables ubi
+                       ON ubi.id_app = ps.id_app AND ubi.id_plan = ps.id AND ubi.id_estado = e.id
+                           INNER JOIN
+                       contratos c ON c.id_plan = ps.id AND c.id_app = ps.id_app AND c.cancelado IS NULL
+                  WHERE ps.cancelado IS NULL
+                    AND 0 < buscar(p_estado, e.nombre)
+                  GROUP BY c.id_empresa,
+                           ad.app.nombre,
+                           c.duracion.fecha_inicio,
+                           c.duracion.fecha_fin,
+                           ps.modalidad,
+                           ps.cantidad_envios,
+                           ps.precio,
+                           c.porcentaje_descuento,
+                           ps.id
+                  ORDER BY ad.app.nombre,
+                           c.duracion.fecha_inicio) s
+                     INNER JOIN
+                 empresas ep ON ep.id = s.empresa_id
+            ORDER BY 2;
+    ELSIF p_estado IS NULL THEN
+        OPEN test_cur FOR
+            SELECT ep.empresa.logo   logo,
+                   ep.empresa.nombre nombre,
+                   s.*
+            FROM (SELECT c.id_empresa                                                empresa_id,
+                         ad.app.nombre                                               nombre_app,
+                         TO_CHAR(c.duracion.fecha_inicio, 'DD-MM-YYYY')              fecha_registro,
+                         TO_CHAR(c.duracion.fecha_inicio, 'DD-MM-YYYY')              fecha_inicio,
+                         TO_CHAR(c.duracion.fecha_fin, 'DD-MM-YYYY')                 fecha_fin,
+                         c.porcentaje_descuento                                      descuento,
+                         ps.modalidad                                                modalidad,
+                         ps.cantidad_envios                                          cantidad_envios,
+                         ps.precio                                                   precio,
+                         LISTAGG(e.nombre, ', ') WITHIN GROUP (ORDER BY e.nombre) AS estados
+                  FROM planes_de_servicio ps
+                           INNER JOIN
+                       aplicaciones_delivery ad ON ad.id = ps.id_app
+                           INNER JOIN
+                       ubicaciones_aplicables uap ON uap.id_app = ps.id_app AND uap.id_plan = ps.id
+                           INNER JOIN
+                       estados e ON e.id = uap.id_estado
+                           INNER JOIN
+                       contratos c ON c.id_plan = ps.id AND c.id_app = ps.id_app AND c.cancelado IS NULL
+                  WHERE ps.cancelado IS NULL
+                  GROUP BY c.id_empresa,
+                           ad.app.nombre,
+                           c.duracion.fecha_inicio,
+                           c.duracion.fecha_fin,
+                           ps.modalidad,
+                           ps.cantidad_envios,
+                           ps.precio,
+                           c.porcentaje_descuento
+                  ORDER BY ad.app.nombre,
+                           c.duracion.fecha_inicio) s
+                     INNER JOIN
+                 empresas ep ON ep.id = s.empresa_id
+            ORDER BY 2;
+
+    END IF;
 END;
 
-CREATE OR REPLACE PROCEDURE reporte3 (test_cur OUT sys_refcursor, sector VARCHAR2 DEFAULT NULL, fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL, estado_nombre VARCHAR2 DEFAULT NULL)
-IS
+CREATE OR REPLACE PROCEDURE reporte3(test_cur OUT SYS_REFCURSOR, sector VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL, fecha_fin DATE DEFAULT NULL,
+                                     estado_nombre VARCHAR2 DEFAULT NULL)
+    IS
 BEGIN
 
     OPEN test_cur FOR
-    SELECT S.*,
-        TREAT(AP.APP AS MARCA).LOGO LOGO_APP,
-        TREAT(EP.EMPRESA AS MARCA).LOGO LOGO_EMPRESA
-        FROM
-            (
-                SELECT
-                PD.ID_APP IDAPP,
-                PD.ID_EMPRESA IDEMPRESA,
-                E.NOMBRE NOMESTADO,
-                TREAT(EP.EMPRESA AS MARCA).NOMBRE NOMBRE_EMP,
-                TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
-                SDC.NOMBRE,
-                COUNT(PD.TRACKING) AS CANTIDAD_PEDIDOS,
-                TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO) FI,
-                TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN) FF
-            FROM
-                PEDIDOS PD
-            INNER JOIN
-                EMPRESAS EP ON EP.ID = PD.ID_EMPRESA
-            INNER JOIN
-                APLICACIONES_DELIVERY AD ON AD.ID = PD.ID_APP
-            INNER JOIN
-                ESTADOS E ON E.ID = PD.ID_ESTADO
-            INNER JOIN
-                SECTORES_DE_COMERCIO SDC ON SDC.ID = EP.id_sector
-            WHERE
-                  PD.CANCELADO IS NULL AND
-                  (fecha_ini IS NULL OR TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO) >= TRUNC(fecha_ini)) AND
-                  (fecha_fin IS NULL OR TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN) <= TRUNC(fecha_fin)) AND
-                  (sector IS NULL OR 0 < buscar(sector,SDC.nombre))
-                   AND (estado_nombre IS NULL OR 0 < buscar(estado_nombre,E.nombre))
-            GROUP BY
-                    PD.ID_APP,
-                    PD.ID_EMPRESA,
-                    TREAT(EP.EMPRESA AS MARCA).NOMBRE,
-                    TREAT(AD.APP AS MARCA).NOMBRE,
-                    SDC.NOMBRE,
-                    E.NOMBRE,
-                    TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO),
-                    TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_FIN)
-            ORDER BY
-                    PD.ID_EMPRESA,
-                    PD.ID_APP,
-                    E.NOMBRE,
-                    TRUNC(TREAT(PD.DURACION AS RANGO_TIEMPO).FECHA_INICIO)
-            ) S
-        INNER JOIN
-            EMPRESAS EP ON EP.ID = S.IDEMPRESA
-        INNER JOIN
-            APLICACIONES_DELIVERY AP ON AP.ID = S.IDAPP;
+        SELECT s.*,
+               TREAT(ap.app AS MARCA).logo     logo_app,
+               TREAT(ep.empresa AS MARCA).logo logo_empresa
+        FROM (
+                 SELECT pd.id_app                                              idapp,
+                        pd.id_empresa                                          idempresa,
+                        e.nombre                                               nomestado,
+                        TREAT(ep.empresa AS MARCA).nombre                      nombre_emp,
+                        TREAT(ad.app AS MARCA).nombre                          nombre_app,
+                        sdc.nombre,
+                        COUNT(pd.tracking) AS                                  cantidad_pedidos,
+                        TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_inicio) fi,
+                        TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_fin)    ff
+                 FROM pedidos pd
+                          INNER JOIN
+                      empresas ep ON ep.id = pd.id_empresa
+                          INNER JOIN
+                      aplicaciones_delivery ad ON ad.id = pd.id_app
+                          INNER JOIN
+                      estados e ON e.id = pd.id_estado
+                          INNER JOIN
+                      sectores_de_comercio sdc ON sdc.id = ep.id_sector
+                 WHERE pd.cancelado IS NULL
+                   AND (fecha_ini IS NULL OR TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+                   AND (fecha_fin IS NULL OR TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+                   AND (sector IS NULL OR 0 < buscar(sector, sdc.nombre))
+                   AND (estado_nombre IS NULL OR 0 < buscar(estado_nombre, e.nombre))
+                 GROUP BY pd.id_app,
+                          pd.id_empresa,
+                          TREAT(ep.empresa AS MARCA).nombre,
+                          TREAT(ad.app AS MARCA).nombre,
+                          sdc.nombre,
+                          e.nombre,
+                          TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_inicio),
+                          TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_fin)
+                 ORDER BY pd.id_empresa,
+                          pd.id_app,
+                          e.nombre,
+                          TRUNC(TREAT(pd.duracion AS RANGO_TIEMPO).fecha_inicio)
+             ) s
+                 INNER JOIN
+             empresas ep ON ep.id = s.idempresa
+                 INNER JOIN
+             aplicaciones_delivery ap ON ap.id = s.idapp;
+
 END;
 
-CREATE OR REPLACE PROCEDURE reporte4 (test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL)
-IS
+CREATE OR REPLACE PROCEDURE reporte4(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL)
+    IS
 BEGIN
     OPEN test_cur FOR
-    SELECT S.*, TREAT(EX.APP AS MARCA).LOGO LOGO_APP
-    FROM
-    (
-    SELECT
-        AD.ID APPI,
-        TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
-        E.NOMBRE NOMBRE_ESTADO,
-        TDU.NOMBRE NOMBRE_TIPO,
-        SUM(DECODE(udt.estado,'OPERATIVA',1,0)) AS UNIDADES_OP,
-        SUM(DECODE(udt.estado,'REPARACION',1,0)) AS UNIDADES_REP
-    FROM
-        GARAJES
-    INNER JOIN
-        APLICACIONES_DELIVERY AD ON AD.ID = GARAJES.ID_APP
-    INNER JOIN
-        UNIDADES_DE_TRANSPORTE UDT ON GARAJES.ID_APP = UDT.ID_APP and GARAJES.ID = UDT.ID_GARAJE
-    INNER JOIN
-        TIPOS_DE_UNIDADES TDU ON UDT.ID_TIPO = TDU.ID
-    INNER JOIN
-        ESTADOS E ON GARAJES.ID_ESTADO = E.ID
-    GROUP BY
-        TREAT(AD.APP AS MARCA).NOMBRE,
-        E.NOMBRE,
-        TDU.NOMBRE,
-        AD.ID
-    ORDER BY
-        TREAT(AD.APP AS MARCA).NOMBRE,
-        E.NOMBRE,
-        TDU.NOMBRE
-    ) S
-    INNER JOIN
-        APLICACIONES_DELIVERY EX ON EX.ID = S.APPI AND ((p_estado IS NULL) OR 0 < buscar(p_estado,S.NOMBRE_ESTADO));
+        SELECT s.*, TREAT(ex.app AS MARCA).logo logo_app
+        FROM (
+                 SELECT ad.id                                          appi,
+                        TREAT(ad.app AS MARCA).nombre                  nombre_app,
+                        e.nombre                                       nombre_estado,
+                        tdu.nombre                                     nombre_tipo,
+                        SUM(DECODE(udt.estado, 'OPERATIVA', 1, 0))  AS unidades_op,
+                        SUM(DECODE(udt.estado, 'REPARACION', 1, 0)) AS unidades_rep
+                 FROM garajes
+                          INNER JOIN
+                      aplicaciones_delivery ad ON ad.id = garajes.id_app
+                          INNER JOIN
+                      unidades_de_transporte udt ON garajes.id_app = udt.id_app AND garajes.id = udt.id_garaje
+                          INNER JOIN
+                      tipos_de_unidades tdu ON udt.id_tipo = tdu.id
+                          INNER JOIN
+                      estados e ON garajes.id_estado = e.id
+                 GROUP BY TREAT(ad.app AS MARCA).nombre,
+                          e.nombre,
+                          tdu.nombre,
+                          ad.id
+                 ORDER BY TREAT(ad.app AS MARCA).nombre,
+                          e.nombre,
+                          tdu.nombre
+             ) s
+                 INNER JOIN
+             aplicaciones_delivery ex
+             ON ex.id = s.appi AND ((p_estado IS NULL) OR 0 < buscar(p_estado, s.nombre_estado));
 END;
 
-CREATE OR REPLACE PROCEDURE reporte6 (test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL, p_fecha_registro DATE DEFAULT NULL)
-IS
+CREATE OR REPLACE PROCEDURE reporte6(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
+                                     p_fecha_registro DATE DEFAULT NULL)
+    IS
 BEGIN
     OPEN test_cur FOR
-    SELECT
-        USUARIOS.FOTO,
-        USUARIOS.PRIMER_NOMBRE,
-        USUARIOS.SEGUNDO_NOMBRE,
-        USUARIOS.PRIMER_APELLIDO,
-        USUARIOS.SEGUNDO_APELLIDO,
-        USUARIOS.TIPO_DE_CEDULA,
-        USUARIOS.NUMERO_DE_CEDULA,
-        --TREAT(USUARIOS.ESTADO AS RANGO_TIEMPO) FECHA_NACIMIENTO,
-        USUARIOS.EMAIL,
-        TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO,
-        TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
-        TREAT(AD.APP AS MARCA).LOGO LOGO_APP,
-        D.DESCRIPCION,
-        E.NOMBRE
-    FROM
-        USUARIOS
-    INNER JOIN
-        REGISTROS R ON USUARIOS.ID = R.ID_USUARIO
-    INNER JOIN
-        APLICACIONES_DELIVERY AD ON R.ID_APP = AD.ID
-    INNER JOIN
-        DIRECCIONES D ON USUARIOS.ID = D.ID_USUARIO
-    INNER JOIN
-        ESTADOS E ON E.ID = D.ID_ESTADO
-    WHERE
-        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR 0 < buscar(p_estado,E.nombre)) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro)
-    ORDER BY
-        E.NOMBRE,
-        R.REGISTRO.FECHA_INICIO;
+        SELECT usuarios.foto,
+               usuarios.primer_nombre,
+               usuarios.segundo_nombre,
+               usuarios.primer_apellido,
+               usuarios.segundo_apellido,
+               usuarios.tipo_de_cedula,
+               usuarios.numero_de_cedula,
+               --TREAT(USUARIOS.ESTADO AS RANGO_TIEMPO) FECHA_NACIMIENTO,
+               usuarios.email,
+               TREAT(r.registro AS RANGO_TIEMPO).fecha_inicio,
+               TREAT(ad.app AS MARCA).nombre nombre_app,
+               TREAT(ad.app AS MARCA).logo   logo_app,
+               d.descripcion,
+               e.nombre
+        FROM usuarios
+                 INNER JOIN
+             registros r ON usuarios.id = r.id_usuario
+                 INNER JOIN
+             aplicaciones_delivery ad ON r.id_app = ad.id
+                 INNER JOIN
+             direcciones d ON usuarios.id = d.id_usuario
+                 INNER JOIN
+             estados e ON e.id = d.id_estado
+        WHERE r.registro.fecha_fin IS NULL
+          AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+          AND (p_fecha_registro IS NULL OR TREAT(r.registro AS RANGO_TIEMPO).fecha_inicio >= p_fecha_registro)
+        ORDER BY e.nombre,
+                 r.registro.fecha_inicio;
+
 END;
 
 
 
-CREATE OR REPLACE PROCEDURE reporte6(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL, p_fecha_registro DATE DEFAULT NULL)
-IS
+CREATE OR REPLACE PROCEDURE reporte6(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
+                                     p_fecha_registro DATE DEFAULT NULL)
+    IS
 BEGIN
     OPEN test_cur FOR
-    SELECT s.*, u.foto FOTO, TREAT(app.APP AS MARCA).LOGO LOGO_APP FROM
-    (SELECT
-        --USUARIOS.FOTO,
-        USUARIOS.PRIMER_NOMBRE,
-        USUARIOS.SEGUNDO_NOMBRE,
-        USUARIOS.PRIMER_APELLIDO,
-        USUARIOS.SEGUNDO_APELLIDO,
-        USUARIOS.TIPO_DE_CEDULA,
-        USUARIOS.NUMERO_DE_CEDULA,
-        USUARIOS.EMAIL,
-        TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO,
-        TREAT(AD.APP AS MARCA).NOMBRE NOMBRE_APP,
-        MAX(D.DESCRIPCION) DESCRIPCION,
-        E.NOMBRE,
-        D.ID_ESTADO,
-        AD.ID APP_ID,
-        USUARIOS.ID U_ID
-    FROM
-        USUARIOS
-    INNER JOIN
-        REGISTROS R ON USUARIOS.ID = R.ID_USUARIO
-    INNER JOIN
-        APLICACIONES_DELIVERY AD ON R.ID_APP = AD.ID
-    INNER JOIN
-        DIRECCIONES D ON USUARIOS.ID = D.ID_USUARIO
-    INNER JOIN
-        ESTADOS E ON E.ID = D.ID_ESTADO
-    WHERE
-        R.REGISTRO.FECHA_FIN IS NULL AND (p_estado IS NULL OR 0 < buscar(p_estado,E.nombre)) AND (p_fecha_registro IS NULL OR TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO >= p_fecha_registro)
-    GROUP BY
-        D.ID_ESTADO,
-        E.NOMBRE,
-        E.ID,
-        AD.ID,
-        USUARIOS.PRIMER_NOMBRE,
-        USUARIOS.SEGUNDO_NOMBRE,
-        USUARIOS.PRIMER_APELLIDO,
-        USUARIOS.SEGUNDO_APELLIDO,
-        USUARIOS.TIPO_DE_CEDULA,
-        USUARIOS.NUMERO_DE_CEDULA,
-        USUARIOS.ID,
-        TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO,
-        TREAT(AD.APP AS MARCA).NOMBRE,
-        USUARIOS.EMAIL
-    ORDER BY
-        E.NOMBRE,
-        MAX(TREAT(R.REGISTRO AS RANGO_TIEMPO).FECHA_INICIO)) s, USUARIOS u, APLICACIONES_DELIVERY app
-    WHERE app.ID = s.APP_ID AND u.ID = s.U_ID
-    ORDER BY s.APP_ID;
+        SELECT s.*, u.foto foto, TREAT(app.app AS MARCA).logo logo_app
+        FROM (SELECT
+                  --USUARIOS.FOTO,
+                  usuarios.primer_nombre,
+                  usuarios.segundo_nombre,
+                  usuarios.primer_apellido,
+                  usuarios.segundo_apellido,
+                  usuarios.tipo_de_cedula,
+                  usuarios.numero_de_cedula,
+                  usuarios.email,
+                  TREAT(r.registro AS RANGO_TIEMPO).fecha_inicio,
+                  TREAT(ad.app AS MARCA).nombre nombre_app,
+                  MAX(d.descripcion)            descripcion,
+                  e.nombre,
+                  d.id_estado,
+                  ad.id                         app_id,
+                  usuarios.id                   u_id
+              FROM usuarios
+                       INNER JOIN
+                   registros r ON usuarios.id = r.id_usuario
+                       INNER JOIN
+                   aplicaciones_delivery ad ON r.id_app = ad.id
+                       INNER JOIN
+                   direcciones d ON usuarios.id = d.id_usuario
+                       INNER JOIN
+                   estados e ON e.id = d.id_estado
+              WHERE r.registro.fecha_fin IS NULL
+                AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+                AND (p_fecha_registro IS NULL OR TREAT(r.registro AS RANGO_TIEMPO).fecha_inicio >= p_fecha_registro)
+              GROUP BY d.id_estado,
+                       e.nombre,
+                       e.id,
+                       ad.id,
+                       usuarios.primer_nombre,
+                       usuarios.segundo_nombre,
+                       usuarios.primer_apellido,
+                       usuarios.segundo_apellido,
+                       usuarios.tipo_de_cedula,
+                       usuarios.numero_de_cedula,
+                       usuarios.id,
+                       TREAT(r.registro AS RANGO_TIEMPO).fecha_inicio,
+                       TREAT(ad.app AS MARCA).nombre,
+                       usuarios.email
+              ORDER BY e.nombre,
+                       MAX(TREAT(r.registro AS RANGO_TIEMPO).fecha_inicio)) s,
+             usuarios u,
+             aplicaciones_delivery app
+        WHERE app.id = s.app_id
+          AND u.id = s.u_id
+        ORDER BY s.app_id;
+
 END;
 
 
 
-CREATE OR REPLACE PROCEDURE pruebaimagenes(test_cur OUT sys_refcursor) IS
+CREATE OR REPLACE PROCEDURE pruebaimagenes(test_cur OUT SYS_REFCURSOR) IS
 BEGIN
     OPEN test_cur FOR
-    SELECT
-        TREAT(APLICACIONES_DELIVERY.app AS MARCA).LOGO as LOGO,
-        TREAT(APLICACIONES_DELIVERY.app AS MARCA).NOMBRE as NOMBRE
-    FROM
-        APLICACIONES_DELIVERY;
-END;
-
-CREATE OR REPLACE PROCEDURE pruebaimagenes2(test_cur OUT sys_refcursor) IS
-BEGIN
-    OPEN test_cur FOR
-    SELECT
-        TREAT(EMPRESAS.empresa AS MARCA).LOGO as LOGO,
-        TREAT(EMPRESAS.empresa AS MARCA).NOMBRE as NOMBRE
-    FROM
-        EMPRESAS;
-END;
-
-CREATE OR REPLACE PROCEDURE pruebaimagenes3(test_cur OUT sys_refcursor) IS
-BEGIN
-    OPEN test_cur FOR
-    SELECT FOTO FROM USUARIOS;
+        SELECT TREAT(aplicaciones_delivery.app AS MARCA).logo   AS logo,
+               TREAT(aplicaciones_delivery.app AS MARCA).nombre AS nombre
+        FROM aplicaciones_delivery;
 END;
 
 
-CREATE OR REPLACE PROCEDURE reporte5(test_cur OUT sys_refcursor, p_estado VARCHAR2 DEFAULT NULL)
-IS
+CREATE OR REPLACE PROCEDURE pruebaimagenes2(test_cur OUT SYS_REFCURSOR) IS
 BEGIN
     OPEN test_cur FOR
-       SELECT
-            s.NOMBRE_ESTADO,
-            s.NOMBRE_MUNICIPIO,
-            s.NOMBRE_EMPRESA,
-            s.NOMBRE_APP,
-            s.NUMERO_PEDIDOS,
-            TREAT(emp.empresa AS MARCA).LOGO as LOGO_EMP,
-            TREAT(apps.app AS MARCA).LOGO as LOGO_APP
-            FROM(SELECT
-                e.ID ID_ESTADO,
-                emp.ID ID_EMP,
-                app.ID ID_APP,
-                e.NOMBRE NOMBRE_ESTADO,
-                mun.NOMBRE NOMBRE_MUNICIPIO,
-                ROW_NUMBER() over (
-                    PARTITION BY e.ID, mun.ID
-                    ORDER BY COUNT(pe.TRACKING) DESC
-                ) row_number,
-                COUNT(pe.TRACKING) NUMERO_PEDIDOS,
-                app.APP.nombre NOMBRE_APP,
-                emp.EMPRESA.nombre NOMBRE_EMPRESA
-                FROM PEDIDOS pe, DIRECCIONES dir, ESTADOS e, MUNICIPIOS mun, EMPRESAS emp, APLICACIONES_DELIVERY app
-                WHERE
-                pe.CANCELADO IS NULL
-                AND pe.DURACION.fecha_fin IS NOT NULL
-                AND dir.ID = pe.ID_DIRECCION
-                AND e.ID = dir.ID_ESTADO
-                AND mun.ID = dir.ID_MUNICIPIO
-                AND emp.ID = pe.ID_EMPRESA
-                AND app.ID = pe.ID_APP
-                AND (p_estado IS NULL OR 0 < buscar(p_estado,E.nombre))
-                GROUP BY
-                e.NOMBRE, app.APP.nombre, emp.EMPRESA.nombre, mun.NOMBRE, e.ID, emp.ID, app.ID, mun.ID
-                ORDER BY e.NOMBRE,MAX(pe.DURACION.fecha_fin) DESC,mun.NOMBRE) s, APLICACIONES_DELIVERY apps, EMPRESAS emp
-        WHERE row_number <=5
-        AND s.ID_EMP = emp.ID
-        AND s.ID_APP = apps.ID
-        ORDER BY NOMBRE_ESTADO, NUMERO_PEDIDOS DESC;
+        SELECT TREAT(empresas.empresa AS MARCA).logo   AS logo,
+               TREAT(empresas.empresa AS MARCA).nombre AS nombre
+        FROM empresas;
+END;
+
+CREATE OR REPLACE PROCEDURE pruebaimagenes3(test_cur OUT SYS_REFCURSOR) IS
+BEGIN
+    OPEN test_cur FOR
+        SELECT foto FROM usuarios;
+END;
+
+
+CREATE OR REPLACE PROCEDURE reporte5(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL)
+    IS
+BEGIN
+    OPEN test_cur FOR
+        SELECT s.nombre_estado,
+               s.nombre_municipio,
+               s.nombre_empresa,
+               s.nombre_app,
+               s.numero_pedidos,
+               TREAT(emp.empresa AS MARCA).logo AS logo_emp,
+               TREAT(apps.app AS MARCA).logo    AS logo_app
+        FROM (SELECT e.id               id_estado,
+                     emp.id             id_emp,
+                     app.id             id_app,
+                     e.nombre           nombre_estado,
+                     mun.nombre         nombre_municipio,
+                     ROW_NUMBER() OVER (
+                         PARTITION BY e.id, mun.id
+                         ORDER BY COUNT(pe.tracking) DESC
+                         )              row_number,
+                     COUNT(pe.tracking) numero_pedidos,
+                     app.app.nombre     nombre_app,
+                     emp.empresa.nombre nombre_empresa
+              FROM pedidos pe,
+                   direcciones dir,
+                   estados e,
+                   municipios mun,
+                   empresas emp,
+                   aplicaciones_delivery app
+              WHERE pe.cancelado IS NULL
+                AND pe.duracion.fecha_fin IS NOT NULL
+                AND dir.id = pe.id_direccion
+                AND e.id = dir.id_estado
+                AND mun.id = dir.id_municipio
+                AND emp.id = pe.id_empresa
+                AND app.id = pe.id_app
+                AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+              GROUP BY e.nombre, app.app.nombre, emp.empresa.nombre, mun.nombre, e.id, emp.id, app.id, mun.id
+              ORDER BY e.nombre, MAX(pe.duracion.fecha_fin) DESC, mun.nombre) s,
+             aplicaciones_delivery apps,
+             empresas emp
+        WHERE row_number <= 5
+          AND s.id_emp = emp.id
+          AND s.id_app = apps.id
+        ORDER BY nombre_estado, numero_pedidos DESC;
 END;
