@@ -1335,54 +1335,47 @@ END;
 
 
 -- FIN DESPACHO
-
--- PROCEDURES OTROS
-/*CREATE OR REPLACE PROCEDURE validar_pedidos(
-    in_fecha IN DATE,
-    in_zona VARCHAR2
-)
+CREATE OR REPLACE PROCEDURE simulacion(n_contratos INTEGER, n_pedidos INTEGER, n_despachos INTEGER, n_max_manteniminto INTEGER)
 IS
-    cur SYS_REFCURSOR;
-
-    nombre_app VARCHAR2(30);
-    counting VARCHAR2(30);
-    nombre_zona VARCHAR2(30);
-    id_zona NUMBER;
-
-    records NUMBER(1);
+    app_cur SYS_REFCURSOR;
+    api APLICACIONES_DELIVERY%ROWTYPE;
+    c_contratos INTEGER;
+    c_pedidos INTEGER;
+    c_despachos INTEGER;
+    c_mantenimiento INTEGER;
 BEGIN
-    records:= 0;
-    SELECT z.id INTO id_zona FROM zonas z WHERE z.nombre = in_zona;
-    DBMS_OUTPUT.PUT_LINE('ID zona '|| id_zona);
-
-    OPEN cur FOR
-        SELECT app.marca.nombre,
-               COUNT(pe.tracking) AS "Pedidos"
-        FROM pedidos pe, direcciones dir, zonas zo, aplicaciones_delivery app, usuarios u
-        WHERE pe.id_direccion = dir.id
-          AND dir.id_zona = zo.id
-          AND zo.id = id_zona
-          AND zo.nombre = in_zona
-          AND u.id = dir.id_usuario
-          AND app.id = u.id_app
-          AND TRIM(pe.fechas.FECHA_INICIO) = TRIM(IN_FECHA)
-        GROUP BY app.nombre;
-
-    LOOP
-        FETCH cur INTO nombre_app, counting;
-        exit when cur%notfound;
-        dbms_output.put_line('RESULTADO: ' || nombre_app || ' generó ' || counting || ' pedido(s) en ' || in_zona || ' para el ' || TO_CHAR(in_fecha, 'yyyy/mm/dd') );
-        records := 1;
-    END LOOP;
-    CLOSE cur;
-
-    IF (records = 0) THEN
-       DBMS_OUTPUT.PUT_LINE('NO EXISTEN REGISTROS PARA LA BÚSQUEDA SOLICITADA');
+    c_contratos := 0;
+    c_pedidos := 0;
+    c_despachos := 0;
+    c_mantenimiento := 0;
+    IF n_contratos >= 0 AND n_pedidos >= 0 AND n_despachos >=0 AND n_max_manteniminto >=0 THEN
+        DBMS_OUTPUT.PUT_LINE(' INICIANDO LA SIMULACIÓN DEL SISTEMA DE DELIVERY');
+        DBMS_OUTPUT.PUT_LINE(' EL TIEMPO DE LA SIMULACIÓN ES: ' || TO_DATE(SIM_DATE(),'dd-mm-yyyy HH:MI:SS'));
+        LOOP
+            EXIT WHEN c_contratos >= n_contratos;
+            modulo_contratos(NULL);
+            c_contratos := c_contratos + 1;
+        END LOOP;
+        LOOP
+            EXIT WHEN c_pedidos >= n_pedidos;
+            modulo_pedido();
+            c_pedidos := c_pedidos + 1;
+        END LOOP;
+        LOOP
+            EXIT WHEN c_despachos >= n_despachos;
+            modulo_contratos(NULL);
+            UPDATE_SIM_TIME('AUMENTO DESDE ' || TO_DATE(SIM_DATE(),'dd-mm-yyyy HH:MI:SS'));
+            c_despachos := c_despachos + 1;
+        END LOOP;
+        OPEN app_cur FOR SELECT AD.* FROM APLICACIONES_DELIVERY AD ORDER BY DBMS_RANDOM.VALUE();
+        LOOP
+            FETCH app_cur INTO api;
+            EXIT WHEN app_cur%NOTFOUND OR c_mantenimiento >= n_max_manteniminto;
+            modulo_mantenimiento(SIM_DATE(), api.ID);
+            c_mantenimiento := c_mantenimiento + 1;
+        END LOOP;
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(' LAS VARIABLES PARA LA SIMULACIÓN DEBEN SER MAYORES O IGUALES A 0');
     END IF;
-
-    EXCEPTION
-    WHEN no_data_found THEN
-        DBMS_OUTPUT.PUT_LINE('NO EXISTE LA ZONA SOLICITADA');
-END;*/
-/
+END;
 
