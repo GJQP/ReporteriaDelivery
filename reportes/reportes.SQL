@@ -373,6 +373,7 @@ BEGIN
         ORDER BY nombre_estado, numero_pedidos DESC;
 END;
 
+-- NOTA: EL REPORTE 7 SE TRAE TODOS SIN IMPORTAR SI HAN FINALIZADO.
 CREATE OR REPLACE PROCEDURE reporte7(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
                                      fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL,p_app VARCHAR2 DEFAULT NULL)
 IS
@@ -420,6 +421,45 @@ FROM (
                   p.tracking
      ) s, APLICACIONES_DELIVERY app
     WHERE app.id = s.APP_ID;
+end;
+
+CREATE OR REPLACE PROCEDURE reporte9(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL,p_zona VARCHAR2 DEFAULT NULL)
+IS
+BEGIN
+OPEN test_cur FOR
+SELECT s.* FROM
+(SELECT
+    MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) FECHA_INICIO,
+    MAX(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) FECHA_FIN,
+    e.nombre NOMBRE_ESTADO,
+    z.nombre NOMBRE_ZONA,
+    sec.nombre SECTOR_COMERCIO,
+    SUM(d.cantidad) CANTIDAD_PRODUCTOS,
+    ROW_NUMBER() OVER (
+         PARTITION BY e.NOMBRE, z.nombre
+         ORDER BY SUM(d.cantidad) DESC
+    )  row_number
+FROM pedidos p, detalles d, productos pro, sectores_de_comercio sec,estados e, zonas z
+WHERE
+    d.ID_TRACKING = p.TRACKING
+    AND e.ID = p.ID_ESTADO
+    AND z.ID = p.ID_ZONA
+    AND pro.ID = d.ID_PRODUCTO
+    AND sec.ID = pro.ID_SECTOR
+    AND TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin IS NOT NULL
+    AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+    AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+    AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+    AND (p_estado IS NULL OR 0 < buscar(p_zona, z.nombre))
+GROUP BY
+    e.nombre,z.nombre,sec.nombre
+ORDER BY
+    e.nombre,
+    z.nombre,
+    SUM(d.cantidad) DESC,
+    MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio)) s
+WHERE s.row_number <=5;
 end;
 
 
