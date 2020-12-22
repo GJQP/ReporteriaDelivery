@@ -406,7 +406,7 @@ FROM (
            AND app.id = p.id_app
            AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
            AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
-           AND (p_app IS NULL OR 0< buscar(p_estado, TREAT(app.APP AS MARCA).nombre)) --no estoy segura si esta parte funciona
+           AND (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
            AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
          GROUP BY dir.descripcion,
                   e.NOMBRE,
@@ -460,6 +460,40 @@ ORDER BY
     SUM(d.cantidad) DESC,
     MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio)) s
 WHERE s.row_number <=5;
+end;
+
+CREATE OR REPLACE PROCEDURE reporte10(test_cur OUT SYS_REFCURSOR, p_app VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL)
+IS
+BEGIN
+OPEN test_cur FOR
+SELECT
+       s.*,
+       TREAT(app.APP AS MARCA).nombre NOMBRE_APP,
+       TREAT(app.APP AS MARCA).logo LOGO_APP,
+       TREAT(emp.EMPRESA AS MARCA).nombre NOMBRE_EMP,
+       TREAT(emp.EMPRESA AS MARCA).logo LOGO_EMP
+FROM
+(SELECT
+    MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) FECHA_INICIO,
+    MAX(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) FECHA_FIN,
+    p.ID_APP ID_APP,
+    p.ID_EMPRESA ID_EMPRESA,
+    SUM(p.total) INGRESOS
+FROM PEDIDOS p, APLICACIONES_DELIVERY app
+WHERE
+    (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+    AND p.ID_APP = app.ID
+    AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+    AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+GROUP BY
+    p.ID_APP, p.ID_EMPRESA
+ORDER BY
+    p.ID_EMPRESA, p.ID_APP
+) s, APLICACIONES_DELIVERY app, EMPRESAS emp
+WHERE
+    app.ID = s.ID_APP
+    AND emp.ID = s.ID_EMPRESA;
 end;
 
 
