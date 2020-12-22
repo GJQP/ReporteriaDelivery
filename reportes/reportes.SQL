@@ -19,7 +19,7 @@ BEGIN
                  INNER JOIN
              aplicaciones_delivery
              ON
-                     planes_de_servicio.id_app = aplicaciones_delivery.id AND planes_de_servicio.cancelado IS NULL
+                     planes_de_servicio.ID_APP = aplicaciones_delivery.id AND planes_de_servicio.cancelado IS NULL
         ORDER BY nombre, TREAT(planes_de_servicio.duracion AS RANGO_TIEMPO).fecha_inicio;
 END;
 
@@ -244,7 +244,7 @@ END;
 
 CREATE OR REPLACE PROCEDURE reporte6(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
                                      p_fecha_registro DATE DEFAULT NULL)
-    IS
+IS
 BEGIN
     OPEN test_cur FOR
         SELECT s.*, u.foto foto, TREAT(app.app AS MARCA).logo logo_app
@@ -372,3 +372,54 @@ BEGIN
           AND s.id_app = apps.id
         ORDER BY nombre_estado, numero_pedidos DESC;
 END;
+
+CREATE OR REPLACE PROCEDURE reporte7(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL,p_app VARCHAR2 DEFAULT NULL)
+IS
+BEGIN
+OPEN test_cur FOR
+SELECT
+       s.*,
+       TREAT(app.APP AS MARCA).nombre NOMBRE_APP,
+       TREAT(app.APP AS MARCA).logo LOGO_APP
+FROM (
+         SELECT e.NOMBRE                                       ESTADO,
+                dir.descripcion                                DESCRIPCION,
+                dir.referencia                                 REFERENCIA,
+                p.tracking                                     TRACKING,
+                TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio FECHA_INICIO,
+                TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin    FECHA_FIN,
+                COUNT(de.cantidad),
+                p.id_app APP_ID,
+                u.email
+         FROM PEDIDOS p,
+              ESTADOS e,
+              DIRECCIONES dir,
+              DETALLES de,
+              USUARIOS u,
+              APLICACIONES_DELIVERY app
+         WHERE e.id = p.id_estado
+           AND dir.id = p.id_direccion
+           AND de.ID_TRACKING = p.tracking
+           AND u.id = p.id_usuario
+           AND app.id = p.id_app
+           AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+           AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+           AND (p_app IS NULL OR 0< buscar(p_estado, TREAT(app.APP AS MARCA).nombre)) --no estoy segura si esta parte funciona
+           AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+         GROUP BY dir.descripcion,
+                  e.NOMBRE,
+                  dir.referencia,
+                  p.tracking,
+                  TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio,
+                  TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin,
+                  u.email,
+                  p.id_app
+         ORDER BY TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio,
+                  TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin,
+                  p.tracking
+     ) s, APLICACIONES_DELIVERY app
+    WHERE app.id = s.APP_ID;
+end;
+
+
