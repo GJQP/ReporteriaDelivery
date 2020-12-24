@@ -11,39 +11,42 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<parameter name="Estado" class="java.lang.String">
+	<parameter name="FechaInicio" class="java.sql.Date">
 		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
 	</parameter>
+	<parameter name="Estado" class="java.lang.String"/>
+	<parameter name="Zona" class="java.lang.String"/>
+	<parameter name="FechaFin" class="java.sql.Date"/>
 	<queryString language="plsql">
-		<![CDATA[{call reporte4($P{ORACLE_REF_CURSOR},$P{Estado})}]]>
+		<![CDATA[{call reporte9($P{ORACLE_REF_CURSOR},$P{Estado},$P{FechaInicio},$P{FechaFin},$P{Zona})}]]>
 	</queryString>
-	<field name="APPI" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="APPI"/>
-		<property name="com.jaspersoft.studio.field.label" value="APPI"/>
+	<field name="FECHA_INICIO" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="FECHA_INICIO"/>
+		<property name="com.jaspersoft.studio.field.label" value="FECHA_INICIO"/>
 	</field>
-	<field name="NOMBRE_APP" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="NOMBRE_APP"/>
-		<property name="com.jaspersoft.studio.field.label" value="NOMBRE_APP"/>
+	<field name="FECHA_FIN" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="FECHA_FIN"/>
+		<property name="com.jaspersoft.studio.field.label" value="FECHA_FIN"/>
 	</field>
 	<field name="NOMBRE_ESTADO" class="java.lang.String">
 		<property name="com.jaspersoft.studio.field.name" value="NOMBRE_ESTADO"/>
 		<property name="com.jaspersoft.studio.field.label" value="NOMBRE_ESTADO"/>
 	</field>
-	<field name="NOMBRE_TIPO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="NOMBRE_TIPO"/>
-		<property name="com.jaspersoft.studio.field.label" value="NOMBRE_TIPO"/>
+	<field name="NOMBRE_ZONA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="NOMBRE_ZONA"/>
+		<property name="com.jaspersoft.studio.field.label" value="NOMBRE_ZONA"/>
 	</field>
-	<field name="UNIDADES_OP" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="UNIDADES_OP"/>
-		<property name="com.jaspersoft.studio.field.label" value="UNIDADES_OP"/>
+	<field name="SECTOR_COMERCIO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="SECTOR_COMERCIO"/>
+		<property name="com.jaspersoft.studio.field.label" value="SECTOR_COMERCIO"/>
 	</field>
-	<field name="UNIDADES_REP" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="UNIDADES_REP"/>
-		<property name="com.jaspersoft.studio.field.label" value="UNIDADES_REP"/>
+	<field name="CANTIDAD_PRODUCTOS" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="CANTIDAD_PRODUCTOS"/>
+		<property name="com.jaspersoft.studio.field.label" value="CANTIDAD_PRODUCTOS"/>
 	</field>
-	<field name="LOGO_APP" class="java.sql.Blob">
-		<property name="com.jaspersoft.studio.field.name" value="LOGO_APP"/>
-		<property name="com.jaspersoft.studio.field.label" value="LOGO_APP"/>
+	<field name="ROW_NUMBER" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="ROW_NUMBER"/>
+		<property name="com.jaspersoft.studio.field.label" value="ROW_NUMBER"/>
 	</field>
 	<background>
 		<band height="840" splitType="Stretch">
@@ -100,7 +103,7 @@
 			</textField>
 			<staticText>
 				<reportElement x="400" y="72" width="82" height="20" forecolor="#5048C2" uuid="511a18f8-ff39-4f9d-bf17-4152ac9bb27d">
-					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$P{Zona} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial Black" size="12"/>
@@ -109,36 +112,44 @@
 			</staticText>
 			<textField>
 				<reportElement x="400" y="89" width="84" height="31" forecolor="#5048C2" uuid="1987cb9d-b5b3-4de0-982c-2b688ab8db26">
-					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
+					<printWhenExpression><![CDATA[$P{Zona} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{Estado}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{Zona}]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="273" y="25" width="120" height="20" forecolor="#554ED4" uuid="0292d863-d02b-4a06-9a7a-cf5e646d9322"/>
+				<reportElement x="273" y="25" width="120" height="20" forecolor="#554ED4" uuid="0292d863-d02b-4a06-9a7a-cf5e646d9322">
+					<printWhenExpression><![CDATA[$P{FechaInicio} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial Black" size="12"/>
 				</textElement>
 				<text><![CDATA[FECHA INICIO:]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="284" y="41" width="109" height="19" forecolor="#5048C2" uuid="679b58b3-ad46-4a37-84b2-a537d7add510"/>
+				<reportElement x="284" y="41" width="109" height="19" forecolor="#5048C2" uuid="679b58b3-ad46-4a37-84b2-a537d7add510">
+					<printWhenExpression><![CDATA[$P{FechaInicio} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DATEFORMAT($P{FechaInicio},"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="279" y="86" width="109" height="19" forecolor="#5048C2" uuid="386208b8-5619-4f9c-b3d1-26ef59f717f2"/>
+				<reportElement x="279" y="86" width="109" height="19" forecolor="#5048C2" uuid="386208b8-5619-4f9c-b3d1-26ef59f717f2">
+					<printWhenExpression><![CDATA[$P{FechaFin} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DATEFORMAT($P{FechaFin},"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="268" y="70" width="120" height="20" forecolor="#554ED4" uuid="788f46f2-f35f-45d3-9a4a-d139f2023937"/>
+				<reportElement x="268" y="70" width="120" height="20" forecolor="#554ED4" uuid="788f46f2-f35f-45d3-9a4a-d139f2023937">
+					<printWhenExpression><![CDATA[$P{FechaFin} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial Black" size="12"/>
 				</textElement>
@@ -212,10 +223,6 @@
 			<rectangle>
 				<reportElement x="0" y="13" width="595" height="83" forecolor="rgba(0, 0, 0, 0.0)" backcolor="rgba(85, 80, 217, 0.14901961)" uuid="867b6f65-6ef4-4397-bef4-e4e72d7798b5"/>
 			</rectangle>
-			<image hAlign="Center" vAlign="Middle">
-				<reportElement x="10" y="12" width="90" height="84" uuid="ece8a079-3c53-4127-a1c0-85b9e1c65ff1"/>
-				<imageExpression><![CDATA[$F{LOGO_APP}.getBinaryStream()]]></imageExpression>
-			</image>
 			<textField>
 				<reportElement x="100" y="12" width="99" height="84" forecolor="#5048C2" uuid="8067dddd-39ae-45c7-83d1-568137de8d2f">
 					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3680d55c-bae1-4b3d-95bc-252cbe211e1d"/>
@@ -223,7 +230,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOMBRE_APP}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DATEFORMAT($F{FECHA_FIN},"dd-MM-yyyy")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="199" y="12" width="99" height="84" forecolor="#5048C2" uuid="8b83e3a3-a469-4a54-9ffd-cfe7a2a55853">
@@ -241,7 +248,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{NOMBRE_TIPO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOMBRE_ZONA}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="397" y="12" width="99" height="84" forecolor="#5048C2" uuid="75b19ea6-73c2-4843-a69e-25e071c9d995">
@@ -250,7 +257,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{UNIDADES_OP}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{SECTOR_COMERCIO}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="496" y="12" width="99" height="84" forecolor="#5048C2" uuid="6dabf404-1ea5-4c62-a27c-6a95687092b5">
@@ -259,7 +266,16 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{UNIDADES_REP}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{CANTIDAD_PRODUCTOS}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="1" y="11" width="99" height="84" forecolor="#5048C2" uuid="b9b0e0e0-73b4-4ef5-8ce0-82e639f118d5">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3680d55c-bae1-4b3d-95bc-252cbe211e1d"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DATEFORMAT($F{FECHA_INICIO},"dd-MM-yyyy")]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>

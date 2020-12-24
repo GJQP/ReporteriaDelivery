@@ -336,7 +336,7 @@
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="112" splitType="Stretch">
+		<band height="53" splitType="Stretch">
 			<textField>
 				<reportElement x="614" y="12" width="215" height="30" forecolor="#5048C2" uuid="6a9ab314-ae9d-4bf5-ae59-81190d9f1ff4"/>
 				<textElement textAlignment="Right" verticalAlignment="Top">
