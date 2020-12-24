@@ -390,7 +390,7 @@ FROM (
                 p.tracking                                     TRACKING,
                 TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio FECHA_INICIO,
                 TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin    FECHA_FIN,
-                COUNT(de.cantidad),
+                COUNT(de.cantidad) CANTIDAD,
                 p.id_app APP_ID,
                 u.email
          FROM PEDIDOS p,
