@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -58,20 +58,20 @@
 		</band>
 	</background>
 	<pageHeader>
-		<band height="129" splitType="Stretch">
+		<band height="120" splitType="Stretch">
 			<staticText>
-				<reportElement x="15" y="19" width="255" height="90" forecolor="#5048C2" uuid="1e28f69f-82e0-4a21-bc1a-72cd2007f738"/>
+				<reportElement x="20" y="30" width="320" height="90" forecolor="#5048C2" uuid="1e28f69f-82e0-4a21-bc1a-72cd2007f738"/>
 				<textElement verticalAlignment="Middle">
-					<font fontName="Arial Black" size="16.5" isBold="true"/>
+					<font fontName="Arial Black" size="20.5" isBold="true"/>
 				</textElement>
-				<text><![CDATA[TOP 10 DE MAYOR CANTIDAD DE PRODUCTOS DESPACHADOS POR ZONA]]></text>
+				<text><![CDATA[TRANSPORTE POR PROVEEDOR DE SERVICIO]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="450" y="26" width="118" height="20" forecolor="#554ED4" uuid="c65b7320-09ec-41aa-9acc-62906d63ef3b"/>
+				<reportElement x="498" y="26" width="70" height="20" forecolor="#554ED4" uuid="c65b7320-09ec-41aa-9acc-62906d63ef3b"/>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial Black" size="12"/>
 				</textElement>
-				<text><![CDATA[FECHA REPORTE:]]></text>
+				<text><![CDATA[FECHA:]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
 				<reportElement x="460" y="42" width="109" height="19" forecolor="#5048C2" uuid="a385377f-f33c-4d27-80af-a4b95881727a"/>
@@ -90,7 +90,7 @@
 				<text><![CDATA[ESTADO:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="498" y="89" width="71" height="20" forecolor="#5048C2" uuid="b1ca7703-6c4d-4df8-aa0e-a9956886b411">
+				<reportElement x="365" y="89" width="204" height="20" forecolor="#5048C2" uuid="b1ca7703-6c4d-4df8-aa0e-a9956886b411">
 					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
@@ -98,52 +98,6 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$P{Estado}]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="400" y="72" width="82" height="20" forecolor="#5048C2" uuid="511a18f8-ff39-4f9d-bf17-4152ac9bb27d">
-					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font fontName="Arial Black" size="12"/>
-				</textElement>
-				<text><![CDATA[ZONA:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="400" y="89" width="84" height="31" forecolor="#5048C2" uuid="1987cb9d-b5b3-4de0-982c-2b688ab8db26">
-					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{Estado}]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="273" y="25" width="120" height="20" forecolor="#554ED4" uuid="0292d863-d02b-4a06-9a7a-cf5e646d9322"/>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
-					<font fontName="Arial Black" size="12"/>
-				</textElement>
-				<text><![CDATA[FECHA INICIO:]]></text>
-			</staticText>
-			<textField textAdjust="StretchHeight">
-				<reportElement x="284" y="41" width="109" height="19" forecolor="#5048C2" uuid="679b58b3-ad46-4a37-84b2-a537d7add510"/>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
-					<font fontName="Arial" size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
-			</textField>
-			<textField textAdjust="StretchHeight">
-				<reportElement x="279" y="86" width="109" height="19" forecolor="#5048C2" uuid="386208b8-5619-4f9c-b3d1-26ef59f717f2"/>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
-					<font fontName="Arial" size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="268" y="70" width="120" height="20" forecolor="#554ED4" uuid="788f46f2-f35f-45d3-9a4a-d139f2023937"/>
-				<textElement textAlignment="Right" verticalAlignment="Bottom">
-					<font fontName="Arial Black" size="12"/>
-				</textElement>
-				<text><![CDATA[FECHA FIN:]]></text>
-			</staticText>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -157,7 +111,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Fecha de Inicio]]></text>
+				<text><![CDATA[Logo]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="100" y="0" width="99" height="61" forecolor="#FFFFFF" uuid="0330fa7b-2393-4800-8cc3-01e24c1114a8">
@@ -166,7 +120,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Fecha de Fin]]></text>
+				<text><![CDATA[Aplicación Delivery]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="199" y="0" width="99" height="61" forecolor="#FFFFFF" uuid="d76f610e-561d-4628-aa80-d82d6b474631">
@@ -184,7 +138,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Zona]]></text>
+				<text><![CDATA[Tipo de Transporte]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="397" y="0" width="99" height="61" forecolor="#FFFFFF" uuid="e6aee6c9-e215-4f1e-95d5-df8b5a5c0d88">
@@ -193,7 +147,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Sector del Producto]]></text>
+				<text><![CDATA[Unidades Disponibles]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="496" y="0" width="99" height="61" forecolor="#FFFFFF" uuid="d8093c05-1051-4886-9591-9f092fa95be3">
@@ -202,7 +156,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Cantidad Productos]]></text>
+				<text><![CDATA[Unidades en Reparación]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
