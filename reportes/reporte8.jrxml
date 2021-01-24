@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_1/reporte1_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_1/reporte1"/>
+	<parameter name="TRACKINGS" class="java.util.Collection"/>
+	<parameter name="TRACK_STR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[$P{TRACKINGS}.toString()]]></defaultValueExpression>
+	</parameter>
+	<queryString language="plsql">
+		<![CDATA[{call reporte8($P{ORACLE_REF_CURSOR},
+						$P{TRACK_STR}
+						)
+}]]>
+	</queryString>
+	<field name="TRACKING" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="TRACKING"/>
+		<property name="com.jaspersoft.studio.field.label" value="TRACKING"/>
+	</field>
+	<field name="F_INICIO" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="F_INICIO"/>
+		<property name="com.jaspersoft.studio.field.label" value="F_INICIO"/>
+	</field>
+	<field name="F_FIN" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="F_FIN"/>
+		<property name="com.jaspersoft.studio.field.label" value="F_FIN"/>
+	</field>
+	<field name="C_PROD" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="C_PROD"/>
+		<property name="com.jaspersoft.studio.field.label" value="C_PROD"/>
+	</field>
+	<field name="CORREO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="CORREO"/>
+		<property name="com.jaspersoft.studio.field.label" value="CORREO"/>
+	</field>
+	<field name="T_ESTIMADO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="T_ESTIMADO"/>
+		<property name="com.jaspersoft.studio.field.label" value="T_ESTIMADO"/>
+	</field>
+	<field name="MAPA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="MAPA"/>
+		<property name="com.jaspersoft.studio.field.label" value="MAPA"/>
+	</field>
+	<background>
+		<band height="840" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<image>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="595" height="840" uuid="430b3008-59af-4430-9403-e841738a5766">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA["fondo.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</background>
+	<pageHeader>
+		<band height="145">
+			<staticText>
+				<reportElement x="19" y="25" width="331" height="65" forecolor="#5048C2" uuid="841ccfa7-cab1-449c-86d1-38dcbeafefdb"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial Black" size="20.5" isBold="true"/>
+				</textElement>
+				<text><![CDATA[MONITOREO DE TRACKING DE ENVÍOS]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="444" y="27" width="70" height="20" forecolor="#554ED4" uuid="e0f8dbf5-e521-4118-9b4e-e25c44ae00ed"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial Black" size="12"/>
+				</textElement>
+				<text><![CDATA[FECHA:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="468" y="26" width="109" height="19" forecolor="#5048C2" uuid="cd3b6160-61df-4526-b851-9b241e2807ca"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="70" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<rectangle>
+				<reportElement x="10" y="0" width="567" height="60" forecolor="rgba(0, 0, 0, 0.0)" backcolor="#5550D9" uuid="df3810a1-f072-48c3-af48-a1087477bee1"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="10" y="0" width="60" height="60" forecolor="#FFFFFF" uuid="31547b9d-20b2-4e0e-adc8-b09e640f1d28"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[N° Tracking]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="70" y="0" width="70" height="60" forecolor="#FFFFFF" uuid="34cf1b50-7d77-4c57-9e0b-74e9275be7b6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de Inicio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="143" y="0" width="60" height="60" forecolor="#FFFFFF" uuid="e945209e-d16e-45eb-b21b-11fa83dc480a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha de Fin]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="0" width="70" height="60" forecolor="#FFFFFF" uuid="1572f06a-14e1-4f85-bd95-798d1f8f4008"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cantidad de productos a enviar]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="290" y="0" width="100" height="60" forecolor="#FFFFFF" uuid="eede042b-4c46-4976-ae4a-dd06bf5e17a3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Email Cliente]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="390" y="0" width="68" height="60" forecolor="#FFFFFF" uuid="cab5810d-c1ab-4e0c-9cf4-e0a4ab4afafe"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tiempo Estimado de Llegada]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="470" y="0" width="107" height="60" forecolor="#FFFFFF" uuid="74872f25-77ae-492a-8057-d48ecacf01e5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Ubicación Exacta]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="124" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<rectangle>
+				<reportElement x="10" y="5" width="567" height="107" forecolor="rgba(0, 0, 0, 0.0)" backcolor="rgba(85, 80, 217, 0.14901961)" uuid="11a1709d-06d5-4d6d-bee9-1a464534d0a0"/>
+			</rectangle>
+			<textField>
+				<reportElement x="10" y="3" width="60" height="110" forecolor="#5048C2" uuid="6197e777-7bbf-429b-9c4e-b91e6a163d19">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TRACKING}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="70" y="3" width="70" height="109" forecolor="#5048C2" uuid="7b6c35d0-8770-4486-aba5-bd38734f7b94">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2285391b-0ac0-40de-8981-d3e936894f5c"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DATEFORMAT($F{F_INICIO},"dd/MM/yyyy hh:mm:ss a")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="142" y="4" width="60" height="109" forecolor="#5048C2" uuid="a10eb20a-cb09-4608-86fc-4d1074717309">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="2285391b-0ac0-40de-8981-d3e936894f5c"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DATEFORMAT($F{F_FIN},"dd/MM/yyyy hh:mm:ss a")]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="209" y="0" width="71" height="110" forecolor="#5048C2" uuid="5c456c4e-9e11-4ab7-8693-7b236e7e61e2">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{C_PROD}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="290" y="0" width="100" height="110" forecolor="#5048C2" uuid="751b0e3d-9478-4f34-b626-1ecc788f0242">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{CORREO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="394" y="3" width="68" height="107" forecolor="#5048C2" uuid="3853da07-b30b-4a96-be70-24f22e54db5c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{T_ESTIMADO}]]></textFieldExpression>
+			</textField>
+			<image>
+				<reportElement x="473" y="9" width="100" height="100" uuid="dbcde1e0-7016-420c-b2f7-e9e818aa9657">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA[$F{MAPA}]]></imageExpression>
+			</image>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="87" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<textField>
+				<reportElement x="349" y="10" width="215" height="50" forecolor="#5048C2" uuid="a5981f36-f852-485a-93cb-5e26b03f0b73"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
