@@ -1107,7 +1107,7 @@ BEGIN
     dbms_output.put_line('## SE HA ASIGNADO LA UNIDAD DE TRANSPORTE ' || unidad_trnsp.id);
 
     --RELEVO
-    FOR l_ruta IN rutas_pedido(pedido_sel.tracking)
+    /*FOR l_ruta IN rutas_pedido(pedido_sel.tracking)
         LOOP
             dbms_output.put_line('## LA UNIDAD VA A RETOMAR EL PEDIDO DE LA UNIDAD ' || l_ruta.id_unidad);
 
@@ -1180,7 +1180,7 @@ BEGIN
                     crear_ubicacion(unidad_trnsp.ubicacion_garaje), 'RETORNO', NULL);
 
             GOTO fin;
-        END LOOP;
+        END LOOP;*/
     --IR A LA SUCURSAL
     dbms_output.put_line('## LA UNIDAD SE DIRIGE A RETIRAR EL PEDIDO EN LA SUCURSAL');
     --por cada pedido en la sucursal listo
@@ -1258,11 +1258,11 @@ BEGIN
                     simular_accidente(
                             unidad_trnsp.id,
                             pedido_aux,
-                            'REPARACION',
+                            'DESCONTINUADA',
                             maleta(l_ped_rut).ruta,
                             ruta_origen_actual,
                             unidad_trnsp.velocidad_media,
-                            maleta.count > 1);
+                            TRUE);
                 END LOOP;
         ELSE
             FOR l_ped_rut IN pedidos_enviados..maleta.last
