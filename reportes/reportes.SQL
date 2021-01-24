@@ -240,8 +240,6 @@ BEGIN
 
 END;
 
-
-
 CREATE OR REPLACE PROCEDURE reporte6(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
                                      p_fecha_registro DATE DEFAULT NULL)
     IS
@@ -371,4 +369,94 @@ BEGIN
           AND s.id_emp = emp.id
           AND s.id_app = apps.id
         ORDER BY nombre_estado, numero_pedidos DESC;
+END;
+
+
+--ENTREGA 3
+
+CREATE OR REPLACE PROCEDURE reporte8(cur_rep OUT SYS_REFCURSOR, p_tracking VARCHAR2) IS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT p.tracking                                                           AS tracking,
+               p.duracion.fecha_inicio                                              AS f_inicio,
+               r.origen.actualizado +
+               ubicacion.obtener_tiempo_estimado_en_horas(r.origen,
+                                                          d2.ubicacion,
+                                                          tdu.velocidad_media) / 24 AS f_fin,
+               --,
+               (SELECT COUNT(*) FROM detalles d WHERE p.tracking = d.id_tracking)   AS c_prod,
+               u.email                                                              AS correo,
+               TRUNC(ubicacion.obtener_tiempo_estimado_en_horas(r.origen,
+                                                                d2.ubicacion,
+                                                                tdu.velocidad_media)
+                   )
+                   || ':' ||
+               TRIM(
+                       TO_CHAR(
+                               MOD(ubicacion.obtener_tiempo_estimado_en_horas(r.origen,
+                                                                              d2.ubicacion,
+                                                                              tdu.velocidad_media) * 60,
+                                   60),
+                               '09'
+                           ))
+                   || 'h'                                                           AS t_estimado,
+               obtener_mapa(r.origen,
+                            r.destino,
+                            tdu.velocidad_media)                                    AS mapa
+        FROM pedidos p
+                 INNER JOIN (SELECT MAX(r.id) AS id, p.tracking
+                             FROM pedidos p
+                                      INNER JOIN rutas r ON p.tracking = r.id_traking
+                             WHERE r.proposito != 'RETORNO'
+                             GROUP BY p.tracking) ru ON ru.tracking = p.tracking
+                 INNER JOIN rutas r ON ru.id = r.id
+                 INNER JOIN direcciones d2
+                            ON d2.id_estado = p.id_estado AND d2.id_municipio = p.id_municipio AND
+                               d2.id_zona = p.id_zona AND
+                               d2.id_usuario = p.id_usuario AND d2.id = p.id_direccion
+                 INNER JOIN unidades_de_transporte udt ON r.id_unidad = udt.id
+                 INNER JOIN tipos_de_unidades tdu ON udt.id_tipo = tdu.id
+                 INNER JOIN usuarios u ON p.id_usuario = u.id
+        WHERE r.cancelado IS NULL
+          AND p.cancelado IS NULL
+          AND p.duracion.fecha_fin IS NULL
+          AND (p_tracking IS NULL OR 0 < BUSCAR(p_tracking,p.tracking));
+END;
+
+CREATE OR REPLACE PROCEDURE reporte12(cur_rep OUT SYS_REFCURSOR, p_origen VARCHAR2, p_destino VARCHAR2) IS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT ad.app.logo          AS logo,
+               zo.nombre            AS origen,
+               zd.nombre            AS destino,
+               tet.tiempo || ' min' AS llegada,
+               tet.nombre           AS tipo
+        FROM (SELECT tdu.nombre,
+                     pdz.id_empresa,
+                     TRUNC(AVG(p.duracion.fecha_fin - p.duracion.fecha_inicio) * 24 * 60) tiempo,
+                     pdz.origen,
+                     pdz.destino
+              FROM pedidos p
+                       INNER JOIN (SELECT p.tracking, p.id_empresa, s.id_zona AS origen, d.id_zona AS destino
+                                   FROM pedidos p
+                                            INNER JOIN (SELECT DISTINCT d.id_sucursal, d.id_tracking FROM detalles d) sc
+                                                       ON sc.id_tracking = p.tracking
+                                            INNER JOIN sucursales s ON sc.id_sucursal = s.id
+                                            INNER JOIN direcciones d
+                                                       ON p.id_estado = d.id_estado AND
+                                                          p.id_municipio = d.id_municipio AND
+                                                          p.id_zona = d.id_zona AND p.id_usuario = d.id_usuario AND
+                                                          p.id_direccion = d.id) pdz ON p.tracking = pdz.tracking
+                       INNER JOIN rutas r ON p.tracking = r.id_traking
+                       INNER JOIN unidades_de_transporte udt ON r.id_unidad = udt.id
+                       INNER JOIN tipos_de_unidades tdu ON tdu.id = udt.id_tipo
+              WHERE p.duracion.fecha_fin IS NOT NULL
+                AND p.cancelado IS NULL
+              GROUP BY tdu.nombre, pdz.id_empresa, pdz.origen, pdz.destino) tet
+             INNER JOIN aplicaciones_delivery ad ON tet.id_empresa = ad.id
+             INNER JOIN zonas zo ON tet.origen = zo.id
+             INNER JOIN zonas zd ON tet.destino = zd.id
+    WHERE (p_origen IS NULL OR 0 < BUSCAR(p_origen,zo.nombre))
+    AND (p_destino IS NULL OR 0 < BUSCAR(p_destino,zd.nombre))
+    ;
 END;

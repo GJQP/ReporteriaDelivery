@@ -1387,3 +1387,23 @@ BEGIN
     END IF;
 END;
 
+CREATE OR REPLACE FUNCTION obtener_mapa(origen UBICACION,
+                                        destino UBICACION,
+                                        velocidad tipos_de_unidades.velocidad_media%TYPE)
+    RETURN VARCHAR2 IS
+
+    url  VARCHAR2(68) := 'https://www.mapquestapi.com/staticmap/v5/map?size=170,170&margin=100';
+    key  VARCHAR2(32) := 'JX2R0AK3akgJkGxmK9wi5NeAnGRn8rjP';
+    moto UBICACION;
+BEGIN
+
+    moto := ubicacion.obtener_posicion(destino,
+                                       origen,
+                                       velocidad,
+                                       (sim_date() - origen.actualizado) * 24);
+
+    RETURN url || '&key=' || key
+--         || '&start=' || origen.latitud || ',' || origen.longitud
+--         || '&end=' || destino.latitud || ',' || destino.longitud
+        || '&locations=' || moto.latitud || ',' || moto.longitud;
+END;
