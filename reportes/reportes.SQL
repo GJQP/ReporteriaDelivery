@@ -240,6 +240,8 @@ BEGIN
 
 END;
 
+
+
 CREATE OR REPLACE PROCEDURE reporte6(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
                                      p_fecha_registro DATE DEFAULT NULL)
     IS
@@ -370,6 +372,131 @@ BEGIN
           AND s.id_app = apps.id
         ORDER BY nombre_estado, numero_pedidos DESC;
 END;
+
+-- NOTA: EL REPORTE 7 SE TRAE TODOS SIN IMPORTAR SI HAN FINALIZADO.
+CREATE OR REPLACE PROCEDURE reporte7(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL,p_app VARCHAR2 DEFAULT NULL)
+IS
+BEGIN
+OPEN test_cur FOR
+SELECT
+       s.*,
+       TREAT(app.APP AS MARCA).nombre NOMBRE_APP,
+       TREAT(app.APP AS MARCA).logo LOGO_APP
+FROM (
+         SELECT e.NOMBRE                                       ESTADO,
+                dir.descripcion                                DESCRIPCION,
+                dir.referencia                                 REFERENCIA,
+                p.tracking                                     TRACKING,
+                TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio FECHA_INICIO,
+                TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin    FECHA_FIN,
+                COUNT(de.cantidad) CANTIDAD,
+                p.id_app APP_ID,
+                u.email
+         FROM PEDIDOS p,
+              ESTADOS e,
+              DIRECCIONES dir,
+              DETALLES de,
+              USUARIOS u,
+              APLICACIONES_DELIVERY app
+         WHERE e.id = p.id_estado
+           AND dir.id = p.id_direccion
+           AND de.ID_TRACKING = p.tracking
+           AND u.id = p.id_usuario
+           AND app.id = p.id_app
+           AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+           AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+           AND (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+           AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+         GROUP BY dir.descripcion,
+                  e.NOMBRE,
+                  dir.referencia,
+                  p.tracking,
+                  TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio,
+                  TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin,
+                  u.email,
+                  p.id_app
+         ORDER BY TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio,
+                  TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin,
+                  p.tracking
+     ) s, APLICACIONES_DELIVERY app
+    WHERE app.id = s.APP_ID;
+end;
+
+CREATE OR REPLACE PROCEDURE reporte9(test_cur OUT SYS_REFCURSOR, p_estado VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL,p_zona VARCHAR2 DEFAULT NULL)
+IS
+BEGIN
+OPEN test_cur FOR
+SELECT s.* FROM
+(SELECT
+    MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) FECHA_INICIO,
+    MAX(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) FECHA_FIN,
+    e.nombre NOMBRE_ESTADO,
+    z.nombre NOMBRE_ZONA,
+    sec.nombre SECTOR_COMERCIO,
+    SUM(d.cantidad) CANTIDAD_PRODUCTOS,
+    ROW_NUMBER() OVER (
+         PARTITION BY e.NOMBRE, z.nombre
+         ORDER BY SUM(d.cantidad) DESC
+    )  row_number
+FROM pedidos p, detalles d, productos pro, sectores_de_comercio sec,estados e, zonas z
+WHERE
+    d.ID_TRACKING = p.TRACKING
+    AND e.ID = p.ID_ESTADO
+    AND z.ID = p.ID_ZONA
+    AND pro.ID = d.ID_PRODUCTO
+    AND sec.ID = pro.ID_SECTOR
+    AND TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin IS NOT NULL
+    AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+    AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+    AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+    AND (p_estado IS NULL OR 0 < buscar(p_zona, z.nombre))
+GROUP BY
+    e.nombre,z.nombre,sec.nombre
+ORDER BY
+    e.nombre,
+    z.nombre,
+    SUM(d.cantidad) DESC,
+    MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio)) s
+WHERE s.row_number <=5;
+end;
+
+CREATE OR REPLACE PROCEDURE reporte10(test_cur OUT SYS_REFCURSOR, p_app VARCHAR2 DEFAULT NULL,
+                                     fecha_ini DATE DEFAULT NULL,fecha_fin DATE DEFAULT NULL)
+IS
+BEGIN
+OPEN test_cur FOR
+SELECT
+       s.*,
+       TREAT(app.APP AS MARCA).nombre NOMBRE_APP,
+       TREAT(app.APP AS MARCA).logo LOGO_APP,
+       TREAT(emp.EMPRESA AS MARCA).nombre NOMBRE_EMP,
+       TREAT(emp.EMPRESA AS MARCA).logo LOGO_EMP
+FROM
+(SELECT
+    MIN(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) FECHA_INICIO,
+    MAX(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) FECHA_FIN,
+    p.ID_APP ID_APP,
+    p.ID_EMPRESA ID_EMPRESA,
+    SUM(p.total) INGRESOS
+FROM PEDIDOS p, APLICACIONES_DELIVERY app
+WHERE
+    (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+    AND p.ID_APP = app.ID
+    AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
+    AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
+GROUP BY
+    p.ID_APP, p.ID_EMPRESA
+ORDER BY
+    p.ID_EMPRESA, p.ID_APP
+) s, APLICACIONES_DELIVERY app, EMPRESAS emp
+WHERE
+    app.ID = s.ID_APP
+    AND emp.ID = s.ID_EMPRESA;
+end;
+
+
 
 
 --ENTREGA 3
