@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -11,14 +11,18 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_2/reporte9_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte9"/>
 	<parameter name="FechaInicio" class="java.sql.Date">
 		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
 	</parameter>
-	<parameter name="Estado" class="java.lang.String"/>
-	<parameter name="Zona" class="java.lang.String"/>
+	<parameter name="Estado" class="java.util.Collection"/>
+	<parameter name="Zona" class="java.util.Collection"/>
 	<parameter name="FechaFin" class="java.sql.Date"/>
 	<queryString language="plsql">
-		<![CDATA[{call reporte9($P{ORACLE_REF_CURSOR},$P{Estado},$P{FechaInicio},$P{FechaFin},$P{Zona})}]]>
+		<![CDATA[{call reporte9($P{ORACLE_REF_CURSOR},'$P!{Estado}',$P{FechaInicio},$P{FechaFin},'$P!{Zona}')}]]>
 	</queryString>
 	<field name="FECHA_INICIO" class="java.sql.Timestamp">
 		<property name="com.jaspersoft.studio.field.name" value="FECHA_INICIO"/>
@@ -61,7 +65,7 @@
 		</band>
 	</background>
 	<pageHeader>
-		<band height="129" splitType="Stretch">
+		<band height="130" splitType="Stretch">
 			<staticText>
 				<reportElement x="15" y="19" width="255" height="90" forecolor="#5048C2" uuid="1e28f69f-82e0-4a21-bc1a-72cd2007f738"/>
 				<textElement verticalAlignment="Middle">
@@ -84,8 +88,8 @@
 				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="485" y="72" width="82" height="20" forecolor="#5048C2" uuid="e3302eae-6775-4099-8371-f549c20d89ea">
-					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
+				<reportElement x="320" y="109" width="82" height="20" forecolor="#5048C2" uuid="e3302eae-6775-4099-8371-f549c20d89ea">
+					<printWhenExpression><![CDATA[$P{Estado}.toString() != "[]"]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial Black" size="12"/>
@@ -93,17 +97,17 @@
 				<text><![CDATA[ESTADO:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="498" y="89" width="71" height="20" forecolor="#5048C2" uuid="b1ca7703-6c4d-4df8-aa0e-a9956886b411">
-					<printWhenExpression><![CDATA[$P{Estado} != null]]></printWhenExpression>
+				<reportElement x="410" y="110" width="175" height="20" forecolor="#5048C2" uuid="b1ca7703-6c4d-4df8-aa0e-a9956886b411">
+					<printWhenExpression><![CDATA[$P{Estado}.toString() != "[]"]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{Estado}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{Estado}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="400" y="72" width="82" height="20" forecolor="#5048C2" uuid="511a18f8-ff39-4f9d-bf17-4152ac9bb27d">
-					<printWhenExpression><![CDATA[$P{Zona} != null]]></printWhenExpression>
+				<reportElement x="15" y="109" width="82" height="20" forecolor="#5048C2" uuid="511a18f8-ff39-4f9d-bf17-4152ac9bb27d">
+					<printWhenExpression><![CDATA[$P{Zona}.toString() != "[]"]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial Black" size="12"/>
@@ -111,13 +115,13 @@
 				<text><![CDATA[ZONA:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="400" y="89" width="84" height="31" forecolor="#5048C2" uuid="1987cb9d-b5b3-4de0-982c-2b688ab8db26">
-					<printWhenExpression><![CDATA[$P{Zona} != null]]></printWhenExpression>
+				<reportElement x="100" y="109" width="198" height="20" forecolor="#5048C2" uuid="1987cb9d-b5b3-4de0-982c-2b688ab8db26">
+					<printWhenExpression><![CDATA[$P{Zona}.toString() != "[]"]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{Zona}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{Zona}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="273" y="25" width="120" height="20" forecolor="#554ED4" uuid="0292d863-d02b-4a06-9a7a-cf5e646d9322">
@@ -138,7 +142,7 @@
 				<textFieldExpression><![CDATA[DATEFORMAT($P{FechaInicio},"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="279" y="86" width="109" height="19" forecolor="#5048C2" uuid="386208b8-5619-4f9c-b3d1-26ef59f717f2">
+				<reportElement x="392" y="73" width="109" height="19" forecolor="#5048C2" uuid="386208b8-5619-4f9c-b3d1-26ef59f717f2">
 					<printWhenExpression><![CDATA[$P{FechaFin} != null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">

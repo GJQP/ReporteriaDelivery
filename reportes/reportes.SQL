@@ -406,8 +406,8 @@ FROM (
            AND app.id = p.id_app
            AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
            AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
-           AND (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
-           AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+           AND (p_app IN ('[]','null') OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+           AND (p_estado IN ('[]','null') OR 0 < buscar(p_estado, e.nombre))
          GROUP BY dir.descripcion,
                   e.NOMBRE,
                   dir.referencia,
@@ -450,8 +450,8 @@ WHERE
     AND TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin IS NOT NULL
     AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
     AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
-    AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
-    AND (p_estado IS NULL OR 0 < buscar(p_zona, z.nombre))
+    AND (p_estado IN ('[]','null') OR 0 < buscar(p_estado, e.nombre))
+    AND (p_zona IN ('[]','null') OR 0 < buscar(p_zona, z.nombre))
 GROUP BY
     e.nombre,z.nombre,sec.nombre
 ORDER BY
@@ -482,7 +482,7 @@ FROM
     SUM(p.total) INGRESOS
 FROM PEDIDOS p, APLICACIONES_DELIVERY app
 WHERE
-    (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+    (p_app IN ('[]','null') OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
     AND p.ID_APP = app.ID
     AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
     AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
