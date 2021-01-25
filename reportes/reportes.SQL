@@ -527,9 +527,12 @@ BEGIN
                                '09'
                            ))
                    || 'h'                                                           AS t_estimado,
-               obtener_mapa(r.origen,
+               OBTENER_MAPA_LAT(r.origen,
                             r.destino,
-                            tdu.velocidad_media)                                    AS mapa
+                            tdu.velocidad_media)  as lat,
+               OBTENER_MAPA_LONG(r.origen,
+                            r.destino,
+                            tdu.velocidad_media)                                    AS longitud
         FROM pedidos p
                  INNER JOIN (SELECT MAX(r.id) AS id, p.tracking
                              FROM pedidos p
@@ -547,7 +550,7 @@ BEGIN
         WHERE r.cancelado IS NULL
           AND p.cancelado IS NULL
           AND p.duracion.fecha_fin IS NULL
-          AND (p_tracking IS NULL OR 0 < BUSCAR(p_tracking,p.tracking));
+          AND (p_tracking IN ('[]','null') OR 0 < BUSCAR(p_tracking,p.tracking));
 END;
 
 CREATE OR REPLACE PROCEDURE reporte12(cur_rep OUT SYS_REFCURSOR, p_origen VARCHAR2, p_destino VARCHAR2) IS
@@ -583,7 +586,17 @@ BEGIN
              INNER JOIN aplicaciones_delivery ad ON tet.id_empresa = ad.id
              INNER JOIN zonas zo ON tet.origen = zo.id
              INNER JOIN zonas zd ON tet.destino = zd.id
-    WHERE (p_origen IS NULL OR 0 < BUSCAR(p_origen,zo.nombre))
-    AND (p_destino IS NULL OR 0 < BUSCAR(p_destino,zd.nombre))
+    WHERE (p_origen IN ('[]','null') OR 0 < BUSCAR(p_origen,zo.nombre))
+    AND (p_destino IN ('[]','null') OR 0 < BUSCAR(p_destino,zd.nombre))
     ;
+END;
+
+CREATE OR REPLACE PROCEDURE reporteX(cur_rep OUT SYS_REFCURSOR, p_origen VARCHAR2)
+IS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT DECODE(p_origen,'[]','siii',DECODE(p_origen,'null','es null','me rindo')) as prueba
+
+             , 'help' as t FROM dual
+        WHERE p_origen IN('[]','null');
 END;
