@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
 	<property name="com.jaspersoft.studio.unit." value="pixel"/>
@@ -11,17 +11,13 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
-	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_2/reporte10_files/main_jrxml"/>
-	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte10"/>
-	<parameter name="Proveedor" class="java.util.Collection">
+	<parameter name="Proveedor" class="java.lang.String">
 		<defaultValueExpression><![CDATA[null]]></defaultValueExpression>
 	</parameter>
 	<parameter name="FechaInicio" class="java.sql.Date"/>
 	<parameter name="FechaFin" class="java.sql.Date"/>
 	<queryString language="plsql">
-		<![CDATA[{call reporte10($P{ORACLE_REF_CURSOR},'$P!{Proveedor}',$P{FechaInicio},$P{FechaFin})}]]>
+		<![CDATA[{call reporte10($P{ORACLE_REF_CURSOR},$P{Proveedor},$P{FechaInicio},$P{FechaFin})}]]>
 	</queryString>
 	<field name="FECHA_INICIO" class="java.sql.Timestamp">
 		<property name="com.jaspersoft.studio.field.name" value="FECHA_INICIO"/>
@@ -81,22 +77,22 @@
 				<text><![CDATA[INGRESOS POR COMERCIO Y PROVEEDOR DE SERVICIOS DELIVERY]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="509" y="26" width="70" height="20" forecolor="#554ED4" uuid="c65b7320-09ec-41aa-9acc-62906d63ef3b"/>
+				<reportElement x="498" y="26" width="70" height="20" forecolor="#554ED4" uuid="c65b7320-09ec-41aa-9acc-62906d63ef3b"/>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial Black" size="12"/>
 				</textElement>
 				<text><![CDATA[FECHA:]]></text>
 			</staticText>
 			<textField textAdjust="StretchHeight">
-				<reportElement x="471" y="42" width="109" height="19" forecolor="#5048C2" uuid="a385377f-f33c-4d27-80af-a4b95881727a"/>
+				<reportElement x="460" y="42" width="109" height="19" forecolor="#5048C2" uuid="a385377f-f33c-4d27-80af-a4b95881727a"/>
 				<textElement textAlignment="Right" verticalAlignment="Bottom">
 					<font fontName="Arial" size="12"/>
 				</textElement>
 				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="484" y="72" width="97" height="20" forecolor="#5048C2" uuid="e3302eae-6775-4099-8371-f549c20d89ea">
-					<printWhenExpression><![CDATA[$P{Proveedor}.toString() != "[]"]]></printWhenExpression>
+				<reportElement x="470" y="72" width="97" height="20" forecolor="#5048C2" uuid="e3302eae-6775-4099-8371-f549c20d89ea">
+					<printWhenExpression><![CDATA[$P{Proveedor}!= null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
 					<font fontName="Arial Black" size="12"/>
@@ -104,13 +100,13 @@
 				<text><![CDATA[PROVEEDOR:]]></text>
 			</staticText>
 			<textField>
-				<reportElement x="430" y="89" width="150" height="31" forecolor="#5048C2" uuid="b1ca7703-6c4d-4df8-aa0e-a9956886b411">
+				<reportElement x="365" y="89" width="204" height="20" forecolor="#5048C2" uuid="b1ca7703-6c4d-4df8-aa0e-a9956886b411">
 					<printWhenExpression><![CDATA[$P{Proveedor}!= null]]></printWhenExpression>
 				</reportElement>
 				<textElement textAlignment="Right">
-					<font size="10"/>
+					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{Proveedor}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{Proveedor}]]></textFieldExpression>
 			</textField>
 			<textField textAdjust="StretchHeight">
 				<reportElement x="316" y="86" width="109" height="19" forecolor="#5048C2" uuid="0c4c5525-25f9-4595-af3c-3b4d59b30e08">

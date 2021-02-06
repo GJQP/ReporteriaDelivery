@@ -13,13 +13,17 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_2/reporte8_files/main_jrxml"/>
-	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte8"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w1" value="634"/>
-	<property name="com.jaspersoft.studio.property.dataset.dialog.DatasetDialog.sash.w2" value="352"/>
+	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_1/reporte1_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_1/reporte1"/>
 	<parameter name="TRACKINGS" class="java.util.Collection"/>
+	<parameter name="TRACK_STR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[$P{TRACKINGS}.toString()]]></defaultValueExpression>
+	</parameter>
 	<queryString language="plsql">
-		<![CDATA[{call reporte8($P{ORACLE_REF_CURSOR},'$P!{TRACKINGS}')}]]>
+		<![CDATA[{call reporte8($P{ORACLE_REF_CURSOR},
+						$P{TRACK_STR}
+						)
+}]]>
 	</queryString>
 	<field name="TRACKING" class="java.math.BigDecimal">
 		<property name="com.jaspersoft.studio.field.name" value="TRACKING"/>
@@ -45,13 +49,9 @@
 		<property name="com.jaspersoft.studio.field.name" value="T_ESTIMADO"/>
 		<property name="com.jaspersoft.studio.field.label" value="T_ESTIMADO"/>
 	</field>
-	<field name="LAT" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="LAT"/>
-		<property name="com.jaspersoft.studio.field.label" value="LAT"/>
-	</field>
-	<field name="LONGITUD" class="java.math.BigDecimal">
-		<property name="com.jaspersoft.studio.field.name" value="LONGITUD"/>
-		<property name="com.jaspersoft.studio.field.label" value="LONGITUD"/>
+	<field name="MAPA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="MAPA"/>
+		<property name="com.jaspersoft.studio.field.label" value="MAPA"/>
 	</field>
 	<background>
 		<band height="840" splitType="Stretch">
@@ -208,8 +208,11 @@
 				<textFieldExpression><![CDATA[$F{T_ESTIMADO}]]></textFieldExpression>
 			</textField>
 			<image>
-				<reportElement x="470" y="5" width="107" height="105" uuid="bcdbbf93-6163-4f7e-aad5-0fdc2c666d80"/>
-				<imageExpression><![CDATA["https://open.mapquestapi.com/staticmap/v5/map?key=JX2R0AK3akgJkGxmK9wi5NeAnGRn8rjP&locations=" + $F{LAT}.toString() + "," + $F{LONGITUD}.toString() + "&size=170,170"]]></imageExpression>
+				<reportElement x="473" y="9" width="100" height="100" uuid="dbcde1e0-7016-420c-b2f7-e9e818aa9657">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA[$F{MAPA}]]></imageExpression>
 			</image>
 		</band>
 	</detail>

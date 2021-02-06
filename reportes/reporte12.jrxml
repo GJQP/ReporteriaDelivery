@@ -16,9 +16,15 @@
 	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_2/reporte12_files/main_jrxml"/>
 	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte12"/>
 	<parameter name="ORIGEN" class="java.util.Collection"/>
+	<parameter name="O_STR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[${ORIGEN}.toString()]]></defaultValueExpression>
+	</parameter>
 	<parameter name="DESTINO" class="java.util.Collection"/>
+	<parameter name="D_STR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[${DESTINO}.toString()]]></defaultValueExpression>
+	</parameter>
 	<queryString language="plsql">
-		<![CDATA[{call reporte12($P{ORACLE_REF_CURSOR},'$P!{ORIGEN}', '$P!{DESTINO}')}]]>
+		<![CDATA[{call reporte12($P{ORACLE_REF_CURSOR},$P{O_STR},$P{D_STR})}]]>
 	</queryString>
 	<field name="LOGO" class="java.sql.Blob">
 		<property name="com.jaspersoft.studio.field.name" value="LOGO"/>
@@ -101,7 +107,7 @@
 				<textElement textAlignment="Right">
 					<font size="12"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{ORIGEN} == null?"TODAS":$P{ORIGEN}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{ORIGEN}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
 			</textField>
 		</band>
 	</pageHeader>
@@ -190,10 +196,15 @@
 				</textElement>
 				<textFieldExpression><![CDATA[$F{TIPO}]]></textFieldExpression>
 			</textField>
-			<image>
-				<reportElement x="10" y="5" width="100" height="105" uuid="53d9dd46-2efc-43a6-9fd8-1ea4fd9c2510"/>
-				<imageExpression><![CDATA[$F{LOGO}.getBinaryStream()]]></imageExpression>
-			</image>
+			<textField>
+				<reportElement x="10" y="3" width="101" height="110" forecolor="#5048C2" uuid="e40a990f-99c6-4ca7-abfe-f89b0b518733">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOGO}]]></textFieldExpression>
+			</textField>
 		</band>
 	</detail>
 	<pageFooter>
