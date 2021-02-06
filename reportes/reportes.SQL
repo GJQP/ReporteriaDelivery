@@ -587,3 +587,116 @@ BEGIN
     AND (p_destino IS NULL OR 0 < BUSCAR(p_destino,zd.nombre))
     ;
 END;
+
+CREATE OR REPLACE PROCEDURE reporte13(cur_rep OUT SYS_REFCURSOR, p_fecha_ini DATE DEFAULT NULL, p_fecha_fin DATE DEFAULT NULL) AS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT
+            S.*, (SELECT ADA.APP.LOGO FROM APLICACIONES_DELIVERY ADA WHERE ADA.ID = S.ID) LOGO
+        FROM (
+            SELECT
+                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
+                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                AVG(PED.VALORACION) VALORACION,
+                AD2.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE
+            FROM
+                PEDIDOS PED
+            INNER JOIN
+                APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
+            WHERE
+                (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_ini IS NULL) AND (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND PED.CANCELADO IS NULL
+            GROUP BY
+                AD2.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE
+            ) S
+        ORDER BY
+            VALORACION;
+END;
+
+-- Función de validación
+CREATE OR REPLACE FUNCTION validarTop(ID_EST INTEGER, ID_APP INTEGER, p_fecha_ini DATE DEFAULT NULL, p_fecha_fin DATE DEFAULT NULL) RETURN INTEGER IS
+    t_cur SYS_REFCURSOR;
+    APPLI INT;
+    times INT;
+    ESTADUS INT;
+BEGIN
+    times := 0;
+    OPEN t_cur FOR
+        SELECT
+            S.APP APP, S.ID_ESTADO ESTA
+        FROM
+             (SELECT
+                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
+                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                COUNT(PED.TRACKING) CANTIDAD,
+                AD2.ID APP,
+                TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE,
+                E.ID ID_ESTADO,
+                E.NOMBRE ESTADO
+            FROM
+                PEDIDOS PED
+            INNER JOIN
+                APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
+            INNER JOIN
+                ESTADOS E ON E.ID = PED.ID_ESTADO
+            WHERE
+                (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_fin IS NULL)
+            GROUP BY
+                AD2.ID,
+                E.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE,
+                E.NOMBRE
+            ORDER BY
+                E.NOMBRE,
+                CANTIDAD DESC
+            ) S;
+    LOOP
+        FETCH t_cur INTO APPLI, ESTADUS;
+        EXIT WHEN t_cur%NOTFOUND;
+        IF ESTADUS = ID_EST THEN
+            times := times + 1;
+        end if;
+        IF APPLI = ID_APP AND times < 4 THEN
+            RETURN 1;
+        ELSIF times > 3 THEN
+            return 0;
+        end if;
+    end loop;
+    return 0;
+END;
+
+CREATE OR REPLACE PROCEDURE reporte11(cur_rep OUT SYS_REFCURSOR, p_fecha_ini DATE DEFAULT NULL, p_fecha_fin DATE DEFAULT NULL, p_zona VARCHAR2 DEFAULT NULL) AS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT
+            S.*, (SELECT ADA.APP.LOGO FROM APLICACIONES_DELIVERY ADA WHERE ADA.ID = S.APP) LOGO
+        FROM (
+            SELECT
+                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
+                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                COUNT(PED.TRACKING) CANTIDAD,
+                AD2.ID APP,
+                TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE,
+                E.ID ID_ESTADO,
+                E.NOMBRE ESTADO
+            FROM
+                PEDIDOS PED
+            INNER JOIN
+                APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
+            INNER JOIN
+                ESTADOS E ON E.ID = PED.ID_ESTADO
+            WHERE
+                (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_fin IS NULL)
+            GROUP BY
+                AD2.ID,
+                E.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE,
+                E.NOMBRE
+            ORDER BY
+                E.NOMBRE,
+                CANTIDAD DESC
+            ) S
+        WHERE
+           1 = validarTop(S.ID_ESTADO, S.APP, p_fecha_ini, p_fecha_fin);
+END;
