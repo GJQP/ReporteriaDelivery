@@ -13,38 +13,35 @@
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
 	<property name="ireport.jasperserver.user" value="jasperadmin"/>
-	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_2/reporte12_files/main_jrxml"/>
-	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte12"/>
-	<parameter name="ORIGEN" class="java.util.Collection"/>
-	<parameter name="O_STR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[${ORIGEN}.toString()]]></defaultValueExpression>
-	</parameter>
-	<parameter name="DESTINO" class="java.util.Collection"/>
-	<parameter name="D_STR" class="java.lang.String" isForPrompting="false">
-		<defaultValueExpression><![CDATA[${DESTINO}.toString()]]></defaultValueExpression>
-	</parameter>
+	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte13"/>
+	<parameter name="F_FIN" class="java.util.Date"/>
+	<parameter name="F_INI" class="java.util.Date"/>
 	<queryString language="plsql">
-		<![CDATA[{call reporte12($P{ORACLE_REF_CURSOR},$P{O_STR},$P{D_STR})}]]>
+		<![CDATA[{call reporte13($P{ORACLE_REF_CURSOR},$P{F_INI},$P{F_FIN})}]]>
 	</queryString>
+	<field name="FECHA_INICIO" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="FECHA_INICIO"/>
+		<property name="com.jaspersoft.studio.field.label" value="FECHA_INICIO"/>
+	</field>
+	<field name="FECHA_FIN" class="java.sql.Timestamp">
+		<property name="com.jaspersoft.studio.field.name" value="FECHA_FIN"/>
+		<property name="com.jaspersoft.studio.field.label" value="FECHA_FIN"/>
+	</field>
+	<field name="VALORACION" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="VALORACION"/>
+		<property name="com.jaspersoft.studio.field.label" value="VALORACION"/>
+	</field>
+	<field name="ID" class="java.math.BigDecimal">
+		<property name="com.jaspersoft.studio.field.name" value="ID"/>
+		<property name="com.jaspersoft.studio.field.label" value="ID"/>
+	</field>
+	<field name="NOMBRE" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="NOMBRE"/>
+		<property name="com.jaspersoft.studio.field.label" value="NOMBRE"/>
+	</field>
 	<field name="LOGO" class="java.sql.Blob">
 		<property name="com.jaspersoft.studio.field.name" value="LOGO"/>
 		<property name="com.jaspersoft.studio.field.label" value="LOGO"/>
-	</field>
-	<field name="ORIGEN" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="ORIGEN"/>
-		<property name="com.jaspersoft.studio.field.label" value="ORIGEN"/>
-	</field>
-	<field name="DESTINO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="DESTINO"/>
-		<property name="com.jaspersoft.studio.field.label" value="DESTINO"/>
-	</field>
-	<field name="LLEGADA" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="LLEGADA"/>
-		<property name="com.jaspersoft.studio.field.label" value="LLEGADA"/>
-	</field>
-	<field name="TIPO" class="java.lang.String">
-		<property name="com.jaspersoft.studio.field.name" value="TIPO"/>
-		<property name="com.jaspersoft.studio.field.label" value="TIPO"/>
 	</field>
 	<background>
 		<band height="840" splitType="Stretch">
@@ -59,13 +56,13 @@
 		</band>
 	</background>
 	<pageHeader>
-		<band height="174">
+		<band height="121">
 			<staticText>
-				<reportElement x="10" y="20" width="400" height="50" forecolor="#5048C2" uuid="841ccfa7-cab1-449c-86d1-38dcbeafefdb"/>
+				<reportElement x="10" y="20" width="410" height="70" forecolor="#5048C2" uuid="841ccfa7-cab1-449c-86d1-38dcbeafefdb"/>
 				<textElement verticalAlignment="Middle">
 					<font fontName="Arial Black" size="20.5" isBold="true"/>
 				</textElement>
-				<text><![CDATA[TIEMPO ESTIMADO DE LLEGADA DE DELIVERY]]></text>
+				<text><![CDATA[PROMEDIO DE SATISFACCIÓN DE USUARIO]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="444" y="27" width="70" height="20" forecolor="#554ED4" uuid="e0f8dbf5-e521-4118-9b4e-e25c44ae00ed"/>
@@ -81,42 +78,6 @@
 				</textElement>
 				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
-			<staticText>
-				<reportElement x="300" y="73" width="140" height="27" forecolor="#5048C2" uuid="f4ce521a-b276-47c6-abe8-0293ce1277a5">
-					<printWhenExpression><![CDATA[$P{DESTINO}.toString() != "[]"]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Left">
-					<font fontName="Arial Black" size="12"/>
-				</textElement>
-				<text><![CDATA[ZONAS DESTINO:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="300" y="100" width="277" height="70" forecolor="#5048C2" uuid="119bf4be-b47b-493f-8ce2-268a08c21642">
-					<printWhenExpression><![CDATA[$P{DESTINO}.toString() != "[]"]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{DESTINO}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="10" y="73" width="240" height="27" forecolor="#5048C2" uuid="d97b2a54-c857-49d2-9dc9-2c3bc4dfb499">
-					<printWhenExpression><![CDATA[$P{ORIGEN}.toString() != "[]"]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Left">
-					<font fontName="Arial Black" size="12"/>
-				</textElement>
-				<text><![CDATA[ZONAS DE ORIGEN:]]></text>
-			</staticText>
-			<textField>
-				<reportElement x="10" y="100" width="240" height="70" forecolor="#5048C2" uuid="b58b15e6-63f0-4822-8c39-1911cc04e8c8">
-					<printWhenExpression><![CDATA[$P{ORIGEN}.toString() != "[]"]]></printWhenExpression>
-				</reportElement>
-				<textElement textAlignment="Right">
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$P{ORIGEN}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
-			</textField>
 		</band>
 	</pageHeader>
 	<columnHeader>
@@ -130,35 +91,35 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Logo]]></text>
+				<text><![CDATA[Fecha de inicio]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="118" y="0" width="100" height="60" forecolor="#FFFFFF" uuid="34cf1b50-7d77-4c57-9e0b-74e9275be7b6"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Zona de Origen]]></text>
+				<text><![CDATA[Fecha de fin]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="220" y="0" width="111" height="60" forecolor="#FFFFFF" uuid="e945209e-d16e-45eb-b21b-11fa83dc480a"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Zona de Destino]]></text>
+				<text><![CDATA[Nombre del provedor de servicio]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="331" y="0" width="113" height="60" forecolor="#FFFFFF" uuid="1572f06a-14e1-4f85-bd95-798d1f8f4008"/>
+				<reportElement x="332" y="0" width="113" height="60" forecolor="#FFFFFF" uuid="1572f06a-14e1-4f85-bd95-798d1f8f4008"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Tiempo Estiamdo de Llegada]]></text>
+				<text><![CDATA[Logo del proveedor de servicio]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="460" y="0" width="107" height="60" forecolor="#FFFFFF" uuid="eede042b-4c46-4976-ae4a-dd06bf5e17a3"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="12" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Tipo de Transporte]]></text>
+				<text><![CDATA[Promedio de satisfacción]]></text>
 			</staticText>
 		</band>
 	</columnHeader>
@@ -175,7 +136,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{ORIGEN}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DATEFORMAT($F{FECHA_FIN},"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="220" y="0" width="112" height="112" forecolor="#5048C2" uuid="19d14382-6e4d-4caa-8518-7d63d23b1f9f">
@@ -184,16 +145,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{DESTINO}]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="331" y="0" width="113" height="110" forecolor="#5048C2" uuid="d7b4d39c-cfcb-4b28-b2c8-13f61fb185d4">
-					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33637b9d-6197-4bb0-9742-038ea29204dc"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font size="14" isBold="true"/>
-				</textElement>
-				<textFieldExpression><![CDATA[$F{LLEGADA}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{NOMBRE}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="460" y="0" width="107" height="110" forecolor="#5048C2" uuid="6f54e058-0af8-4091-84bf-7d616b6ee7c9">
@@ -202,7 +154,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{TIPO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{VALORACION}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="10" y="3" width="101" height="110" forecolor="#5048C2" uuid="e40a990f-99c6-4ca7-abfe-f89b0b518733">
@@ -211,8 +163,12 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="14" isBold="true"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$F{LOGO}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[DATEFORMAT($F{FECHA_INICIO},"dd/MM/yyyy")]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="340" y="5" width="112" height="107" uuid="4a9646aa-b779-44bb-8749-7e0928859f40"/>
+				<imageExpression><![CDATA[$F{LOGO}.getBinaryStream()]]></imageExpression>
+			</image>
 		</band>
 	</detail>
 	<pageFooter>

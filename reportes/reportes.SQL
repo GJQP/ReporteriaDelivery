@@ -406,8 +406,8 @@ FROM (
            AND app.id = p.id_app
            AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
            AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
-           AND (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
-           AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
+           AND (p_app IN ('[]','null') OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+           AND (p_estado IN ('[]','null') OR 0 < buscar(p_estado, e.nombre))
          GROUP BY dir.descripcion,
                   e.NOMBRE,
                   dir.referencia,
@@ -450,8 +450,8 @@ WHERE
     AND TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin IS NOT NULL
     AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
     AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
-    AND (p_estado IS NULL OR 0 < buscar(p_estado, e.nombre))
-    AND (p_estado IS NULL OR 0 < buscar(p_zona, z.nombre))
+    AND (p_estado IN ('[]','null') OR 0 < buscar(p_estado, e.nombre))
+    AND (p_zona IN ('[]','null') OR 0 < buscar(p_zona, z.nombre))
 GROUP BY
     e.nombre,z.nombre,sec.nombre
 ORDER BY
@@ -482,7 +482,7 @@ FROM
     SUM(p.total) INGRESOS
 FROM PEDIDOS p, APLICACIONES_DELIVERY app
 WHERE
-    (p_app IS NULL OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
+    (p_app IN ('[]','null') OR 0< buscar(p_app, TREAT(app.APP AS MARCA).nombre))
     AND p.ID_APP = app.ID
     AND (fecha_ini IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_inicio) >= TRUNC(fecha_ini))
     AND (fecha_fin IS NULL OR TRUNC(TREAT(p.duracion AS RANGO_TIEMPO).fecha_fin) <= TRUNC(fecha_fin))
@@ -527,9 +527,12 @@ BEGIN
                                '09'
                            ))
                    || 'h'                                                           AS t_estimado,
-               obtener_mapa(r.origen,
+               OBTENER_MAPA_LAT(r.origen,
                             r.destino,
-                            tdu.velocidad_media)                                    AS mapa
+                            tdu.velocidad_media)  as lat,
+               OBTENER_MAPA_LONG(r.origen,
+                            r.destino,
+                            tdu.velocidad_media)                                    AS longitud
         FROM pedidos p
                  INNER JOIN (SELECT MAX(r.id) AS id, p.tracking
                              FROM pedidos p
@@ -547,7 +550,7 @@ BEGIN
         WHERE r.cancelado IS NULL
           AND p.cancelado IS NULL
           AND p.duracion.fecha_fin IS NULL
-          AND (p_tracking IS NULL OR 0 < BUSCAR(p_tracking,p.tracking));
+          AND (p_tracking IN ('[]','null') OR 0 < BUSCAR(p_tracking,p.tracking));
 END;
 
 CREATE OR REPLACE PROCEDURE reporte12(cur_rep OUT SYS_REFCURSOR, p_origen VARCHAR2, p_destino VARCHAR2) IS
@@ -583,7 +586,130 @@ BEGIN
              INNER JOIN aplicaciones_delivery ad ON tet.id_empresa = ad.id
              INNER JOIN zonas zo ON tet.origen = zo.id
              INNER JOIN zonas zd ON tet.destino = zd.id
-    WHERE (p_origen IS NULL OR 0 < BUSCAR(p_origen,zo.nombre))
-    AND (p_destino IS NULL OR 0 < BUSCAR(p_destino,zd.nombre))
+    WHERE (p_origen IN ('[]','null') OR 0 < BUSCAR(p_origen,zo.nombre))
+    AND (p_destino IN ('[]','null') OR 0 < BUSCAR(p_destino,zd.nombre))
     ;
+END;
+
+CREATE OR REPLACE PROCEDURE reporteX(cur_rep OUT SYS_REFCURSOR, p_origen VARCHAR2)
+IS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT DECODE(p_origen,'[]','siii',DECODE(p_origen,'null','es null','me rindo')) as prueba
+
+             , 'help' as t FROM dual
+        WHERE p_origen IN('[]','null');
+END;
+
+CREATE OR REPLACE PROCEDURE reporte13(cur_rep OUT SYS_REFCURSOR, p_fecha_ini DATE DEFAULT NULL, p_fecha_fin DATE DEFAULT NULL) AS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT
+            S.*, (SELECT ADA.APP.LOGO FROM APLICACIONES_DELIVERY ADA WHERE ADA.ID = S.ID) LOGO
+        FROM (
+            SELECT
+                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
+                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                TO_CHAR(AVG(PED.VALORACION),'0.99') VALORACION,
+                AD2.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE
+            FROM
+                PEDIDOS PED
+            INNER JOIN
+                APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
+            WHERE
+                (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_ini IS NULL) AND (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND PED.CANCELADO IS NULL
+            GROUP BY
+                AD2.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE
+            ) S
+        ORDER BY
+            VALORACION;
+END;
+
+-- Función de validación
+CREATE OR REPLACE FUNCTION validarTop(ID_EST INTEGER, ID_APP INTEGER, p_fecha_ini DATE DEFAULT NULL, p_fecha_fin DATE DEFAULT NULL) RETURN INTEGER IS
+    t_cur SYS_REFCURSOR;
+    APPLI INT;
+    times INT;
+    ESTADUS INT;
+BEGIN
+    times := 0;
+    OPEN t_cur FOR
+        SELECT
+            S.APP APP, S.ID_ESTADO ESTA
+        FROM
+             (SELECT
+                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
+                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                COUNT(PED.TRACKING) CANTIDAD,
+                AD2.ID APP,
+                TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE,
+                E.ID ID_ESTADO,
+                E.NOMBRE ESTADO
+            FROM
+                PEDIDOS PED
+            INNER JOIN
+                APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
+            INNER JOIN
+                ESTADOS E ON E.ID = PED.ID_ESTADO
+            WHERE
+                (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_fin IS NULL)
+            GROUP BY
+                AD2.ID,
+                E.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE,
+                E.NOMBRE
+            ORDER BY
+                E.NOMBRE,
+                CANTIDAD DESC
+            ) S;
+    LOOP
+        FETCH t_cur INTO APPLI, ESTADUS;
+        EXIT WHEN t_cur%NOTFOUND;
+        IF ESTADUS = ID_EST THEN
+            times := times + 1;
+        end if;
+        IF APPLI = ID_APP AND times < 4 THEN
+            RETURN 1;
+        ELSIF times > 3 THEN
+            return 0;
+        end if;
+    end loop;
+    return 0;
+END;
+
+CREATE OR REPLACE PROCEDURE reporte11(cur_rep OUT SYS_REFCURSOR, p_fecha_ini DATE DEFAULT NULL, p_fecha_fin DATE DEFAULT NULL, p_zona VARCHAR2 DEFAULT NULL) AS
+BEGIN
+    OPEN cur_rep FOR
+        SELECT
+            S.*, (SELECT ADA.APP.LOGO FROM APLICACIONES_DELIVERY ADA WHERE ADA.ID = S.APP) LOGO
+        FROM (
+            SELECT
+                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
+                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                COUNT(PED.TRACKING) CANTIDAD,
+                AD2.ID APP,
+                TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE,
+                E.ID ID_ESTADO,
+                E.NOMBRE ESTADO
+            FROM
+                PEDIDOS PED
+            INNER JOIN
+                APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
+            INNER JOIN
+                ESTADOS E ON E.ID = PED.ID_ESTADO
+            WHERE
+                (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_fin IS NULL)
+            GROUP BY
+                AD2.ID,
+                E.ID,
+                TREAT(AD2.APP AS MARCA).NOMBRE,
+                E.NOMBRE
+            ORDER BY
+                E.NOMBRE,
+                CANTIDAD DESC
+            ) S
+        WHERE
+           1 = validarTop(S.ID_ESTADO, S.APP, p_fecha_ini, p_fecha_fin);
 END;
