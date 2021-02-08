@@ -652,7 +652,8 @@ BEGIN
             INNER JOIN
                 APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
             INNER JOIN
-                ESTADOS E ON E.ID = PED.ID_ESTADO AND
+                ESTADOS E ON E.ID = PED.ID_ESTADO
+            WHERE
                 (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND
                 (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_ini IS NULL) AND
                 (PED.CANCELADO IS NULL)
@@ -699,7 +700,8 @@ BEGIN
             INNER JOIN
                 APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
             INNER JOIN
-                ESTADOS E ON E.ID = PED.ID_ESTADO AND
+                ESTADOS E ON E.ID = PED.ID_ESTADO
+            WHERE
                 (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND
                 (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_ini IS NULL) AND
                 (PED.CANCELADO IS NULL)
