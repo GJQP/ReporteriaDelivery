@@ -688,8 +688,8 @@ BEGIN
             S.*, (SELECT ADA.APP.LOGO FROM APLICACIONES_DELIVERY ADA WHERE ADA.ID = S.APP) LOGO
         FROM (
             SELECT
-                MIN(PED.DURACION.FECHA_INICIO) fecha_inicio,
-                MAX(PED.DURACION.FECHA_FIN) fecha_fin,
+                TO_CHAR(MIN(PED.DURACION.FECHA_INICIO), 'dd/mm/yyyy') fecha_inicio,
+                TO_CHAR(MAX(PED.DURACION.FECHA_FIN), 'dd/mm/yyyy') fecha_fin,
                 COUNT(PED.TRACKING) CANTIDAD,
                 AD2.ID APP,
                 TREAT(AD2.APP AS MARCA).NOMBRE NOMBRE,
