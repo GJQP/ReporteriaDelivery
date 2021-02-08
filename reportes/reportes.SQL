@@ -654,7 +654,7 @@ BEGIN
             INNER JOIN
                 ESTADOS E ON E.ID = PED.ID_ESTADO
             WHERE
-                (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_fin IS NULL)
+                (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_ini IS NULL)
             GROUP BY
                 AD2.ID,
                 E.ID,
@@ -700,7 +700,7 @@ BEGIN
             INNER JOIN
                 ESTADOS E ON E.ID = PED.ID_ESTADO
             WHERE
-                (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_fin IS NULL)
+                (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_ini IS NULL)
             GROUP BY
                 AD2.ID,
                 E.ID,
