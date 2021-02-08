@@ -618,7 +618,7 @@ BEGIN
             INNER JOIN
                 APLICACIONES_DELIVERY AD2 ON AD2.ID = PED.ID_APP
             WHERE
-                (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_ini IS NULL) AND (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND PED.CANCELADO IS NULL
+                (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_ini IS NULL) AND (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND PED.CANCELADO IS NULL
             GROUP BY
                 AD2.ID,
                 TREAT(AD2.APP AS MARCA).NOMBRE
@@ -654,7 +654,7 @@ BEGIN
             INNER JOIN
                 ESTADOS E ON E.ID = PED.ID_ESTADO
             WHERE
-                (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_fin IS NULL)
+                (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_fin IS NULL)
             GROUP BY
                 AD2.ID,
                 E.ID,
@@ -700,7 +700,7 @@ BEGIN
             INNER JOIN
                 ESTADOS E ON E.ID = PED.ID_ESTADO
             WHERE
-                (PED.DURACION.FECHA_FIN <= p_fecha_fin OR p_fecha_fin IS NULL) AND (PED.DURACION.FECHA_INICIO >= p_fecha_ini OR p_fecha_fin IS NULL)
+                (TRUNC(PED.DURACION.FECHA_FIN) <= p_fecha_fin OR p_fecha_fin IS NULL) AND (TRUNC(PED.DURACION.FECHA_INICIO) >= p_fecha_ini OR p_fecha_fin IS NULL)
             GROUP BY
                 AD2.ID,
                 E.ID,
@@ -711,5 +711,6 @@ BEGIN
                 CANTIDAD DESC
             ) S
         WHERE
-           1 = validarTop(S.ID_ESTADO, S.APP, p_fecha_ini, p_fecha_fin);
+           1 = validarTop(S.ID_ESTADO, S.APP, p_fecha_ini, p_fecha_fin) AND
+           (p_zona IN ('[]','null') OR 0 < BUSCAR(p_zona,S.ESTADO));
 END;
