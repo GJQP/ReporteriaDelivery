@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.15.0.final using JasperReports Library version 6.15.0-dd49bfb94918336b8321d5507193f0169ead4e95  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Blank_A4" pageWidth="595" pageHeight="842" columnWidth="595" leftMargin="0" rightMargin="0" topMargin="0" bottomMargin="0" uuid="4acf034b-018e-43b4-a4eb-0865d9fd7f06">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Oracle XE"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="ireport.jasperserver.url" value="http://localhost:8080/jasperserver/"/>
+	<property name="ireport.jasperserver.user" value="jasperadmin"/>
+	<property name="ireport.jasperserver.report.resource" value="/BD2/Entrega_2/reporte12_files/main_jrxml"/>
+	<property name="ireport.jasperserver.reportUnit" value="/BD2/Entrega_2/reporte12"/>
+	<parameter name="ORIGEN" class="java.util.Collection"/>
+	<parameter name="O_STR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[${ORIGEN}.toString()]]></defaultValueExpression>
+	</parameter>
+	<parameter name="DESTINO" class="java.util.Collection"/>
+	<parameter name="D_STR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[${DESTINO}.toString()]]></defaultValueExpression>
+	</parameter>
+	<queryString language="plsql">
+		<![CDATA[{call reporte12($P{ORACLE_REF_CURSOR},$P{O_STR},$P{D_STR})}]]>
+	</queryString>
+	<field name="LOGO" class="java.sql.Blob">
+		<property name="com.jaspersoft.studio.field.name" value="LOGO"/>
+		<property name="com.jaspersoft.studio.field.label" value="LOGO"/>
+	</field>
+	<field name="ORIGEN" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ORIGEN"/>
+		<property name="com.jaspersoft.studio.field.label" value="ORIGEN"/>
+	</field>
+	<field name="DESTINO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="DESTINO"/>
+		<property name="com.jaspersoft.studio.field.label" value="DESTINO"/>
+	</field>
+	<field name="LLEGADA" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="LLEGADA"/>
+		<property name="com.jaspersoft.studio.field.label" value="LLEGADA"/>
+	</field>
+	<field name="TIPO" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="TIPO"/>
+		<property name="com.jaspersoft.studio.field.label" value="TIPO"/>
+	</field>
+	<background>
+		<band height="840" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			<image>
+				<reportElement stretchType="RelativeToBandHeight" x="0" y="0" width="595" height="840" uuid="430b3008-59af-4430-9403-e841738a5766">
+					<property name="com.jaspersoft.studio.unit.x" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA["fondo.jpg"]]></imageExpression>
+			</image>
+		</band>
+	</background>
+	<pageHeader>
+		<band height="174">
+			<staticText>
+				<reportElement x="10" y="20" width="400" height="50" forecolor="#5048C2" uuid="841ccfa7-cab1-449c-86d1-38dcbeafefdb"/>
+				<textElement verticalAlignment="Middle">
+					<font fontName="Arial Black" size="20.5" isBold="true"/>
+				</textElement>
+				<text><![CDATA[TIEMPO ESTIMADO DE LLEGADA DE DELIVERY]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="444" y="27" width="70" height="20" forecolor="#554ED4" uuid="e0f8dbf5-e521-4118-9b4e-e25c44ae00ed"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial Black" size="12"/>
+				</textElement>
+				<text><![CDATA[FECHA:]]></text>
+			</staticText>
+			<textField textAdjust="StretchHeight">
+				<reportElement x="468" y="26" width="109" height="19" forecolor="#5048C2" uuid="cd3b6160-61df-4526-b851-9b241e2807ca"/>
+				<textElement textAlignment="Right" verticalAlignment="Bottom">
+					<font fontName="Arial" size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[DATEFORMAT(new java.util.Date(),"dd/MM/yyyy")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="300" y="73" width="140" height="27" forecolor="#5048C2" uuid="f4ce521a-b276-47c6-abe8-0293ce1277a5">
+					<printWhenExpression><![CDATA[$P{DESTINO}.toString() != "[]"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font fontName="Arial Black" size="12"/>
+				</textElement>
+				<text><![CDATA[ZONAS DESTINO:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="300" y="100" width="277" height="70" forecolor="#5048C2" uuid="119bf4be-b47b-493f-8ce2-268a08c21642">
+					<printWhenExpression><![CDATA[$P{DESTINO}.toString() != "[]"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{DESTINO}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="10" y="73" width="240" height="27" forecolor="#5048C2" uuid="d97b2a54-c857-49d2-9dc9-2c3bc4dfb499">
+					<printWhenExpression><![CDATA[$P{ORIGEN}.toString() != "[]"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Left">
+					<font fontName="Arial Black" size="12"/>
+				</textElement>
+				<text><![CDATA[ZONAS DE ORIGEN:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="10" y="100" width="240" height="70" forecolor="#5048C2" uuid="b58b15e6-63f0-4822-8c39-1911cc04e8c8">
+					<printWhenExpression><![CDATA[$P{ORIGEN}.toString() != "[]"]]></printWhenExpression>
+				</reportElement>
+				<textElement textAlignment="Right">
+					<font size="12"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{ORIGEN}.toString().replaceAll("[\\[\\]]", "")]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="65" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<rectangle>
+				<reportElement x="10" y="0" width="567" height="60" forecolor="rgba(0, 0, 0, 0.0)" backcolor="#5550D9" uuid="df3810a1-f072-48c3-af48-a1087477bee1"/>
+			</rectangle>
+			<staticText>
+				<reportElement x="10" y="0" width="100" height="60" forecolor="#FFFFFF" uuid="31547b9d-20b2-4e0e-adc8-b09e640f1d28"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Logo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="118" y="0" width="100" height="60" forecolor="#FFFFFF" uuid="34cf1b50-7d77-4c57-9e0b-74e9275be7b6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Zona de Origen]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="220" y="0" width="111" height="60" forecolor="#FFFFFF" uuid="e945209e-d16e-45eb-b21b-11fa83dc480a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Zona de Destino]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="331" y="0" width="113" height="60" forecolor="#FFFFFF" uuid="1572f06a-14e1-4f85-bd95-798d1f8f4008"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tiempo Estiamdo de Llegada]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="460" y="0" width="107" height="60" forecolor="#FFFFFF" uuid="eede042b-4c46-4976-ae4a-dd06bf5e17a3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Tipo de Transporte]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="124" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<rectangle>
+				<reportElement x="10" y="5" width="567" height="107" forecolor="rgba(0, 0, 0, 0.0)" backcolor="rgba(85, 80, 217, 0.14901961)" uuid="11a1709d-06d5-4d6d-bee9-1a464534d0a0"/>
+			</rectangle>
+			<textField>
+				<reportElement x="118" y="0" width="101" height="110" forecolor="#5048C2" uuid="0e855c17-f849-4acd-bd45-d6c519f154e6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{ORIGEN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="220" y="0" width="112" height="112" forecolor="#5048C2" uuid="19d14382-6e4d-4caa-8518-7d63d23b1f9f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="5a635469-0946-4701-b7ea-2948dcb0799e"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DESTINO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="331" y="0" width="113" height="110" forecolor="#5048C2" uuid="d7b4d39c-cfcb-4b28-b2c8-13f61fb185d4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="33637b9d-6197-4bb0-9742-038ea29204dc"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LLEGADA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="0" width="107" height="110" forecolor="#5048C2" uuid="6f54e058-0af8-4091-84bf-7d616b6ee7c9">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b9cb5b21-6ee4-4300-9281-4954d479570e"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{TIPO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="10" y="3" width="101" height="110" forecolor="#5048C2" uuid="e40a990f-99c6-4ca7-abfe-f89b0b518733">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="29b4ff6b-8463-4ae8-8a90-0c0c74b2be2b"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{LOGO}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="87" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<textField>
+				<reportElement x="349" y="10" width="215" height="50" forecolor="#5048C2" uuid="a5981f36-f852-485a-93cb-5e26b03f0b73"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página "+$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>
