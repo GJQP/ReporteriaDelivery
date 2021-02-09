@@ -1,0 +1,67 @@
+
+-- Rol transportista
+GRANT SELECT
+ON APLICACIONES_DELIVERY
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON EMPRESAS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON SUCURSALES
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON PRODUCTOS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON PEDIDOS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON DETALLES
+TO c##Transportista_ROL;
+
+GRANT SELECT,UPDATE
+ON RUTAS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON GARAJES
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON UNIDADES_DE_TRANSPORTE
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON REGISTRO_DE_MANTENIMIENTO
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON TIPOS_DE_UNIDADES
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON USUARIOS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON DIRECCIONES
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON ZONAS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON MUNICIPIOS
+TO c##Transportista_ROL;
+
+GRANT SELECT
+ON ESTADOS
+TO c##Transportista_ROL;
+
+
