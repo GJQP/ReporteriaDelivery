@@ -1,4 +1,3 @@
--- PRIVILEGIOS TDA
 
 
 -- Rol transportista
@@ -408,5 +407,26 @@ GRANT SELECT
 ON ESTADOS
 TO c##UsuarioFinal_ROL;
 
+-- PRIVILEGIOS TDA
+GRANT ALL
+ON CANCELACION
+TO c##Transportista_ROL,c##AppDelivery_ROL,c##Sucursal_ROL,c##Empresa_ROL,c##UsuarioFinal_ROL;
+
+GRANT ALL
+ON MARCA
+TO c##Transportista_ROL,c##AppDelivery_ROL,c##Sucursal_ROL,c##Empresa_ROL,c##UsuarioFinal_ROL;
+
+GRANT ALL
+ON RANGO_TIEMPO
+TO c##Transportista_ROL,c##AppDelivery_ROL,c##Sucursal_ROL,c##Empresa_ROL,c##UsuarioFinal_ROL;
+
+GRANT ALL
+ON UBICACION
+TO c##Transportista_ROL,c##AppDelivery_ROL,c##Sucursal_ROL,c##Empresa_ROL,c##UsuarioFinal_ROL;
+
+-- PROCEDURE
+GRANT EXECUTE
+ON INSERTAR_USUARIO
+TO c##AppDelivery_ROL;
 
 
