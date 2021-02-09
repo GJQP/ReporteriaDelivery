@@ -21,7 +21,15 @@ SELECT * FROM C##TESTUSER.ZONAS;
 SELECT * FROM C##TESTUSER.MUNICIPIOS;
 SELECT * FROM C##TESTUSER.ESTADOS;
 
--- Lecturas no autorizadas
+---- Lecturas no autorizadas
 SELECT * FROM C##TESTUSER.REGISTRO_DE_MANTENIMIENTO;
 
--- CREACIONES AUTORIZADAS
+---- CREACIONES AUTORIZADAS
+
+-- crear producto
+INSERT INTO C##TESTUSER.PRODUCTOS VALUES (1, 5, DEFAULT, 'Sushi especial', 1.74, 0, 'Ración mixta de sushi');
+
+-- crear un evento
+
+
+---
